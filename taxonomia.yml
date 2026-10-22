@@ -26,6 +26,9 @@ valores:
     mantenimiento: Corrección de errores, refactors, documentación posterior
   tecnologias:
     agnostico: Sirve para cualquier tecnología
+    express: ''
+    flutter: ''
+    prisma: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban

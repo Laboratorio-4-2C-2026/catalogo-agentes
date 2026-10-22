@@ -29,7 +29,7 @@ pre{white-space:pre-wrap;background:var(--soft);border-radius:8px;padding:10px 1
 <div class="g"><div class="list" id="list"></div><div class="d" id="det"></div></div>
 </div>
 <script>
-const D = [];
+const D = [{"name": "g03-planify-jira-ticket", "description": "Escribe, mejora o crea tickets de Jira del proyecto Planify con un paso a paso anclado al código real de los repos mobile (Flutter) y backend (Express + Prisma). Usar cuando se pide redactar, revisar o detallar un ticket, aunque solo se dé el número.", "tipo": "skill", "grupo": "03", "autor": "Julieta Iglesias", "colaboradores": [], "area": ["gestion"], "fase": ["planificacion", "analisis"], "tecnologias": ["flutter", "express", "prisma"], "herramientas": ["claude-code"], "requiere": ["jira"], "madurez": "usado-en-proyecto", "relacionados": [], "ejemplo": "**Pedido:** \"Mejorá el PLANIFY-40 con un paso a paso como el del 33.\"\n\n**Resultado:** La descripción completa del ticket en español, con Objetivo, Depende de (indicando si cada dependencia ya está mergeada), un Paso a paso donde cada paso dice qué se hace, para qué, en qué archivo real va y por qué no se puede saltear, Fuera de alcance y Criterios de aceptación. Antes de escribir en Jira, muestra el borrador y pide confirmación.", "ruta": "skills/g03-planify-jira-ticket"}];
 const st = {q:"", area:new Set(), fase:new Set(), herramientas:new Set(), grupo:new Set(), sel:null};
 const $ = id => document.getElementById(id);
 function e(t,c,x){const n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n}
