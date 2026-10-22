@@ -1,6 +1,6 @@
 """Controles automáticos de las fichas.
 
-Uso: python scripts/validar.py [--base origin/main] [--autor-pr usuario]
+Uso: python scripts/validar.py [--base origin/main]
 Escribe un informe en Markdown. Termina con error si alguna ficha no cumple.
 """
 import argparse
@@ -39,11 +39,10 @@ def autor_en_base(base, ruta):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", help="rama contra la que se compara, ej: origin/main")
-    parser.add_argument("--autor-pr", help="usuario de GitHub que abrió el PR")
     args = parser.parse_args()
 
     integrantes = cargar_yaml(RAIZ / "integrantes.yml")
-    errores, avisos, nombres = [], [], {}
+    errores, nombres = [], {}
 
     for tipo, carpeta in piezas():
         nombre = carpeta.name
@@ -112,27 +111,14 @@ def main():
         if texto_ejemplo(carpeta, ruta, es_yml) is None:
             error("falta la sección `## Ejemplo de uso`" + (" (o el archivo EJEMPLO.md)." if es_yml else "."))
 
-    if args.base and args.autor_pr:
-        grupo_pr = next((g for g, lista in integrantes.items()
-                         if any(str(p.get("github", "")).lower() == args.autor_pr.lower() for p in lista or [])), None)
-        cambiados = (git("diff", "--name-only", f"{args.base}...HEAD") or "").split()
-        carpetas = {c.split("/")[1] for c in cambiados
-                    if c.split("/")[0] in ("skills", "agentes", "comandos") and len(c.split("/")) > 2}
-        ajenos = sorted(n for n in carpetas
-                        if grupo_pr and NOMBRE.match(n) and clave_grupo(n[1:3]) != grupo_pr)
-        if ajenos:
-            avisos.append(f"- Este PR modifica piezas de otro grupo: {', '.join(f'`{a}`' for a in ajenos)}. "
-                          "Por acuerdo, cada grupo trabaja solo sobre las suyas.")
-
     print("### Controles automáticos\n")
-    if avisos:
-        print("Avisos:\n\n" + "\n".join(avisos) + "\n")
     if errores:
         cosas = "cosa" if len(errores) == 1 else "cosas"
         print(f"Hay {len(errores)} {cosas} para corregir antes de aceptar el PR:\n")
         print("\n".join(errores) + "\n")
         sys.exit(1)
-    print(f"Todo en orden. Se revisaron {len(nombres)} piezas.\n")
+    cantidad = "pieza" if len(nombres) == 1 else "piezas"
+    print(f"Todo en orden. Se revisaron {len(nombres)} {cantidad}.\n")
 
 
 if __name__ == "__main__":

@@ -11,6 +11,9 @@ permissions:
 jobs:
   revisar:
     runs-on: ubuntu-latest
+    env:
+      # Los scripts se toman siempre de main (carpeta _base) y revisan la rama del PR.
+      CATALOGO_RAIZ: ${{ github.workspace }}
     steps:
       - name: Bajar la rama del PR
         uses: actions/checkout@v4
@@ -18,16 +21,22 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
+      - name: Bajar los scripts de main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: _base
+
       - name: Preparar Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Instalar dependencias
-        run: pip install -r requirements.txt
+        run: pip install -r _base/requirements.txt
 
       - name: Normalizar valores de las fichas
-        run: python scripts/normalizar.py > informe-normalizacion.md
+        run: python _base/scripts/normalizar.py > ../informe-1-normalizacion.md
 
       - name: Guardar las correcciones en la rama del PR
         run: |
@@ -39,17 +48,19 @@ jobs:
             git push
           fi
 
+      - name: Agente decisor
+        run: python _base/scripts/decisor.py --base origin/main --autor-pr "${{ github.event.pull_request.user.login }}" > ../informe-2-decisor.md
+
       - name: Controles automáticos
-        id: validar
         run: |
           set -o pipefail
-          python scripts/validar.py --base origin/main --autor-pr "${{ github.event.pull_request.user.login }}" | tee informe-validacion.md
+          python _base/scripts/validar.py --base origin/main | tee ../informe-3-validacion.md
 
       - name: Comentar el resultado en el PR
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cat informe-normalizacion.md informe-validacion.md > comentario.md 2>/dev/null || true
-          gh pr comment ${{ github.event.pull_request.number }} --body-file comentario.md --edit-last \
-            || gh pr comment ${{ github.event.pull_request.number }} --body-file comentario.md
+          cat ../informe-1-normalizacion.md ../informe-3-validacion.md ../informe-2-decisor.md > ../comentario.md 2>/dev/null || true
+          gh pr comment ${{ github.event.pull_request.number }} --body-file ../comentario.md --edit-last \
+            || gh pr comment ${{ github.event.pull_request.number }} --body-file ../comentario.md
