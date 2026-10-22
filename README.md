@@ -2,7 +2,7 @@
 
 Skills, agentes y comandos de IA hechos por todos los grupos de la materia.
 
-- **Explorar el catálogo y ver el avance por alumno:** cloná o actualizá el repo (`git pull`) y abrí `sitio/index.html` con doble clic.
+- **Explorar el catálogo y ver el avance por alumno:** https://laboratorio-4-2c-2026.github.io/catalogo-agentes/ (se actualiza solo después de cada merge). También se puede abrir `sitio/index.html` con doble clic.
 - **Subir o actualizar piezas:** seguí los pasos de [CONTRIBUTING.md](CONTRIBUTING.md).
 - **Prompts para preparar las piezas:** carpeta [prompts/](prompts/).
 

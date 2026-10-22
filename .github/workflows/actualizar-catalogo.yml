@@ -7,6 +7,12 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: actualizar-catalogo
+  cancel-in-progress: false
 
 jobs:
   actualizar:
@@ -35,3 +41,19 @@ jobs:
             git commit -m "Actualizar listas y sitio"
             git push
           fi
+
+      - name: Preparar el sitio para GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: sitio
+
+  publicar:
+    needs: actualizar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Publicar en GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
