@@ -14,7 +14,7 @@ Reglas:
 
 - Trabajá **en una rama del repo, no en un fork**: el bot necesita poder corregir tu rama.
 - Tocá **solo las piezas de tu grupo** (las que empiezan con tu prefijo).
-- No edites a mano `taxonomia.yml`, `explorador/` ni las tablas de categorías: se actualizan solos.
+- No edites a mano `taxonomia.yml`, `sitio/` ni las tablas de categorías: se actualizan solos.
 
 Para actualizar una pieza que ya está, usá `prompts/2-actualizar-pieza.md`.
 

@@ -23,15 +23,15 @@ jobs:
       - name: Sumar valores nuevos a las listas y a los READMEs
         run: python scripts/actualizar_listas.py
 
-      - name: Regenerar el explorador
-        run: python scripts/generar_explorador.py
+      - name: Regenerar el sitio (explorador y avance por alumno)
+        run: python scripts/generar_sitio.py
 
       - name: Guardar cambios en main
         run: |
           if [ -n "$(git status --porcelain)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add taxonomia.yml README.md CONTRIBUTING.md explorador
-            git commit -m "Actualizar listas y explorador"
+            git add taxonomia.yml README.md CONTRIBUTING.md sitio
+            git commit -m "Actualizar listas y sitio"
             git push
           fi
