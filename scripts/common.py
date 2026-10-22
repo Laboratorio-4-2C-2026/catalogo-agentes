@@ -1,11 +1,14 @@
 """Funciones compartidas por los scripts del catálogo."""
+import os
 import re
 import unicodedata
 from pathlib import Path
 
 import yaml
 
-RAIZ = Path(__file__).resolve().parent.parent
+# Raíz del repo a revisar. En los workflows los scripts se toman de main y se
+# apuntan a la rama del PR con CATALOGO_RAIZ.
+RAIZ = Path(os.environ.get("CATALOGO_RAIZ") or Path(__file__).resolve().parent.parent).resolve()
 TIPOS = {"skills": "skill", "agentes": "agente", "comandos": "comando"}
 CAMPOS_LISTA = ["area", "fase", "tecnologias", "metodologia", "herramientas", "requiere"]
 CAMPOS_VALOR = ["madurez"]
