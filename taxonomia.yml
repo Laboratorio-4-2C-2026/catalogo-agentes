@@ -1,0 +1,119 @@
+# Valores comunes de las fichas del catálogo.
+# Lo actualiza solo el workflow al aceptar un PR: no hace falta editarlo a mano.
+# 'alias' convierte variantes conocidas en el valor oficial (ej: reactjs -> react).
+
+valores:
+  area:
+    frontend: Interfaces web y lo que ve el usuario
+    backend: Servidores, APIs, bases de datos
+    mobile: Apps para celular
+    datos: Análisis, ETL, reportes de datos
+    ia: Modelos, prompts, agentes que crean agentes
+    qa: Calidad y pruebas
+    devops: Infraestructura, CI/CD, despliegues
+    seguridad: Auditorías, vulnerabilidades, permisos
+    gestion: Tickets, sprints, estimaciones, reportes de estado
+    diseno: UX/UI, prototipos, design systems
+    documentacion: READMEs, manuales, documentación técnica
+  fase:
+    planificacion: Antes de empezar, backlog, sprints, estimación
+    analisis: Requerimientos, historias de usuario, criterios de aceptación
+    diseno: Arquitectura, modelos de datos, prototipos
+    desarrollo: Escribir código
+    testing: Pruebas automáticas y manuales
+    revision: Code review, revisión de entregables, cierres de sprint
+    despliegue: Publicar, CI/CD, releases
+    mantenimiento: Corrección de errores, refactors, documentación posterior
+  tecnologias:
+    agnostico: Sirve para cualquier tecnología
+  metodologia:
+    scrum: Pensada para Scrum
+    kanban: Pensada para Kanban
+    agnostico: Sirve para cualquier forma de trabajo
+  herramientas:
+    claude-code: Claude Code
+    cursor: Cursor
+    codex: Codex
+    otra: Otra herramienta
+  requiere:
+    jira: Jira (por conexión MCP o API)
+    github: GitHub (por conexión MCP o la CLI gh)
+    figma: Figma (por conexión MCP)
+    google-sheets: Google Sheets (por conexión MCP)
+    slack: Slack (por conexión MCP)
+  madurez:
+    experimental: Recién hecha, poco probada
+    probado: Se probó varias veces
+    usado-en-proyecto: Se usó en el proyecto real
+alias:
+  area:
+    front: frontend
+    front-end: frontend
+    fe: frontend
+    web: frontend
+    back: backend
+    back-end: backend
+    be: backend
+    movil: mobile
+    app: mobile
+    data: datos
+    inteligencia-artificial: ia
+    ai: ia
+    testing: qa
+    calidad: qa
+    quality-assurance: qa
+    infraestructura: devops
+    security: seguridad
+    pm: gestion
+    project-management: gestion
+    management: gestion
+    design: diseno
+    ux: diseno
+    ui: diseno
+    ux-ui: diseno
+    docs: documentacion
+    documentation: documentacion
+  fase:
+    planning: planificacion
+    analysis: analisis
+    design: diseno
+    development: desarrollo
+    dev: desarrollo
+    test: testing
+    tests: testing
+    review: revision
+    code-review: revision
+    deploy: despliegue
+    deployment: despliegue
+    maintenance: mantenimiento
+  tecnologias:
+    reactjs: react
+    react-js: react
+    nest: nestjs
+    nest-js: nestjs
+    node: nodejs
+    node-js: nodejs
+    vuejs: vue
+    vue-js: vue
+    next: nextjs
+    next-js: nextjs
+    ts: typescript
+    js: javascript
+    postgres: postgresql
+    agnostic: agnostico
+    cualquiera: agnostico
+  metodologia:
+    agnostic: agnostico
+  herramientas:
+    claude: claude-code
+    claudecode: claude-code
+    openai-codex: codex
+  requiere:
+    jira-mcp: jira
+    github-mcp: github
+    figma-mcp: figma
+    sheets: google-sheets
+  madurez:
+    usado: usado-en-proyecto
+    en-produccion: usado-en-proyecto
+    beta: experimental

@@ -1,0 +1,55 @@
+name: Revisar PR
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  revisar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Bajar la rama del PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Normalizar valores de las fichas
+        run: python scripts/normalizar.py > informe-normalizacion.md
+
+      - name: Guardar las correcciones en la rama del PR
+        run: |
+          if [ -n "$(git status --porcelain -- skills agentes comandos)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add skills agentes comandos
+            git commit -m "Normalizar valores de las fichas"
+            git push
+          fi
+
+      - name: Controles automáticos
+        id: validar
+        run: |
+          set -o pipefail
+          python scripts/validar.py --base origin/main --autor-pr "${{ github.event.pull_request.user.login }}" | tee informe-validacion.md
+
+      - name: Comentar el resultado en el PR
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat informe-normalizacion.md informe-validacion.md > comentario.md 2>/dev/null || true
+          gh pr comment ${{ github.event.pull_request.number }} --body-file comentario.md --edit-last \
+            || gh pr comment ${{ github.event.pull_request.number }} --body-file comentario.md

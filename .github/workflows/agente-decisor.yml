@@ -1,0 +1,52 @@
+name: Agente decisor
+
+# Opcional: necesita una API key de Anthropic guardada como secreto ANTHROPIC_API_KEY.
+# Sin la key, este workflow no corre y el resto del catálogo funciona igual.
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  decisor:
+    if: ${{ vars.DECISOR_ACTIVO == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: >-
+            --max-turns 15
+            --allowedTools "Read,Glob,Grep,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr comment:*),Bash(git diff:*)"
+          prompt: |
+            Sos el agente decisor del Catálogo Común de Agentes. Revisá el PR #${{ github.event.pull_request.number }}
+            del repo ${{ github.repository }}.
+
+            Contexto: cada pieza vive en skills/, agentes/ o comandos/, en una carpeta gNN-nombre
+            con su ficha (frontmatter con name, description y metadata). Las listas de valores
+            están en taxonomia.yml. Las fichas ya fueron normalizadas por un script.
+
+            Para cada pieza que agrega o modifica el PR:
+            1. Leé sus instrucciones y decí si area y fase son coherentes con lo que hace.
+               Si falta un valor evidente, sugerilo. Usá valores de taxonomia.yml.
+            2. Si la ficha usa un valor nuevo que es sinónimo de uno existente (por ejemplo
+               "pruebas" en lugar de "testing"), sugerí usar el existente.
+            3. Buscá en el repo piezas de cualquier grupo que hagan algo parecido y sugerí
+               agregarlas en metadata.relacionados.
+            4. Si la description no distingue la pieza de las parecidas, sugerí una mejor.
+            5. Si el ejemplo de uso es vago o no coincide con lo que hace la pieza, decilo.
+
+            Reglas: nunca propongas fusionar, borrar ni reescribir piezas. No cambies el autor.
+            No modifiques archivos. Escribí un solo comentario en el PR, en español, breve,
+            agrupado por pieza, usando: gh pr comment ${{ github.event.pull_request.number }} --body "..."
+            Terminá con: "Son sugerencias. El grupo decide si las aplica."

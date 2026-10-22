@@ -1,0 +1,110 @@
+"""Genera explorador/index.html: una página sola, sin dependencias, que se abre
+con doble clic y permite buscar y filtrar todas las piezas del catálogo.
+
+Corre solo, después de aceptar un PR.
+"""
+import json
+
+from common import RAIZ, archivo_ficha, como_lista, leer_ficha, piezas, texto_ejemplo
+
+PLANTILLA = """<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explorador · Catálogo Común de Agentes</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--fg:#1a2130;--muted:#5b6577;--line:#dde1e8;--acc:#2e55c8;--soft:#e7ecfb;--tag:#8a5a00;--tagbg:#fbf1dc}
+@media (prefers-color-scheme:dark){:root{--bg:#12161e;--card:#1a1f2a;--fg:#e4e8f0;--muted:#9aa4b6;--line:#2c3342;--acc:#8ea8ff;--soft:#1f2a48;--tag:#f0c56a;--tagbg:#3a2f17}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.5 system-ui,sans-serif;padding:24px 16px}
+.w{max-width:1100px;margin:0 auto}h1{margin:0 0 4px}.m{color:var(--muted)}
+input{width:100%;font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--fg);margin:16px 0 10px}
+.row{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;align-items:center}.row b{font-size:12px;text-transform:uppercase;color:var(--muted);min-width:96px}
+.chip{font:inherit;font-size:14px;padding:3px 10px;border-radius:99px;border:1px solid var(--line);background:var(--card);color:var(--fg);cursor:pointer}
+.chip.on{background:var(--acc);border-color:var(--acc);color:var(--card)}
+.g{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}@media(min-width:860px){.g{grid-template-columns:1fr 1fr}}
+.list{display:grid;gap:8px;align-content:start}.c{text-align:left;font:inherit;color:var(--fg);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer}
+.c.on{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}.n{font-family:ui-monospace,Consolas,monospace;font-weight:600;font-size:14px}
+.t{display:inline-block;font-size:12px;padding:0 7px;border-radius:99px;background:var(--tagbg);color:var(--tag);margin:2px 2px 0 0}
+.d{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;align-self:start;position:sticky;top:12px}
+dl{display:grid;grid-template-columns:120px 1fr;gap:4px 10px;font-size:14.5px}dt{color:var(--muted)}dd{margin:0}
+pre{white-space:pre-wrap;background:var(--soft);border-radius:8px;padding:10px 12px;font:14px/1.5 system-ui,sans-serif}
+.rel button{font-family:ui-monospace,Consolas,monospace;font-size:13px;background:none;border:1px solid var(--line);border-radius:6px;color:var(--acc);cursor:pointer;margin:2px}
+</style></head><body><div class="w">
+<h1>Explorador del catálogo</h1><div class="m" id="tot"></div>
+<input id="q" type="search" placeholder="Buscar por nombre, descripción o tecnología…">
+<div class="row" id="f-area"><b>Área</b></div>
+<div class="row" id="f-fase"><b>Fase</b></div>
+<div class="row" id="f-herramientas"><b>Herramienta</b></div>
+<div class="row" id="f-grupo"><b>Grupo</b></div>
+<div class="g"><div class="list" id="list"></div><div class="d" id="det"></div></div>
+</div>
+<script>
+const D = __DATOS__;
+const st = {q:"", area:new Set(), fase:new Set(), herramientas:new Set(), grupo:new Set(), sel:null};
+const $ = id => document.getElementById(id);
+function e(t,c,x){const n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n}
+function chips(campo){const box=$("f-"+campo);while(box.children.length>1)box.lastChild.remove();
+  const vals=[...new Set(D.flatMap(p=>[].concat(p[campo]||[])))].sort();
+  vals.forEach(v=>{const b=e("button","chip"+(st[campo].has(v)?" on":""),campo==="grupo"?"g"+v:v);
+    b.onclick=()=>{st[campo].has(v)?st[campo].delete(v):st[campo].add(v);render()};box.append(b)})}
+function ok(p){const q=st.q.toLowerCase();
+  if(q&&!(p.name+" "+p.description+" "+(p.tecnologias||[]).join(" ")).toLowerCase().includes(q))return false;
+  for(const c of ["area","fase","herramientas","grupo"]){if(st[c].size&&![].concat(p[c]||[]).some(v=>st[c].has(v)))return false}
+  return true}
+function render(){["area","fase","herramientas","grupo"].forEach(chips);
+  const l=D.filter(ok),box=$("list");box.innerHTML="";$("tot").textContent=l.length+" de "+D.length+" piezas";
+  if(!l.some(p=>p.name===st.sel))st.sel=l.length?l[0].name:null;
+  l.forEach(p=>{const b=e("button","c"+(p.name===st.sel?" on":""));b.append(e("div","n",p.name),e("div","m",p.description));
+    const t=e("div");[].concat(p.area||[],p.herramientas||[]).forEach(v=>t.append(e("span","t",v)));b.append(t);
+    b.onclick=()=>{st.sel=p.name;render()};box.append(b)});
+  const d=$("det");d.innerHTML="";const p=D.find(x=>x.name===st.sel);
+  if(!p){d.append(e("div","m","Ninguna pieza coincide con los filtros."));return}
+  d.append(e("div","n",p.name),e("p",null,p.description));const dl=e("dl");
+  [["Tipo",p.tipo],["Grupo","g"+p.grupo],["Autor",p.autor],["Colaboradores",p.colaboradores.join(", ")||"—"],["Área",(p.area||[]).join(", ")],
+   ["Fase",(p.fase||[]).join(", ")],["Tecnologías",(p.tecnologias||[]).join(", ")],["Funciona en",(p.herramientas||[]).join(", ")],
+   ["Requiere",(p.requiere||[]).join(", ")||"nada externo"],["Madurez",p.madurez],["Carpeta",p.ruta]]
+   .forEach(([k,v])=>dl.append(e("dt",null,k),e("dd",null,v||"—")));d.append(dl);
+  d.append(e("b",null,"Ejemplo de uso"),e("pre",null,p.ejemplo||"—"));
+  if(p.relacionados.length){const r=e("div","rel");r.append(e("div","m","Relacionadas:"));
+    p.relacionados.forEach(n=>{const b=e("button",null,n);b.onclick=()=>{for(const c of ["area","fase","herramientas","grupo"])st[c].clear();st.q="";$("q").value="";st.sel=n;render()};r.append(b)});d.append(r)}}
+$("q").oninput=ev=>{st.q=ev.target.value;render()};render();
+</script></body></html>
+"""
+
+
+def main():
+    datos = []
+    for tipo, carpeta in piezas():
+        ruta, es_yml = archivo_ficha(carpeta)
+        if not ruta:
+            continue
+        ficha, _ = leer_ficha(ruta, es_yml)
+        if not ficha:
+            continue
+        meta = ficha.get("metadata") or {}
+        autor = meta.get("autor") or {}
+        datos.append({
+            "name": ficha.get("name", carpeta.name),
+            "description": str(ficha.get("description", "")).strip(),
+            "tipo": tipo,
+            "grupo": str(meta.get("grupo", "")),
+            "autor": autor.get("nombre", "") if isinstance(autor, dict) else "",
+            "colaboradores": [c.get("nombre", "") for c in como_lista(meta.get("colaboradores")) if isinstance(c, dict)],
+            "area": como_lista(meta.get("area")),
+            "fase": como_lista(meta.get("fase")),
+            "tecnologias": como_lista(meta.get("tecnologias")),
+            "herramientas": como_lista(meta.get("herramientas")),
+            "requiere": como_lista(meta.get("requiere")),
+            "madurez": meta.get("madurez", ""),
+            "relacionados": como_lista(meta.get("relacionados")),
+            "ejemplo": texto_ejemplo(carpeta, ruta, es_yml) or "",
+            "ruta": carpeta.relative_to(RAIZ).as_posix(),
+        })
+    salida = RAIZ / "explorador" / "index.html"
+    salida.parent.mkdir(exist_ok=True)
+    json_datos = json.dumps(datos, ensure_ascii=False).replace("</", "<\\/")
+    salida.write_text(PLANTILLA.replace("__DATOS__", json_datos), encoding="utf-8")
+    print(f"Explorador generado con {len(datos)} piezas: {salida.relative_to(RAIZ)}")
+
+
+if __name__ == "__main__":
+    main()
