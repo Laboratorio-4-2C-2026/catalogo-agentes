@@ -2,18 +2,12 @@
 # Lo mantiene la cátedra. De acá salen el control de autores y el panel de seguimiento.
 # La clave es "grupo-NN" (dos dígitos). El material de la cátedra usa "catedra" (prefijo g00).
 
-catedra:
-  - nombre: Nombre Apellido
-    github: usuario-docente
+catedra: []
 
 grupo-03:
-  - nombre: Nombre Apellido
-    github: usuario-1
-  - nombre: Nombre Apellido
-    github: usuario-2
+  - nombre: Julieta Iglesias
+    github: JuliIglesias
 
 grupo-08:
-  - nombre: Nombre Apellido
-    github: usuario-3
-  - nombre: Nombre Apellido
-    github: usuario-4
+  - nombre: Ezequiel Rickert
+    github: ezequielrickert

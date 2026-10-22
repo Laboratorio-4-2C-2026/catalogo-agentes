@@ -24,10 +24,10 @@ def main():
         meta = (ficha or {}).get("metadata") or {}
         autor = meta.get("autor")
         if isinstance(autor, dict):
-            como_autor[autor.get("github")] += 1
+            como_autor[str(autor.get("github", "")).lower()] += 1
         for c in como_lista(meta.get("colaboradores")):
             if isinstance(c, dict):
-                colaboraciones[c.get("github")] += 1
+                colaboraciones[str(c.get("github", "")).lower()] += 1
 
     bloques = []
     for grupo, lista in integrantes.items():
@@ -35,14 +35,14 @@ def main():
             continue
         filas, completos = [], 0
         for p in lista or []:
-            n = como_autor[p["github"]]
+            n = como_autor[p["github"].lower()]
             completos += n >= META
             estado = "Completo" if n >= META else f"Faltan {META - n}"
             filas.append(
                 f"<tr><td>{html.escape(p['nombre'])}</td><td><code>{html.escape(p['github'])}</code></td>"
                 f"<td class=n>{n}</td><td><div class=bar><span style='width:{min(100, n * 10)}%'></span></div></td>"
-                f"<td class=n>{colaboraciones[p['github']]}</td><td class={'ok' if n >= META else 'no'}>{estado}</td></tr>")
-        total = sum(como_autor[p["github"]] for p in lista or [])
+                f"<td class=n>{colaboraciones[p['github'].lower()]}</td><td class={'ok' if n >= META else 'no'}>{estado}</td></tr>")
+        total = sum(como_autor[p["github"].lower()] for p in lista or [])
         bloques.append(f"<h2>{html.escape(grupo)} · {total} piezas · {completos} de {len(lista or [])} estudiantes completos</h2>"
                        "<table><tr><th>Estudiante</th><th>GitHub</th><th>Como autor</th><th>Avance</th>"
                        "<th>Colaboraciones</th><th>Estado</th></tr>" + "".join(filas) + "</table>")

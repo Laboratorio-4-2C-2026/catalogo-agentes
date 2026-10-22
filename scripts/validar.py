@@ -86,7 +86,7 @@ def main():
         elif m and m.group(1) != grupo:
             error(f"el prefijo `g{m.group(1)}` no coincide con `grupo: \"{grupo}\"`.")
 
-        miembros = {p.get("github") for p in integrantes.get(clave_grupo(grupo), []) or []}
+        miembros = {str(p.get("github", "")).lower() for p in integrantes.get(clave_grupo(grupo), []) or []}
         autor = meta.get("autor")
         personas = [("autor", autor)] + [("colaborador", c) for c in como_lista(meta.get("colaboradores"))]
         if not re.fullmatch(r"\d{2}", grupo):
@@ -96,7 +96,7 @@ def main():
                 continue
             if not isinstance(persona, dict) or not persona.get("nombre") or not persona.get("github"):
                 error(f"cada {rol} necesita `nombre` y `github`.")
-            elif persona["github"] not in miembros:
+            elif str(persona["github"]).lower() not in miembros:
                 error(f"el {rol} `{persona['github']}` no figura en `integrantes.yml` como integrante de `{clave_grupo(grupo)}`.")
 
         if args.base and isinstance(autor, dict):
@@ -114,7 +114,7 @@ def main():
 
     if args.base and args.autor_pr:
         grupo_pr = next((g for g, lista in integrantes.items()
-                         if any(p.get("github") == args.autor_pr for p in lista or [])), None)
+                         if any(str(p.get("github", "")).lower() == args.autor_pr.lower() for p in lista or [])), None)
         cambiados = (git("diff", "--name-only", f"{args.base}...HEAD") or "").split()
         carpetas = {c.split("/")[1] for c in cambiados
                     if c.split("/")[0] in ("skills", "agentes", "comandos") and len(c.split("/")) > 2}
@@ -128,7 +128,8 @@ def main():
     if avisos:
         print("Avisos:\n\n" + "\n".join(avisos) + "\n")
     if errores:
-        print(f"Hay {len(errores)} cosas para corregir antes de aceptar el PR:\n")
+        cosas = "cosa" if len(errores) == 1 else "cosas"
+        print(f"Hay {len(errores)} {cosas} para corregir antes de aceptar el PR:\n")
         print("\n".join(errores) + "\n")
         sys.exit(1)
     print(f"Todo en orden. Se revisaron {len(nombres)} piezas.\n")
