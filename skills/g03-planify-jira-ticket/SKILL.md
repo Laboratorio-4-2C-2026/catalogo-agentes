@@ -3,21 +3,30 @@ name: g03-planify-jira-ticket
 description: Escribe, mejora o crea tickets de Jira del proyecto Planify con un paso a paso anclado al código real de los repos mobile (Flutter) y backend (Express + Prisma). Usar cuando se pide redactar, revisar o detallar un ticket, aunque solo se dé el número.
 metadata:
   tipo: skill
-  area: [gestion]
-  fase: [planificacion, analisis]
-  tecnologias: [Flutter, Express, Prisma]
-  metodologia: [scrum]
-  herramientas: [claude-code]
-  requiere: [jira]
-  grupo: "03"
+  area:
+  - gestion
+  fase:
+  - planificacion
+  - analisis
+  tecnologias:
+  - flutter
+  - express
+  - prisma
+  metodologia:
+  - scrum
+  herramientas:
+  - claude-code
+  requiere:
+  - jira
+  grupo: '03'
   autor:
     nombre: Julieta Iglesias
     github: JuliIglesias
-  responsables: [JuliIglesias]
+  responsables:
+  - JuliIglesias
   madurez: usado-en-proyecto
   relacionados: []
 ---
-
 # Writing Jira tickets for Planify
 
 This skill captures the way tickets are written on the Planify project. The audience for these tickets is junior developers who start the feature **from scratch**, reading nothing but the ticket. That is why the level of detail matters: not so generic that it is unclear what to do, and not so resolved that nothing is left to think about.
