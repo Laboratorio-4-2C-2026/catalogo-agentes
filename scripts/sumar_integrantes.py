@@ -12,9 +12,8 @@ del PR. Escribe un informe en Markdown.
 import re
 import subprocess
 
-import yaml
 
-from common import RAIZ, archivo_ficha, cargar_yaml, clave_grupo, como_lista, leer_ficha, piezas
+from common import RAIZ, archivo_ficha, cargar_yaml, clave_grupo, como_lista, leer_ficha, piezas, volcar_yaml
 
 ENCABEZADO = ("# Integrantes de cada grupo: nombre y usuario de GitHub.\n"
               "# De acá salen el control de autores y la vista de avance por alumno.\n"
@@ -68,7 +67,7 @@ def main():
 
     if agregados:
         orden = sorted(integrantes, key=lambda k: (k != "catedra", k))
-        texto = yaml.safe_dump({k: integrantes[k] for k in orden}, allow_unicode=True, sort_keys=False, width=1000)
+        texto = volcar_yaml({k: integrantes[k] for k in orden})
         ruta.write_text(ENCABEZADO + re.sub(r"\n(?=grupo-|catedra)", "\n\n", texto), encoding="utf-8", newline="\n")
 
     if agregados or rechazados:

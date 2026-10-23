@@ -31,8 +31,20 @@ def cargar_yaml(ruta):
     return yaml.safe_load(ruta.read_text(encoding="utf-8")) or {}
 
 
+class _Dumper(yaml.SafeDumper):
+    """Escribe entre comillas los textos que parecen números (ej: grupo "08"), para que ningún parser los lea como enteros."""
+
+
+_Dumper.add_representer(str, lambda d, v: d.represent_scalar(
+    "tag:yaml.org,2002:str", v, style='"' if re.fullmatch(r"[0-9]+", v) else None))
+
+
+def volcar_yaml(datos):
+    return yaml.dump(datos, Dumper=_Dumper, allow_unicode=True, sort_keys=False, width=1000)
+
+
 def guardar_yaml(ruta, datos, encabezado=""):
-    texto = yaml.safe_dump(datos, allow_unicode=True, sort_keys=False, width=1000)
+    texto = volcar_yaml(datos)
     Path(ruta).write_text(encabezado + texto, encoding="utf-8")
 
 
@@ -70,7 +82,7 @@ def leer_ficha(ruta, es_yml):
 
 
 def escribir_ficha(ruta, es_yml, ficha, cuerpo):
-    dump = yaml.safe_dump(ficha, allow_unicode=True, sort_keys=False, width=1000)
+    dump = volcar_yaml(ficha)
     ruta.write_text(dump if es_yml else f"---\n{dump}---\n{cuerpo}", encoding="utf-8")
 
 
