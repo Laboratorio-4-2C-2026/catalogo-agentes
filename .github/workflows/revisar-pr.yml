@@ -38,13 +38,22 @@ jobs:
       - name: Normalizar valores de las fichas
         run: python _base/scripts/normalizar.py > ../informe-1-normalizacion.md
 
+      - name: Sumar integrantes nuevos
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          touch ../informe-0-integrantes.md
+          if [ -f _base/scripts/sumar_integrantes.py ]; then
+            python _base/scripts/sumar_integrantes.py > ../informe-0-integrantes.md
+          fi
+
       - name: Guardar las correcciones en la rama del PR
         run: |
-          if [ -n "$(git status --porcelain -- skills agentes comandos)" ]; then
+          if [ -n "$(git status --porcelain -- skills agentes comandos integrantes.yml)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add skills agentes comandos
-            git commit -m "Normalizar valores de las fichas"
+            git add skills agentes comandos integrantes.yml
+            git commit -m "Normalizar fichas y sumar integrantes nuevos"
             git push
           fi
 
@@ -71,6 +80,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cat ../informe-1-normalizacion.md ../informe-3-validacion.md ../informe-2-decisor.md ../informe-4-revisor-ia.md > ../comentario.md 2>/dev/null || true
+          cat ../informe-1-normalizacion.md ../informe-0-integrantes.md ../informe-3-validacion.md ../informe-2-decisor.md ../informe-4-revisor-ia.md > ../comentario.md 2>/dev/null || true
           gh pr comment ${{ github.event.pull_request.number }} --body-file ../comentario.md --edit-last \
             || gh pr comment ${{ github.event.pull_request.number }} --body-file ../comentario.md
