@@ -4,7 +4,7 @@
 2. Pegá el prompt de `prompts/1-preparar-piezas.md` y completá los DATOS DEL EQUIPO.
 3. Revisá la tabla que te devuelve la IA y corregí lo que haga falta.
    - **Recomendado:** pedile a tu herramienta que revise las fichas con la skill `skills/g03-revisor-de-fichas/SKILL.md` (modo local). Propone mejoras de clasificación, descripción, ejemplo y piezas relacionadas, y solo aplica las que aceptes.
-4. En tu copia del repo, creá una rama: `git checkout -b g03-carga-inicial` (con tu número de grupo).
+4. En tu copia del repo, creá una rama que empiece con tu número de grupo: `git checkout -b g03-carga-inicial`. Si alguna ficha no dice el grupo, el bot lo toma del nombre de la rama.
 5. Copiá las carpetas `gNN-…` a `skills/`, `agentes/` o `comandos/`. Si no sabés dónde va cada una, subilas donde quieras: el bot las mueve a su lugar, les pone el prefijo del grupo y avisa en el comentario (necesitan tener ficha).
 6. `git add`, `git commit` y `git push -u origin <tu-rama>`.
 7. Abrí el Pull Request en GitHub hacia `main`.

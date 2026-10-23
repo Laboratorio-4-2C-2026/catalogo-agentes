@@ -39,7 +39,7 @@ jobs:
         run: |
           touch ../informe-0-ordenar.md
           if [ -f _base/scripts/ordenar.py ]; then
-            python _base/scripts/ordenar.py --base origin/main --autor-pr "${{ github.event.pull_request.user.login }}" > ../informe-0-ordenar.md
+            python _base/scripts/ordenar.py --base origin/main --autor-pr "${{ github.event.pull_request.user.login }}" --rama "${{ github.head_ref }}" > ../informe-0-ordenar.md               || echo "_El ordenamiento de piezas no pudo correr en este PR; el resto de la revisión sigue._" > ../informe-0-ordenar.md
           fi
 
       - name: Normalizar valores de las fichas
@@ -88,5 +88,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cat ../informe-0-ordenar.md ../informe-1-normalizacion.md ../informe-0-integrantes.md ../informe-3-validacion.md ../informe-2-decisor.md ../informe-4-revisor-ia.md > ../comentario.md 2>/dev/null || true
+          [ -s ../comentario.md ] || echo "La revisión automática no generó resultados. Revisá la pestaña Actions." > ../comentario.md
           gh pr comment ${{ github.event.pull_request.number }} --body-file ../comentario.md --edit-last \
             || gh pr comment ${{ github.event.pull_request.number }} --body-file ../comentario.md

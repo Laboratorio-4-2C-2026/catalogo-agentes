@@ -5,12 +5,14 @@ donde corresponde (skills/gNN-nombre/SKILL.md, agentes/gNN-nombre/gNN-nombre.md,
 comandos/gNN-nombre/gNN-nombre.md), el bot:
 - decide el tipo (metadata.tipo; si no está, SKILL.md es skill, un .md con
   "tools" es agente y una ruta con "command"/"comando" es comando),
-- decide el grupo (metadata.grupo; si no está, el grupo de quien abrió el PR),
+- decide el grupo, en este orden: metadata.grupo, el prefijo gNN del nombre,
+  el grupo de quien abrió el PR (según integrantes.yml) y el nombre de la rama
+  (g08-mis-skills, grupo-8/..., grupo08-...),
 - arma el nombre gNN-nombre (sin guiones bajos ni prefijos repetidos),
 - mueve la pieza con sus archivos de apoyo y actualiza name, tipo y grupo.
 
 No inventa fichas: si un archivo no tiene frontmatter, lo informa y no lo toca.
-Uso: python scripts/ordenar.py --base origin/main [--autor-pr usuario]
+Uso: python scripts/ordenar.py --base origin/main [--autor-pr usuario] [--rama nombre-de-la-rama]
 """
 import argparse
 import re
@@ -42,6 +44,12 @@ def ubicacion_correcta(rel, tipo, nombre):
     return rel in (f"{carpeta}/{nombre}/{archivo}", f"{carpeta}/{nombre}/metadata.yml")
 
 
+def grupo_de_rama(rama):
+    """g08-mis-skills, g8/carga, grupo-08-..., grupo8_... -> "08". Devuelve None si la rama no lo dice."""
+    m = re.match(r"^(?:g|grupo)[-_]?(\d{1,2})(?:[-_/]|$)", rama or "", re.I)
+    return f"{int(m.group(1)):02d}" if m and 1 <= int(m.group(1)) <= 99 else None
+
+
 def es_pieza(archivo):
     if archivo.name == "SKILL.md":
         return True
@@ -65,13 +73,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--base", default="origin/main")
     parser.add_argument("--autor-pr")
+    parser.add_argument("--rama", help="rama del PR, para sacar el grupo si no hay otra forma")
     args = parser.parse_args()
 
     cambiados = [c for c in git("diff", "--name-only", "--diff-filter=AMR", f"{args.base}...HEAD").split()
                  if not IGNORAR.match(c)]
     candidatos = sorted({c for c in cambiados if c.lower().endswith((".md", "metadata.yml"))
                          and not c.lower().endswith(("ejemplo.md",))})
-    grupo_pr = grupo_de(args.autor_pr)
+    grupo_pr = grupo_de(args.autor_pr) or grupo_de_rama(args.rama)
     movidas, avisos = [], []
 
     for rel in candidatos:
@@ -105,13 +114,14 @@ def main():
             m = re.match(r"^g(\d{2})-", str(ficha.get("name")))
             grupo = m.group(1) if m else (grupo_pr or "")
         if not re.fullmatch(r"\d{2}", grupo):
-            avisos.append(f"- `{rel}`: no se pudo saber el grupo. Completá `metadata.grupo` en la ficha.")
+            avisos.append(f"- `{rel}`: no se pudo saber el grupo. Completá `metadata.grupo` en la ficha o usá una rama que empiece con el número de grupo (por ejemplo `g08-mis-skills`).")
             continue
 
         base = slug(str(ficha["name"]).replace("_", "-"))
         base = re.sub(r"^(g\d{2}-)+", "", base) or slug(ruta.parent.name)
         nombre = f"g{grupo}-{base}"[:64].rstrip("-")
-        if ubicacion_correcta(rel, tipo, nombre) and ficha.get("name") == nombre:
+        if (ubicacion_correcta(rel, tipo, nombre) and ficha.get("name") == nombre
+                and str(meta.get("grupo")) == grupo and meta.get("tipo") == tipo):
             continue
 
         carpeta_destino = RAIZ / CARPETA_DE_TIPO[tipo] / nombre
@@ -137,12 +147,16 @@ def main():
         ficha["metadata"] = meta
         escribir_ficha(destino, es_yml, ficha, cuerpo)
         git("add", destino.relative_to(RAIZ).as_posix())
-        movidas.append(f"- `{rel}` → `{destino.relative_to(RAIZ).as_posix()}` ({tipo})")
+        nuevo_rel = destino.relative_to(RAIZ).as_posix()
+        if nuevo_rel == rel:
+            movidas.append(f"- `{rel}`: se completó la ficha con `tipo: {tipo}` y `grupo: \"{grupo}\"`")
+        else:
+            movidas.append(f"- `{rel}` → `{nuevo_rel}` ({tipo})")
 
     if movidas or avisos:
         print("### Ordenamiento de piezas\n")
     if movidas:
-        print("Piezas movidas a su lugar (el cambio ya está en este PR):\n")
+        print("Piezas ordenadas (el cambio ya está en este PR):\n")
         print("\n".join(movidas) + "\n")
     if avisos:
         print("No se pudieron ordenar:\n")
