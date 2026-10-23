@@ -3,11 +3,11 @@ name: g03-express-pr-mentor
 description: 'Agente mentor que prepara un PR del repo backend (Express) antes de abrirlo: atomicidad de commits, descripción del PR, resolución de conflictos, nombre de rama y chequeos de Express. Usar sobre la propia rama, antes de pedir revisión.'
 tools: Read, Grep, Glob, Bash
 skills:
-- express-project-structure-guidelines
-- express-typescript
-- prisma
-- postgresql-best-practices
-- supertest-api-testing
+- g03-express-project-structure-guidelines
+- g03-express-typescript
+- g03-prisma
+- g03-postgresql-best-practices
+- g03-supertest-api-testing
 metadata:
   tipo: agente
   area:

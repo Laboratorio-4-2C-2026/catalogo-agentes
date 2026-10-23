@@ -3,11 +3,11 @@ name: g03-express-pr-reviewer
 description: 'Agente que revisa un PR ya abierto del repo backend (Express) para el PM o líder antes de aprobarlo: higiene de commits y descripción, resolución de conflictos, nombre de rama y calidad del código Express. Usar al revisar PRs de backend.'
 tools: Read, Grep, Glob, Bash
 skills:
-- express-project-structure-guidelines
-- express-typescript
-- prisma
-- postgresql-best-practices
-- supertest-api-testing
+- g03-express-project-structure-guidelines
+- g03-express-typescript
+- g03-prisma
+- g03-postgresql-best-practices
+- g03-supertest-api-testing
 metadata:
   tipo: agente
   area:

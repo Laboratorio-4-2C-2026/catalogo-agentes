@@ -3,10 +3,10 @@ name: g03-express-security-agent
 description: 'Agente auditor de seguridad para el backend con Express, TypeScript, Prisma y PostgreSQL: cifrado en tránsito y en reposo, superficie de ataque y checklist alineado con OWASP, con enfoque pedagógico. Usar antes de entregar endpoints que manejan datos sensibles.'
 tools: Read, Grep, Glob, Bash
 skills:
-- express-typescript
-- prisma
-- postgresql-best-practices
-- multi-stage-dockerfile
+- g03-express-typescript
+- g03-prisma
+- g03-postgresql-best-practices
+- g03-multi-stage-dockerfile
 metadata:
   tipo: agente
   area:

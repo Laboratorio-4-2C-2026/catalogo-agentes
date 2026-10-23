@@ -3,9 +3,9 @@ name: g03-flutter-security-agent
 description: 'Agente auditor de seguridad para la app mobile en Flutter: almacenamiento local seguro, deep links y secretos dentro del bundle, con enfoque pedagógico. Usar antes de entregar una funcionalidad que maneja datos sensibles o enlaces externos.'
 tools: Read, Grep, Glob, Bash
 skills:
-- dart-fix-runtime-errors
-- dart-run-static-analysis
-- flutter-project-structure-guidelines
+- g03-dart-fix-runtime-errors
+- g03-dart-run-static-analysis
+- g03-flutter-project-structure-guidelines
 metadata:
   tipo: agente
   area:

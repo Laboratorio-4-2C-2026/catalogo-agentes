@@ -3,11 +3,11 @@ name: g03-express-test-builder-agent
 description: Agente de QA que diseña, escribe y ejecuta suites completas de tests unitarios y de integración HTTP para APIs Express con TypeScript, usando Vitest, Supertest y repositorios falsos en memoria. Usar cuando se necesita cobertura de tests escrita y verificada.
 tools: Read, Grep, Glob, Bash, Edit, Write
 skills:
-- supertest-api-testing
-- javascript-typescript-vitest
-- express-project-structure-guidelines
-- express-typescript
-- prisma
+- g03-supertest-api-testing
+- g03-javascript-typescript-vitest
+- g03-express-project-structure-guidelines
+- g03-express-typescript
+- g03-prisma
 metadata:
   tipo: agente
   area:

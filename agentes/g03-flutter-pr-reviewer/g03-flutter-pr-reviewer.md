@@ -3,12 +3,12 @@ name: g03-flutter-pr-reviewer
 description: 'Agente que revisa un PR ya abierto del repo mobile (Flutter) para el PM o líder antes de aprobarlo: higiene de commits y descripción, resolución de conflictos, nombre de rama y calidad del código Flutter. Usar al revisar PRs de mobile.'
 tools: Read, Grep, Glob, Bash
 skills:
-- flutter-project-structure-guidelines
-- flutter-apply-material3-guidelines
-- flutter-apply-glassmorphism-design
-- dart-run-static-analysis
-- flutter-add-widget-test
-- dart-add-unit-test
+- g03-flutter-project-structure-guidelines
+- g03-flutter-apply-material3-guidelines
+- g03-flutter-apply-glassmorphism-design
+- g03-dart-run-static-analysis
+- g03-flutter-add-widget-test
+- g03-dart-add-unit-test
 metadata:
   tipo: agente
   area:

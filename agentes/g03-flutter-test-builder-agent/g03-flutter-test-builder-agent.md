@@ -3,10 +3,10 @@ name: g03-flutter-test-builder-agent
 description: Agente de QA que diseña, escribe y ejecuta suites completas de tests unitarios, de notifiers y de widgets en Flutter con flutter_test y dobles de prueba en memoria. Usar cuando se necesita cobertura de tests escrita y verificada.
 tools: Read, Grep, Glob, Bash, Edit, Write
 skills:
-- flutter-add-widget-test
-- dart-add-unit-test
-- dart-fix-runtime-errors
-- dart-run-static-analysis
+- g03-flutter-add-widget-test
+- g03-dart-add-unit-test
+- g03-dart-fix-runtime-errors
+- g03-dart-run-static-analysis
 metadata:
   tipo: agente
   area:

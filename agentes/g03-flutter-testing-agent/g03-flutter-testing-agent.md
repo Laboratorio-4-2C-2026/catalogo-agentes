@@ -3,10 +3,10 @@ name: g03-flutter-testing-agent
 description: 'Agente mentor de testing en Flutter y Dart: guía a estudiantes para escribir tests unitarios, de notifiers y de widgets con flutter_test y repositorios falsos, sin escribir los tests por ellos. Usar al aprender o revisar tests de la app mobile.'
 tools: Read, Grep, Glob, Bash
 skills:
-- dart-add-unit-test
-- dart-fix-runtime-errors
-- dart-run-static-analysis
-- flutter-add-widget-test
+- g03-dart-add-unit-test
+- g03-dart-fix-runtime-errors
+- g03-dart-run-static-analysis
+- g03-flutter-add-widget-test
 metadata:
   tipo: agente
   area:
