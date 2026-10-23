@@ -96,7 +96,8 @@ def main():
             if not isinstance(persona, dict) or not persona.get("nombre") or not persona.get("github"):
                 error(f"cada {rol} necesita `nombre` y `github`.")
             elif str(persona["github"]).lower() not in miembros:
-                error(f"el {rol} `{persona['github']}` no figura en `integrantes.yml` como integrante de `{clave_grupo(grupo)}`.")
+                error(f"el {rol} `{persona['github']}` no figura en `integrantes.yml` como integrante de `{clave_grupo(grupo)}`. "
+                      "Si es alguien nuevo, el bot lo suma solo cuando el usuario existe en GitHub: revisá cómo está escrito.")
 
         if args.base and isinstance(autor, dict):
             anterior = autor_en_base(args.base, ruta)

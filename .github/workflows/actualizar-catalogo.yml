@@ -39,7 +39,8 @@ jobs:
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add taxonomia.yml README.md CONTRIBUTING.md sitio
             git commit -m "Actualizar listas y sitio"
-            git push
+            # Si main cambió mientras corría (varios merges seguidos), la próxima corrida lo actualiza.
+            git push || echo "::notice::main cambió durante la corrida; la próxima corrida guarda el sitio actualizado."
           fi
 
       - name: Preparar el sitio para GitHub Pages

@@ -16,6 +16,7 @@ Reglas:
 - Trabajá **en una rama del repo, no en un fork**: el bot necesita poder corregir tu rama.
 - Tocá **solo las piezas de tu grupo** (las que empiezan con tu prefijo).
 - No edites a mano `taxonomia.yml`, `sitio/` ni las tablas de categorías: se actualizan solos.
+- Si en una ficha ponés como autor o colaborador a alguien que todavía no está en `integrantes.yml`, el bot lo suma solo al grupo de la pieza (con su nombre y usuario de GitHub) cuando revisa el PR.
 
 Para actualizar una pieza que ya está, usá `prompts/2-actualizar-pieza.md`.
 
