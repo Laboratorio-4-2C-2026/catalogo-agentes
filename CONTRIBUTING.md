@@ -25,11 +25,11 @@ Preferí siempre estos valores. Si ninguno encaja, podés escribir uno nuevo: se
 <!-- LISTAS:INICIO -->
 | Campo | Valores (cantidad de piezas que lo usan) |
 |---|---|
-| `area` | `frontend` (0), `backend` (0), `mobile` (0), `datos` (0), `ia` (0), `qa` (0), `devops` (0), `seguridad` (0), `gestion` (1), `diseno` (0), `documentacion` (0) |
-| `fase` | `planificacion` (1), `analisis` (1), `diseno` (0), `desarrollo` (0), `testing` (0), `revision` (0), `despliegue` (0), `mantenimiento` (0) |
-| `tecnologias` | `agnostico` (0), `express` (1), `flutter` (1), `prisma` (1) |
+| `area` | `frontend` (0), `backend` (0), `mobile` (0), `datos` (0), `ia` (1), `qa` (0), `devops` (0), `seguridad` (0), `gestion` (1), `diseno` (0), `documentacion` (1) |
+| `fase` | `planificacion` (1), `analisis` (1), `diseno` (0), `desarrollo` (0), `testing` (0), `revision` (1), `despliegue` (0), `mantenimiento` (0) |
+| `tecnologias` | `agnostico` (1), `express` (1), `flutter` (1), `prisma` (1) |
 | `metodologia` | `scrum` (1), `kanban` (0), `agnostico` (0) |
-| `herramientas` | `claude-code` (1), `cursor` (0), `codex` (0), `otra` (0) |
+| `herramientas` | `claude-code` (2), `cursor` (0), `codex` (0), `otra` (1) |
 | `requiere` | `jira` (1), `github` (0), `figma` (0), `google-sheets` (0), `slack` (0) |
-| `madurez` | `experimental` (0), `probado` (0), `usado-en-proyecto` (1) |
+| `madurez` | `experimental` (1), `probado` (0), `usado-en-proyecto` (1) |
 <!-- LISTAS:FIN -->
