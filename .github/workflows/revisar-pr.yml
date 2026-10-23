@@ -51,6 +51,16 @@ jobs:
       - name: Agente decisor
         run: python _base/scripts/decisor.py --base origin/main --autor-pr "${{ github.event.pull_request.user.login }}" > ../informe-2-decisor.md
 
+      - name: Revisor de fichas con IA (solo si el repo tiene API key)
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          REVISOR_MODELO: ${{ vars.REVISOR_MODELO }}
+        run: |
+          touch ../informe-4-revisor-ia.md
+          if [ -f _base/scripts/revisor_ia.py ]; then
+            python _base/scripts/revisor_ia.py --base origin/main > ../informe-4-revisor-ia.md
+          fi
+
       - name: Controles automáticos
         run: |
           set -o pipefail
@@ -61,6 +71,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cat ../informe-1-normalizacion.md ../informe-3-validacion.md ../informe-2-decisor.md > ../comentario.md 2>/dev/null || true
+          cat ../informe-1-normalizacion.md ../informe-3-validacion.md ../informe-2-decisor.md ../informe-4-revisor-ia.md > ../comentario.md 2>/dev/null || true
           gh pr comment ${{ github.event.pull_request.number }} --body-file ../comentario.md --edit-last \
             || gh pr comment ${{ github.event.pull_request.number }} --body-file ../comentario.md
