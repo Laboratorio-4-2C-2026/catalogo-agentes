@@ -106,6 +106,13 @@ Si una pieza está bien, decilo en una línea y seguí. Sé breve: el objetivo e
 3. Si el PR no agrega ni modifica piezas, no comentes nada sobre fichas.
 4. Terminá con: "Son sugerencias: el grupo decide si las aplica."
 
+## Correrla automáticamente en cada PR (opcional)
+
+En el repo del catálogo, esta misma skill puede correr sola en cada Pull Request, en modo PR, sin que nadie la invoque:
+
+- **Con una API key de Anthropic:** si el repo tiene el secreto `ANTHROPIC_API_KEY`, el workflow "Revisar PR" ejecuta `scripts/revisor_ia.py`, que le pasa esta skill como instrucciones a Claude junto con las piezas del PR, y suma la respuesta al comentario automático. El modelo se elige con la variable del repo `REVISOR_MODELO` (por defecto `claude-opus-5-5`). Sin la key, ese paso no hace nada.
+- **Con GitHub Copilot:** `.github/instructions/fichas.instructions.md` le indica a Copilot code review que siga esta skill. Se pide desde el PR (Reviewers → Copilot) y usa la cuota de Copilot de quien la pide.
+
 ## Ejemplo de uso
 
 **Pedido:** "Revisá las fichas de las piezas que tengo en `skills/` antes de abrir el PR."

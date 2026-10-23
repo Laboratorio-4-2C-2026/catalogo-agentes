@@ -3,6 +3,7 @@
 1. Abrí tu herramienta (Claude Code, Cursor o Codex) en la carpeta donde tenés tus piezas.
 2. Pegá el prompt de `prompts/1-preparar-piezas.md` y completá los DATOS DEL EQUIPO.
 3. Revisá la tabla que te devuelve la IA y corregí lo que haga falta.
+   - **Recomendado:** pedile a tu herramienta que revise las fichas con la skill `skills/g03-revisor-de-fichas/SKILL.md` (modo local). Propone mejoras de clasificación, descripción, ejemplo y piezas relacionadas, y solo aplica las que aceptes.
 4. En tu copia del repo, creá una rama: `git checkout -b g03-carga-inicial` (con tu número de grupo).
 5. Copiá las carpetas `gNN-…` a `skills/`, `agentes/` o `comandos/`.
 6. `git add`, `git commit` y `git push -u origin <tu-rama>`.
