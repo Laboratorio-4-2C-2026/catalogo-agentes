@@ -26,11 +26,11 @@ Preferí siempre estos valores. Si ninguno encaja, podés escribir uno nuevo: se
 <!-- LISTAS:INICIO -->
 | Campo | Valores (cantidad de piezas que lo usan) |
 |---|---|
-| `area` | `frontend` (0), `backend` (1), `mobile` (2), `datos` (0), `ia` (1), `qa` (2), `devops` (0), `seguridad` (0), `gestion` (5), `diseno` (1), `documentacion` (1) |
-| `fase` | `planificacion` (4), `analisis` (3), `diseno` (2), `desarrollo` (1), `testing` (0), `revision` (5), `despliegue` (0), `mantenimiento` (1) |
-| `tecnologias` | `agnostico` (7), `express` (1), `flutter` (3), `prisma` (1), `dart` (1) |
+| `area` | `frontend` (2), `backend` (13), `mobile` (19), `datos` (2), `ia` (1), `qa` (14), `devops` (1), `seguridad` (2), `gestion` (5), `diseno` (4), `documentacion` (1) |
+| `fase` | `planificacion` (4), `analisis` (3), `diseno` (6), `desarrollo` (16), `testing` (8), `revision` (14), `despliegue` (1), `mantenimiento` (4) |
+| `tecnologias` | `agnostico` (7), `express` (10), `flutter` (18), `prisma` (4), `dart` (17), `docker` (1), `figma` (1), `javascript` (1), `postgresql` (3), `riverpod` (1), `supertest` (3), `typescript` (11), `vitest` (3), `zod` (1) |
 | `metodologia` | `scrum` (5), `kanban` (0), `agnostico` (0) |
-| `herramientas` | `claude-code` (10), `cursor` (0), `codex` (8), `otra` (1) |
-| `requiere` | `jira` (4), `github` (4), `figma` (0), `google-sheets` (3), `slack` (0) |
-| `madurez` | `experimental` (6), `probado` (0), `usado-en-proyecto` (4) |
+| `herramientas` | `claude-code` (40), `cursor` (0), `codex` (38), `otra` (1) |
+| `requiere` | `jira` (4), `github` (5), `figma` (1), `google-sheets` (3), `slack` (0), `dart-mcp` (2) |
+| `madurez` | `experimental` (36), `probado` (0), `usado-en-proyecto` (4) |
 <!-- LISTAS:FIN -->

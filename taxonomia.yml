@@ -30,6 +30,15 @@ valores:
     flutter: ''
     prisma: ''
     dart: ''
+    docker: ''
+    figma: ''
+    javascript: ''
+    postgresql: ''
+    riverpod: ''
+    supertest: ''
+    typescript: ''
+    vitest: ''
+    zod: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
@@ -45,6 +54,7 @@ valores:
     figma: Figma (por conexión MCP)
     google-sheets: Google Sheets (por conexión MCP)
     slack: Slack (por conexión MCP)
+    dart-mcp: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
