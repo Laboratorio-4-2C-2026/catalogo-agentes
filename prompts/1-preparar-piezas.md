@@ -10,7 +10,8 @@ DATOS DEL EQUIPO (completar antes de usar)
 - Quién hizo cada pieza (nombre original de la pieza -> autor; colaboradores si los hubo):
     revisor-prs -> autor: Nombre Apellido
     jira-ticket -> autor: Nombre Apellido; colaboradores: Nombre Apellido
-- Herramienta con la que trabajamos: claude-code | cursor | codex
+- Herramientas en las que usamos o probamos las piezas (una o varias): claude-code, cursor, codex, otra
+- Madurez de las piezas, si la saben (por pieza o para todas): experimental | probado | usado-en-proyecto
 - Carpeta donde están nuestras piezas: (ruta)
 - Carpeta de salida: (ruta donde dejar las piezas listas)
 
@@ -19,10 +20,11 @@ Recorré la carpeta indicada y listá cada skill, agente o comando. Para cada un
 - skill: un paquete de instrucciones que la IA carga cuando la tarea lo necesita.
 - agente: un asistente con rol propio (subagente).
 - comando: una instrucción que se ejecuta con /nombre.
+Si la misma pieza aparece copiada en más de una carpeta (por ejemplo, una copia para cada herramienta), tomala una sola vez y anotalo en la tabla final.
 
 PASO 2. Ponerle nombre
 - Formato: gNN-nombre-descriptivo. Ejemplo: g03-planify-jira-ticket
-- Solo minúsculas, números y guiones. Sin espacios, acentos ni ñ (diseno, no diseño).
+- Solo minúsculas, números y guiones. Sin espacios, acentos, ñ ni guiones bajos (flutter-frontend-agent, no flutter_frontend_agent).
 - Máximo 64 caracteres.
 - El nombre tiene que decir qué hace (g05-generador-de-casos-de-prueba, no g05-agente-1).
 - Si ya empieza con el prefijo del grupo, no lo repitas.
@@ -30,23 +32,23 @@ PASO 2. Ponerle nombre
 
 PASO 3. Ubicar los archivos
 - skill: carpeta skills/gNN-nombre/ con un archivo SKILL.md. Si no estaba en ese formato, convertila: frontmatter con name y description, y debajo las instrucciones originales tal cual. Los archivos de apoyo (scripts, plantillas, ejemplos) van dentro de la misma carpeta.
-- agente: carpeta agentes/gNN-nombre/ con el archivo en el formato original de su herramienta.
-- comando: carpeta comandos/gNN-nombre/ con el archivo en el formato original de su herramienta.
-- Si el archivo original no admite frontmatter YAML (por ejemplo, TOML o JSON), creá un archivo metadata.yml en la misma carpeta con los campos del paso 4.
+- agente: carpeta agentes/gNN-nombre/ con el archivo principal renombrado a gNN-nombre.md (por ejemplo agentes/g03-qa-agent/g03-qa-agent.md). Mantené el formato original de su herramienta.
+- comando: carpeta comandos/gNN-nombre/ con el archivo principal renombrado a gNN-nombre.md, en el formato original de su herramienta.
+- Si el archivo original no admite frontmatter YAML (por ejemplo, TOML o JSON), dejalo con su nombre original y creá al lado un metadata.yml con los campos del paso 4 y un EJEMPLO.md con el ejemplo de uso del paso 5.
 - El nombre de la carpeta tiene que ser exactamente igual al campo name.
 
 PASO 4. Completar la ficha
 Agregá al frontmatter (o a metadata.yml) estos campos. Donde dice "lista común", usá primero los valores listados; solo si ninguno encaja, escribí uno nuevo.
 
 name: gNN-nombre
-description: una o dos oraciones en español. Qué hace y cuándo usarla. Mencioná la tecnología o el caso concreto para que se distinga de otras parecidas.
+description: una o dos oraciones en español, aunque la pieza esté en otro idioma. Qué hace y cuándo usarla. Mencioná la tecnología o el caso concreto para que se distinga de otras parecidas.
 metadata:
   tipo: skill | agente | comando
   area: [lista común, uno o más] frontend, backend, mobile, datos, ia, qa, devops, seguridad, gestion, diseno, documentacion
   fase: [lista común, uno o más] planificacion, analisis, diseno, desarrollo, testing, revision, despliegue, mantenimiento
   tecnologias: [lista común] en minúsculas, nombre oficial, sin versión (react, nestjs, flutter, postgresql). Si sirve para cualquier tecnología: [agnostico]
   metodologia: [lista común, opcional] scrum, kanban, agnostico
-  herramientas: [lista común] claude-code, cursor, codex, otra
+  herramientas: [lista común] las de DATOS DEL EQUIPO en las que esta pieza se usó o probó: claude-code, cursor, codex, otra
   requiere: [lista común] servicios externos o conexiones MCP que necesita (jira, github, figma, google-sheets...). Si no necesita nada: []
   grupo: "NN"   (entre comillas, igual al prefijo del nombre)
   autor:        (una sola persona, según "Quién hizo cada pieza")
@@ -59,6 +61,11 @@ metadata:
   madurez: [lista común] experimental (recién hecha, poco probada), probado (se probó varias veces), usado-en-proyecto (se usó en el proyecto real)
   relacionados: []
 
+Si el frontmatter original ya tenía otros datos:
+- Campos propios de la herramienta (por ejemplo tools, skills, model, allowed-tools): conservalos tal cual, al mismo nivel que name y description.
+- Si ya tenía un bloque metadata con otras claves, conservalas dentro de metadata junto a las nuevas.
+- Si el frontmatter original no es YAML válido (por ejemplo, una description sin comillas que contiene ": "), reescribilo como YAML válido (con comillas donde haga falta) sin cambiar el contenido de ningún campo.
+
 PASO 5. Ejemplo de uso
 - Si la pieza no tiene una sección "## Ejemplo de uso", agregala al final con este formato:
     ## Ejemplo de uso
@@ -67,18 +74,25 @@ PASO 5. Ejemplo de uso
 - Basate solo en lo que dicen las instrucciones de la pieza. No le atribuyas capacidades que no tiene.
 - Marcá en la tabla final "ejemplo generado" para que el grupo lo revise.
 
-PASO 6. Si algo no encaja
+PASO 6. Referencias a otras piezas del grupo
+- Si una pieza nombra a otra del mismo grupo en un campo de configuración del frontmatter (por ejemplo, una lista skills: de un agente), actualizá ese nombre al nuevo con prefijo gNN, para que la herramienta la siga encontrando.
+- Si la nombra dentro del texto de las instrucciones, no lo cambies: anotalo en la tabla final como "referencia a revisar".
+
+PASO 7. Si algo no encaja
 - Usá primero los valores de la lista. Si de verdad ninguno encaja, escribí uno nuevo en minúsculas, sin acentos y con guiones, y marcalo como "valor nuevo" en la tabla final.
-- Si no estás seguro de la madurez, poné experimental.
+- Si DATOS DEL EQUIPO no dice la madurez de una pieza, poné experimental y marcalo como "madurez sin confirmar" en la tabla final.
+- Si no sabés en qué herramientas se usó una pieza, usá las de DATOS DEL EQUIPO y marcalo como "herramientas sin confirmar".
 - Si una pieza no figura en "Quién hizo cada pieza", NO adivines el autor: dejalo vacío y marcalo como "falta autor" en la tabla final.
 - Usá solo integrantes de la lista del grupo como autor o colaboradores.
 - Si una pieza no tiene instrucciones claras o parece incompleta, anotalo en la tabla final.
 
-PASO 7. Mostrar el resultado
+PASO 8. Mostrar el resultado
 Al terminar, mostrame:
 1. Una tabla con estas columnas: nombre | tipo | autor | colaboradores | area | fase | tecnologias | requiere | madurez | dudas
 2. Cuántas piezas quedaron como autor de cada integrante.
-3. La lista de piezas que tuviste que convertir de formato o a las que les agregaste el ejemplo.
+3. La lista de archivos que renombraste o convertiste de formato, y las piezas a las que les agregaste el ejemplo.
 4. Cualquier cosa que te haya parecido rara o incompleta.
+
+Recomendado antes de subir: revisá las fichas con la skill g03-revisor-de-fichas del catálogo (skills/g03-revisor-de-fichas/SKILL.md), en modo local.
 
 No hagas commit, no subas nada y no abras ningún Pull Request. Primero reviso yo la tabla.
