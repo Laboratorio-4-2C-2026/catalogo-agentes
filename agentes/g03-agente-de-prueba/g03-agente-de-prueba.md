@@ -1,18 +1,26 @@
 ---
-name: agente_de_prueba
+name: g03-agente-de-prueba
 description: Agente de prueba para verificar que el bot ordena piezas subidas en la raíz; usar solo para testear.
 tools: Read, Grep
 metadata:
-  area: [qa]
-  fase: [testing]
-  tecnologias: [agnostico]
-  herramientas: [claude-code]
+  area:
+  - qa
+  fase:
+  - testing
+  tecnologias:
+  - agnostico
+  herramientas:
+  - claude-code
   requiere: []
-  autor: {nombre: Julieta Iglesias, github: JuliIglesias}
-  responsables: [JuliIglesias]
+  autor:
+    nombre: Julieta Iglesias
+    github: JuliIglesias
+  responsables:
+  - JuliIglesias
   madurez: experimental
+  tipo: agente
+  grupo: "03"
 ---
-
 Prueba.
 
 ## Ejemplo de uso
