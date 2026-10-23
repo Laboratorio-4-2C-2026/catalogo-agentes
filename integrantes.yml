@@ -1,23 +1,26 @@
 # Integrantes de cada grupo: nombre y usuario de GitHub.
-# Lo mantiene la cátedra. De acá salen el control de autores y el panel de seguimiento.
+# De acá salen el control de autores y la vista de avance por alumno.
 # La clave es "grupo-NN" (dos dígitos). El material de la cátedra usa "catedra" (prefijo g00).
+# Los autores y colaboradores nuevos los suma solo el bot al revisar cada PR.
 
 catedra: []
 
 grupo-03:
-  - nombre: Julieta Iglesias
-    github: JuliIglesias
-  - nombre: Ignacio Nicolás Correa Rodríguez
-    github: NachoCor2007
-  - nombre: Mateo Piccinini
-    github: mPiccinini
-  - nombre: Lautaro German Reinoso
-    github: LautiGR116
+- nombre: Julieta Iglesias
+  github: JuliIglesias
+- nombre: Ignacio Nicolás Correa Rodríguez
+  github: NachoCor2007
+- nombre: Mateo Piccinini
+  github: mPiccinini
+- nombre: Lautaro German Reinoso
+  github: LautiGR116
 
 grupo-08:
-  - nombre: Ezequiel Rickert
-    github: ezequielrickert
-  - nombre: Tomas Bernardez
-    github: Tomibernardez04
-  - nombre: Hilario Lagos
-    github: HiluLagos
+- nombre: Ezequiel Rickert
+  github: ezequielrickert
+- nombre: Tomas Bernardez
+  github: Tomibernardez04
+- nombre: Hilario Lagos
+  github: HiluLagos
+- nombre: The Octocat
+  github: octocat
