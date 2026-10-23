@@ -3,11 +3,11 @@ name: g03-express-backend-agent
 description: 'Agente mentor de backend con Node.js, Express y TypeScript para estudiantes: guía con Clean Architecture, Prisma, PostgreSQL, autenticación con JWT de Cognito y seguridad, sin generar archivos completos. Usar al desarrollar o revisar código del backend.'
 tools: Read, Grep, Glob, Bash
 skills:
-- express-project-structure-guidelines
-- express-typescript
-- prisma
-- postgresql-best-practices
-- multi-stage-dockerfile
+- g03-express-project-structure-guidelines
+- g03-express-typescript
+- g03-prisma
+- g03-postgresql-best-practices
+- g03-multi-stage-dockerfile
 metadata:
   tipo: agente
   area:

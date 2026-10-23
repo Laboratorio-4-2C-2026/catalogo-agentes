@@ -3,16 +3,16 @@ name: g03-flutter-frontend-agent
 description: 'Agente mentor de Flutter y Dart para estudiantes: revisa código y guía con arquitectura limpia, Riverpod y Material 3 mediante preguntas, sin generar código mágico. Usar al desarrollar o revisar pantallas de la app mobile.'
 tools: Read, Grep, Glob, Bash
 skills:
-- flutter-project-structure-guidelines
-- flutter-apply-material3-guidelines
-- figma-inspect-design
-- dart-fix-runtime-errors
-- dart-run-static-analysis
-- dart-resolve-package-conflicts
-- flutter-add-widget-preview
-- flutter-build-responsive-layout
-- flutter-fix-layout-issues
-- flutter-setup-localization
+- g03-flutter-project-structure-guidelines
+- g03-flutter-apply-material3-guidelines
+- g03-figma-inspect-design
+- g03-dart-fix-runtime-errors
+- g03-dart-run-static-analysis
+- g03-dart-resolve-package-conflicts
+- g03-flutter-add-widget-preview
+- g03-flutter-build-responsive-layout
+- g03-flutter-fix-layout-issues
+- g03-flutter-setup-localization
 metadata:
   tipo: agente
   area:

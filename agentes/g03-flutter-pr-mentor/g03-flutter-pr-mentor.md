@@ -3,12 +3,12 @@ name: g03-flutter-pr-mentor
 description: 'Agente mentor que prepara un PR del repo mobile (Flutter) antes de abrirlo: atomicidad de commits, descripción del PR, resolución de conflictos, nombre de rama y chequeos de Flutter. Usar sobre la propia rama, antes de pedir revisión.'
 tools: Read, Grep, Glob, Bash
 skills:
-- flutter-project-structure-guidelines
-- flutter-apply-material3-guidelines
-- flutter-apply-glassmorphism-design
-- dart-run-static-analysis
-- flutter-add-widget-test
-- dart-add-unit-test
+- g03-flutter-project-structure-guidelines
+- g03-flutter-apply-material3-guidelines
+- g03-flutter-apply-glassmorphism-design
+- g03-dart-run-static-analysis
+- g03-flutter-add-widget-test
+- g03-dart-add-unit-test
 metadata:
   tipo: agente
   area:

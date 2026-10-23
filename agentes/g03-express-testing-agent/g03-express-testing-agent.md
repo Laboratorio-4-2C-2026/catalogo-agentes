@@ -3,11 +3,11 @@ name: g03-express-testing-agent
 description: 'Agente mentor de testing para backends Express con TypeScript: guía a estudiantes para escribir tests unitarios y de integración HTTP con Vitest, Supertest y repositorios falsos, sin escribir los tests por ellos. Usar al aprender o revisar tests del backend.'
 tools: Read, Grep, Glob, Bash
 skills:
-- javascript-typescript-vitest
-- supertest-api-testing
-- express-project-structure-guidelines
-- express-typescript
-- prisma
+- g03-javascript-typescript-vitest
+- g03-supertest-api-testing
+- g03-express-project-structure-guidelines
+- g03-express-typescript
+- g03-prisma
 metadata:
   tipo: agente
   area:
