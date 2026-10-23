@@ -23,11 +23,11 @@ Esta tabla se actualiza sola cada vez que se acepta un PR.
 <!-- LISTAS:INICIO -->
 | Campo | Valores (cantidad de piezas que lo usan) |
 |---|---|
-| `area` | `frontend` (0), `backend` (0), `mobile` (0), `datos` (0), `ia` (1), `qa` (0), `devops` (0), `seguridad` (0), `gestion` (1), `diseno` (0), `documentacion` (1) |
-| `fase` | `planificacion` (1), `analisis` (1), `diseno` (0), `desarrollo` (0), `testing` (0), `revision` (1), `despliegue` (0), `mantenimiento` (0) |
-| `tecnologias` | `agnostico` (1), `express` (1), `flutter` (1), `prisma` (1) |
-| `metodologia` | `scrum` (1), `kanban` (0), `agnostico` (0) |
-| `herramientas` | `claude-code` (2), `cursor` (0), `codex` (0), `otra` (1) |
-| `requiere` | `jira` (1), `github` (0), `figma` (0), `google-sheets` (0), `slack` (0) |
-| `madurez` | `experimental` (1), `probado` (0), `usado-en-proyecto` (1) |
+| `area` | `frontend` (0), `backend` (1), `mobile` (2), `datos` (0), `ia` (1), `qa` (2), `devops` (0), `seguridad` (0), `gestion` (5), `diseno` (1), `documentacion` (1) |
+| `fase` | `planificacion` (4), `analisis` (3), `diseno` (2), `desarrollo` (1), `testing` (0), `revision` (5), `despliegue` (0), `mantenimiento` (1) |
+| `tecnologias` | `agnostico` (7), `express` (1), `flutter` (3), `prisma` (1), `dart` (1) |
+| `metodologia` | `scrum` (5), `kanban` (0), `agnostico` (0) |
+| `herramientas` | `claude-code` (10), `cursor` (0), `codex` (8), `otra` (1) |
+| `requiere` | `jira` (4), `github` (4), `figma` (0), `google-sheets` (3), `slack` (0) |
+| `madurez` | `experimental` (6), `probado` (0), `usado-en-proyecto` (4) |
 <!-- LISTAS:FIN -->

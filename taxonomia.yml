@@ -29,6 +29,7 @@ valores:
     express: ''
     flutter: ''
     prisma: ''
+    dart: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
