@@ -39,7 +39,7 @@ jobs:
         run: |
           touch ../informe-0-ordenar.md
           if [ -f _base/scripts/ordenar.py ]; then
-            python _base/scripts/ordenar.py --base origin/main --autor-pr "${{ github.event.pull_request.user.login }}" > ../informe-0-ordenar.md
+            python _base/scripts/ordenar.py --base origin/main --autor-pr "${{ github.event.pull_request.user.login }}" --rama "${{ github.head_ref }}" > ../informe-0-ordenar.md
           fi
 
       - name: Normalizar valores de las fichas
