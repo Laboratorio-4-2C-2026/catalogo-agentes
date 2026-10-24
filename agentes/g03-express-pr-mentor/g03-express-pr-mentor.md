@@ -31,7 +31,7 @@ metadata:
     github: JuliIglesias
   responsables:
   - mPiccinini
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Agent: Express PR Readiness Mentor

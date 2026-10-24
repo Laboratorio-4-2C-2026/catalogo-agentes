@@ -21,7 +21,7 @@ metadata:
     github: NachoCor2007
   responsables:
   - NachoCor2007
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # PostgreSQL Best Practices

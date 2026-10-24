@@ -24,7 +24,7 @@ metadata:
     github: NachoCor2007
   responsables:
   - LautiGR116
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Skill: Apply Google Material Design 3 (M3) Guidelines in Flutter

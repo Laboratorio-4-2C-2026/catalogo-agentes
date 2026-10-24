@@ -22,7 +22,7 @@ metadata:
     github: NachoCor2007
   responsables:
   - NachoCor2007
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Skill: Express API Integration Testing with Supertest

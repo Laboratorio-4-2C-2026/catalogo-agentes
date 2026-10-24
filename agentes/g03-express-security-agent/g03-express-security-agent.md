@@ -32,7 +32,7 @@ metadata:
     github: JuliIglesias
   responsables:
   - mPiccinini
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Agent: Backend Security Auditor (Pedagogical Mentor)

@@ -35,7 +35,7 @@ metadata:
     github: JuliIglesias
   responsables:
   - mPiccinini
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Agent: Backend QA & Testing Mentor (Node.js, Express & TypeScript)

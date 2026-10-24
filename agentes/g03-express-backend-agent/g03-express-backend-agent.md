@@ -33,7 +33,7 @@ metadata:
     github: JuliIglesias
   responsables:
   - NachoCor2007
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Agent: Backend Specialist & Pedagogical Mentor (Node.js, Express & TypeScript)
