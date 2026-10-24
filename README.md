@@ -29,5 +29,5 @@ Esta tabla se actualiza sola cada vez que se acepta un PR.
 | `metodologia` | `scrum` (5), `kanban` (0), `agnostico` (0) |
 | `herramientas` | `claude-code` (40), `cursor` (0), `codex` (38), `otra` (1) |
 | `requiere` | `jira` (4), `github` (5), `figma` (1), `google-sheets` (3), `slack` (0), `dart-mcp` (2) |
-| `madurez` | `experimental` (36), `probado` (0), `usado-en-proyecto` (4) |
+| `madurez` | `experimental` (0), `probado` (0), `usado-en-proyecto` (40) |
 <!-- LISTAS:FIN -->
