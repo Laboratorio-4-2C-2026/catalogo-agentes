@@ -13,7 +13,7 @@ metadata:
     nombre: Julieta Iglesias
     github: JuliIglesias
   responsables: [JuliIglesias]
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 

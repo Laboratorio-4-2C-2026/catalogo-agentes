@@ -29,7 +29,7 @@ metadata:
     github: JuliIglesias
   responsables:
   - LautiGR116
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Agent: Mobile Security Auditor (Pedagogical Mentor)

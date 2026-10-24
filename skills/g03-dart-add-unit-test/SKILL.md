@@ -23,7 +23,7 @@ metadata:
     github: NachoCor2007
   responsables:
   - LautiGR116
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
   model: models/gemini-3.1-pro-preview
   last_modified: Mon, 03 Aug 2026 21:51:24 GMT

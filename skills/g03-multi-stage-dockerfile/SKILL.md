@@ -22,7 +22,7 @@ metadata:
     github: NachoCor2007
   responsables:
   - mPiccinini
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 Your goal is to help me create efficient multi-stage Dockerfiles that follow best practices, resulting in smaller, more secure container images.

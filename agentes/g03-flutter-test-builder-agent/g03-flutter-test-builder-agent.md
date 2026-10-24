@@ -30,7 +30,7 @@ metadata:
     github: NachoCor2007
   responsables:
   - LautiGR116
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Agent: Flutter Test Builder & QA Engineer (Mobile)

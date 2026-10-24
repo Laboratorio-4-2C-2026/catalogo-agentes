@@ -23,7 +23,7 @@ metadata:
     github: JuliIglesias
   responsables:
   - JuliIglesias
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Agent: Consultative Product Owner (MVP Gatekeeper)

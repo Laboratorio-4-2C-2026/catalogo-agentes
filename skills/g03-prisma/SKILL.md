@@ -24,7 +24,7 @@ metadata:
     github: NachoCor2007
   responsables:
   - mPiccinini
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Prisma

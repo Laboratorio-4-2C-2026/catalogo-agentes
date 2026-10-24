@@ -21,7 +21,7 @@ metadata:
     github: JuliIglesias
   responsables:
   - JuliIglesias
-  madurez: experimental
+  madurez: usado-en-proyecto
   relacionados: []
 ---
 # Skill: Premium Glassmorphism for Planify (Flutter)
