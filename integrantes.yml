@@ -37,6 +37,16 @@ grupo-03:
 - nombre: Lautaro German Reinoso
   github: LautiGR116
 
+grupo-04:
+- nombre: Manuel Lostaló
+  github: ManuLosta
+- nombre: Alexander Köttner
+  github: Alexander-Kottner
+- nombre: Martin Barreiro
+  github: martinbarreiroo
+- nombre: Tomás Serra
+  github: TomasSerra
+
 grupo-05:
 - nombre: Ramiro Castro Martinez
   github: rcastromartinez
@@ -86,6 +96,16 @@ grupo-09:
   github: Agustin5421
 - nombre: Xoaquin Sanchez Varsallona
   github: XoaquinSanchezVarsallona
+
+grupo-10:
+- nombre: Marcos Carrizo Aslanian
+  github: MarcosCarrizoA
+- nombre: Pedro Ramirez Neira
+  github: pedroramirezneira
+- nombre: Victoria Martin Botter
+  github: vmartinbotter
+- nombre: Azul Garber
+  github: amgarber
 
 grupo-11:
 - nombre: Tomas Valle Duran
