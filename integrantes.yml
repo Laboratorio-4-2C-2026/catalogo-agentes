@@ -1,23 +1,146 @@
 # Integrantes de cada grupo: nombre y usuario de GitHub.
-# Lo mantiene la cátedra. De acá salen el control de autores y el panel de seguimiento.
+# De acá salen el control de autores y la vista de avance por alumno.
 # La clave es "grupo-NN" (dos dígitos). El material de la cátedra usa "catedra" (prefijo g00).
+# Los autores y colaboradores nuevos los suma solo el bot al revisar cada PR.
 
-catedra: []
+catedra:
+- nombre: Marcos Giagnorio
+  github: marcosgiag
+
+grupo-01:
+- nombre: Francisco Zizzi
+  github: FranciscoZizzi
+- nombre: Tomás Roldán Borjas
+  github: TomRolB
+- nombre: Agustín Alma
+  github: AAgustin9
+- nombre: Tobías Grati
+  github: tbgrati
+
+grupo-02:
+- nombre: Ines Gassiebayle
+  github: inesgassiebayle
+- nombre: Liz Lubelcyk
+  github: lizlubelczyk
+- nombre: Luz Laura
+  github: luzlaura
+- nombre: Maria Clara Lopez
+  github: ClaraLopez1
 
 grupo-03:
-  - nombre: Julieta Iglesias
-    github: JuliIglesias
-  - nombre: Ignacio Nicolás Correa Rodríguez
-    github: NachoCor2007
-  - nombre: Mateo Piccinini
-    github: mPiccinini
-  - nombre: Lautaro German Reinoso
-    github: LautiGR116
+- nombre: Julieta Iglesias
+  github: JuliIglesias
+- nombre: Ignacio Nicolás Correa Rodríguez
+  github: NachoCor2007
+- nombre: Mateo Piccinini
+  github: mPiccinini
+- nombre: Lautaro German Reinoso
+  github: LautiGR116
+
+grupo-05:
+- nombre: Ramiro Castro Martinez
+  github: rcastromartinez
+- nombre: Pedro de Foronda
+  github: Pedrodeforonda
+- nombre: Francisco José Lang
+  github: FranciscoLang2209
+- nombre: Manuel Salas Seeber
+  github: Manuelsalasseeber
+
+grupo-06:
+- nombre: Felipe Fernandez Cronenbold
+  github: sonpipe0
+- nombre: Tomás Alcázar
+  github: tomasalcazar
+- nombre: Camila Catalini
+  github: CCatalini
+- nombre: Tais Marambio
+  github: TaisMarambio
+
+grupo-07:
+- nombre: Pablo Baratta
+  github: PabloBaratta
+- nombre: Julieta Garberoglio
+  github: JulietaG13
+- nombre: Josefina Sapag
+  github: jmsapag
+- nombre: Ana Abramowich
+  github: AbramowichAna
 
 grupo-08:
-  - nombre: Ezequiel Rickert
-    github: ezequielrickert
-  - nombre: Tomas Bernardez
-    github: Tomibernardez04
-  - nombre: Hilario Lagos
-    github: HiluLagos
+- nombre: Ezequiel Rickert
+  github: ezequielrickert
+- nombre: Tomas Bernardez
+  github: Tomibernardez04
+- nombre: Hilario Lagos
+  github: HiluLagos
+- nombre: Martina Garcia Galasso
+  github: martinagarciagalasso
+
+grupo-09:
+- nombre: Máximo Sallemi
+  github: MaximoSallemi
+- nombre: Bruno Iacovone
+  github: BrunoIacovone
+- nombre: Agustín Martínez
+  github: Agustin5421
+- nombre: Xoaquin Sanchez Varsallona
+  github: XoaquinSanchezVarsallona
+
+grupo-11:
+- nombre: Tomas Valle Duran
+  github: TomasValleDuran
+- nombre: Ignacio Chevallier Boutell
+  github: IgnacioChevallier
+- nombre: Matias Chialva
+  github: Matichialvaa
+- nombre: Santos Bogo
+  github: santosbogo
+
+grupo-12:
+- nombre: Nicolas Mangini
+  github: n-mangini
+- nombre: Marcos Hussey
+  github: husseymarcos
+- nombre: Francisco Manfredi
+  github: FranManfredi
+- nombre: Lucas Monteverdi
+  github: lucasmonteverdi1
+
+grupo-13:
+- nombre: Pablo Pagliaricci
+  github: Pagliaricci
+- nombre: Mirko Vrancic
+  github: Mvrancic
+- nombre: Jeronimo Engelhard
+  github: JeroEngel
+- nombre: Tobias Berger
+  github: TotoBerger
+
+grupo-14:
+- nombre: Macarena Alimena
+  github: MackyAlimena
+- nombre: Martina de Jesus
+  github: mardejesus
+- nombre: Anapaola Borda
+  github: AnaB2
+- nombre: Elías Ballesteros
+  github: Elias85974
+
+grupo-15:
+- nombre: Francisco Calveyra
+  github: FranCalveyra
+- nombre: Marcos Sasaki
+  github: sasakiimarcos
+- nombre: Nicolas Berretta
+  github: Nicolas-Berretta
+- nombre: Felipe Germano
+  github: GermanoFelipe
+
+grupo-16:
+- nombre: Valentino Gianuzzo
+  github: ValentinoGianuzzo
+- nombre: Carla Boggio
+  github: carBoggio
+- nombre: Esteban Antonijevic
+  github: eantonijevic
