@@ -39,6 +39,8 @@ valores:
     typescript: ''
     vitest: ''
     zod: ''
+    n8n: ''
+    supabase: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
