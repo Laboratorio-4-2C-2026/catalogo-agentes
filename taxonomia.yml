@@ -39,12 +39,8 @@ valores:
     typescript: ''
     vitest: ''
     zod: ''
-    firebase: ''
-    firestore: ''
-    git: ''
-    jest: ''
-    nodejs: ''
-    react: ''
+    n8n: ''
+    supabase: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
