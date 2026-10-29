@@ -13,7 +13,18 @@ DATOS DEL EQUIPO (completar antes de usar)
 - Herramientas en las que usamos o probamos las piezas (una o varias): claude-code, cursor, codex, otra
 - Madurez de las piezas, si la saben (por pieza o para todas): experimental | probado | usado-en-proyecto
 - Carpeta donde están nuestras piezas: (ruta)
-- Carpeta de salida: (ruta donde dejar las piezas listas)
+- Carpeta donde está (o donde clonar) el repo del catálogo: (ruta; si la dejás vacía, usá la carpeta actual)
+
+PASO 0. Preparar el repo del catálogo
+El repo es https://github.com/Laboratorio-4-2C-2026/catalogo-agentes. Las piezas se dejan directamente adentro de una copia local.
+- Si la carpeta indicada (o la actual) ya es una copia del repo (git remote get-url origin dice Laboratorio-4-2C-2026/catalogo-agentes), usala: git checkout main y git pull.
+- Si no hay copia, clonalo en esa carpeta:
+    - Si está instalada la CLI de GitHub y tiene sesión (gh auth status no da error): gh repo clone Laboratorio-4-2C-2026/catalogo-agentes
+    - Si no: git clone https://github.com/Laboratorio-4-2C-2026/catalogo-agentes.git
+- Si el clone o el pull fallan por permisos, frená y avisame: tengo que aceptar las invitaciones de GitHub a la organización y al repo.
+- Creá una rama que empiece con el número de grupo, por ejemplo gNN-carga-inicial (si ya existe, usá otra: gNN-carga-2). No trabajes en main.
+- Leé taxonomia.yml del repo: sus valores son las listas comunes del paso 4 (pueden tener más valores que los de este prompt).
+- Mirá qué carpetas gNN- del grupo ya existen en skills/, agentes/ y comandos/, para no repetir nombres. Si una pieza ya está en el catálogo, no la dupliques: anotala en la tabla final como "ya existe" (para cambiarla se usa el Prompt 2).
 
 PASO 1. Identificar cada pieza
 Recorré la carpeta indicada y listá cada skill, agente o comando. Para cada uno decidí el tipo:
@@ -30,7 +41,7 @@ PASO 2. Ponerle nombre
 - Si ya empieza con el prefijo del grupo, no lo repitas.
 - No puede haber dos piezas del grupo con el mismo nombre.
 
-PASO 3. Ubicar los archivos
+PASO 3. Ubicar los archivos (dentro de la copia del repo)
 - skill: carpeta skills/gNN-nombre/ con un archivo SKILL.md. Si no estaba en ese formato, convertila: frontmatter con name y description, y debajo las instrucciones originales tal cual. Los archivos de apoyo (scripts, plantillas, ejemplos) van dentro de la misma carpeta.
 - agente: carpeta agentes/gNN-nombre/ con el archivo principal renombrado a gNN-nombre.md (por ejemplo agentes/g03-qa-agent/g03-qa-agent.md). Mantené el formato original de su herramienta.
 - comando: carpeta comandos/gNN-nombre/ con el archivo principal renombrado a gNN-nombre.md, en el formato original de su herramienta.
@@ -38,7 +49,7 @@ PASO 3. Ubicar los archivos
 - El nombre de la carpeta tiene que ser exactamente igual al campo name.
 
 PASO 4. Completar la ficha
-Agregá al frontmatter (o a metadata.yml) estos campos. Donde dice "lista común", usá primero los valores listados; solo si ninguno encaja, escribí uno nuevo.
+Agregá al frontmatter (o a metadata.yml) estos campos. Donde dice "lista común", usá primero los valores de taxonomia.yml; solo si ninguno encaja, escribí uno nuevo.
 
 name: gNN-nombre
 description: una o dos oraciones en español, aunque la pieza esté en otro idioma. Qué hace y cuándo usarla. Mencioná la tecnología o el caso concreto para que se distinga de otras parecidas.
@@ -96,3 +107,9 @@ Al terminar, mostrame:
 Recomendado antes de subir: revisá las fichas con la skill g03-revisor-de-fichas del catálogo (skills/g03-revisor-de-fichas/SKILL.md), en modo local.
 
 No hagas commit, no subas nada y no abras ningún Pull Request. Primero reviso yo la tabla.
+
+PASO 9. Subir (solo cuando yo te lo confirme)
+- git add skills agentes comandos, y un commit con un mensaje como "Agregar piezas del grupo NN".
+- git push -u origin <la rama del paso 0>
+- Si está la CLI de GitHub: gh pr create --base main --title "Piezas del grupo NN" --body "Carga de piezas del grupo NN". Si no, pasame el link para abrir el Pull Request desde GitHub.
+- Después, esperá el comentario automático del bot en el PR y contame qué dice. Si hay errores, corregilos en la misma rama y volvé a hacer push.
