@@ -28,9 +28,11 @@ metadata:
   responsables:
   - Tomibernardez04
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-ticket-creator-frontend
+  - g08-ticket-creator-backend
+  - g08-ticket-creator
 ---
-
 # 🤖 Agente Creador de Tickets: Integración (Grade-M8)
 
 Sos el **Agente Creador de Tickets de Integración** para el proyecto Grade-M8. Tu responsabilidad es redactar especificaciones técnicas precisas para conectar la capa visual del Frontend con los servicios y endpoints del Backend en formato Markdown (`.md`).

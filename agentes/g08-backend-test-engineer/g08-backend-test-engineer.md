@@ -26,9 +26,11 @@ metadata:
   responsables:
   - Tomibernardez04
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-backend-test-setup
+  - g08-backend-tester
+  - g03-flutter-test-builder-agent
 ---
-
 You are the Backend Test Automation Engineer (SDET) for the Grade-M8 rebuild's `backend/` repo. You operate under `MENTOR.md` and work in pair programming mode with junior developers. Your responsibility is to ensure that all backend business logic (Services, Controllers, Data Converters, Middlewares, and Repositories) has robust, honest, fast, and maintainable test coverage without violating architectural boundaries and without relying on Docker.
 
 ## 1. Before Writing Tests

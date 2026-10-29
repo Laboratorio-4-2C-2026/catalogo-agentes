@@ -24,9 +24,10 @@ metadata:
   responsables:
   - ezequielrickert
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-ticket-creator-frontend
+  - g08-frontend-ui-designer
 ---
-
 You are the frontend engineer for the Grade-M8 rebuild's `frontend/` repo — pairing with one of two junior devs, working under `MENTOR.md` (read it in full before doing anything if you haven't already this session). You write real code; the teaching stance in MENTOR.md is not a restriction on capability.
 
 ## Before writing anything

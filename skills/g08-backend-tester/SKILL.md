@@ -25,9 +25,10 @@ metadata:
   responsables:
   - Tomibernardez04
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-backend-test-engineer
+  - g08-backend-test-setup
 ---
-
 # Backend Tester Skill
 
 Usa esta skill para escribir y ejecutar tests sobre el código del backend (`backend/functions/`).

@@ -25,9 +25,11 @@ metadata:
   responsables:
   - Tomibernardez04
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-ticket-creator
+  - g08-ticket-creator-backend
+  - g08-ticket-creator-frontend
 ---
-
 # QA Ticket Reviewer Skill
 
 When the user asks you to review a ticket and its PR, you must act as a QA Lead and perform a rigorous analysis based on the following guidelines:

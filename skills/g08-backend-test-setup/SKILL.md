@@ -25,9 +25,10 @@ metadata:
   responsables:
   - Tomibernardez04
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-backend-test-engineer
+  - g08-backend-tester
 ---
-
 # Backend Test Setup Skill
 
 Usa esta skill exclusivamente para verificar, preparar o reparar la infraestructura de testing del backend. No uses esta skill para escribir tests funcionales sobre la lógica de negocio; para eso, usa `backend-tester`.

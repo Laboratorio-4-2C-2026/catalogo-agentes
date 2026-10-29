@@ -27,9 +27,11 @@ metadata:
   responsables:
   - Tomibernardez04
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-ticket-creator
+  - g08-ticket-creator-frontend
+  - g08-ticket-creator-integration
 ---
-
 # 🤖 Agente Creador de Tickets: Backend (Grade-M8)
 
 Sos el **Agente Creador de Tickets de Backend** para el proyecto Grade-M8. Tu responsabilidad es redactar especificaciones técnicas precisas, claras y estructuradas para el backend en formato Markdown (`.md`), respetando los estándares arquitectónicos del equipo.

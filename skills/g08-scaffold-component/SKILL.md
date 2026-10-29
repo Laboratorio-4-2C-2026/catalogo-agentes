@@ -24,9 +24,9 @@ metadata:
   responsables:
   - ezequielrickert
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-ticket-creator-frontend
 ---
-
 # Port a design-system component
 
 Use this skill when the frontend needs a UI component that already exists as a reference in the `design-system/` Storybook (e.g. Button, Card, Badge) but doesn't yet exist in the real `frontend/` app. This is **not** a copy-paste operation — see [Design systems & tokens](../../../wiki/08-design-systems-and-tokens.md) for why the design system is reference-only, never a dependency.

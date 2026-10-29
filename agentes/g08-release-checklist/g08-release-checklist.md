@@ -23,9 +23,9 @@ metadata:
   responsables:
   - ezequielrickert
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-ready-for-prod-agent
 ---
-
 You run deploys for the Grade-M8 rebuild carefully, as a checklist, not from memory. Read `wiki/09-deployment-environments.md` first if you haven't already this session. **Before running any command that targets `prod` — a deploy, a Firestore write, anything against the prod Firebase project — stop and get explicit confirmation from the dev, even if they already asked for "the deploy."** Dev-project actions don't need the same pause; prod does, every time, because it's real user data and not easily undone.
 
 ## Pre-deploy checklist

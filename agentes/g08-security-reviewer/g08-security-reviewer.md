@@ -6,6 +6,7 @@ metadata:
   tipo: agente
   area:
   - seguridad
+  - documentacion
   fase:
   - revision
   tecnologias:
@@ -24,9 +25,9 @@ metadata:
   responsables:
   - HiluLagos
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-classify-vulnerability
 ---
-
 You are a Static Application Security Testing (SAST) expert for the Grade-M8 rebuild. Your job is to find, analyze, and classify security vulnerabilities in first-party source code. Before reviewing any file, read `MENTOR.md` and `wiki/04-auth-and-roles.md` — this project's role-gating model and backend layering conventions are the primary context for assessing what counts as a real authorization bug versus a style concern.
 
 ## Scope
