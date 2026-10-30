@@ -25,11 +25,11 @@ Esta tabla se actualiza sola cada vez que se acepta un PR.
 <!-- LISTAS:INICIO -->
 | Campo | Valores (cantidad de piezas que lo usan) |
 |---|---|
-| `area` | `frontend` (17), `backend` (32), `mobile` (19), `datos` (3), `ia` (6), `qa` (35), `devops` (9), `seguridad` (9), `gestion` (22), `diseno` (7), `documentacion` (10) |
-| `fase` | `planificacion` (16), `analisis` (13), `diseno` (12), `desarrollo` (38), `testing` (20), `revision` (31), `despliegue` (7), `mantenimiento` (6) |
-| `tecnologias` | `agnostico` (25), `express` (18), `flutter` (18), `prisma` (4), `dart` (17), `docker` (3), `figma` (2), `javascript` (1), `postgresql` (3), `riverpod` (1), `supertest` (3), `typescript` (43), `vitest` (3), `zod` (1), `n8n` (1), `supabase` (1), `firebase` (10), `firestore` (3), `git` (1), `jest` (4), `nodejs` (3), `react` (13) |
-| `metodologia` | `scrum` (58), `kanban` (0), `agnostico` (1) |
-| `herramientas` | `claude-code` (94), `cursor` (53), `codex` (38), `otra` (2) |
-| `requiere` | `jira` (4), `github` (15), `figma` (1), `google-sheets` (3), `slack` (0), `dart-mcp` (2) |
-| `madurez` | `experimental` (0), `probado` (0), `usado-en-proyecto` (94) |
+| `area` | `frontend` (18), `backend` (33), `mobile` (19), `datos` (3), `ia` (6), `qa` (38), `devops` (9), `seguridad` (9), `gestion` (30), `diseno` (7), `documentacion` (13) |
+| `fase` | `planificacion` (20), `analisis` (14), `diseno` (12), `desarrollo` (38), `testing` (21), `revision` (36), `despliegue` (8), `mantenimiento` (7) |
+| `tecnologias` | `agnostico` (34), `express` (18), `flutter` (18), `prisma` (4), `dart` (17), `docker` (3), `figma` (2), `javascript` (1), `postgresql` (3), `riverpod` (1), `supertest` (3), `typescript` (43), `vitest` (3), `zod` (1), `n8n` (1), `supabase` (1), `firebase` (10), `firestore` (3), `git` (1), `jest` (4), `nodejs` (3), `react` (13), `python` (1) |
+| `metodologia` | `scrum` (68), `kanban` (0), `agnostico` (1) |
+| `herramientas` | `claude-code` (104), `cursor` (53), `codex` (38), `otra` (2) |
+| `requiere` | `jira` (14), `github` (20), `figma` (1), `google-sheets` (3), `slack` (0), `dart-mcp` (2), `chrome` (2), `discord` (4), `google-drive` (1) |
+| `madurez` | `experimental` (2), `probado` (0), `usado-en-proyecto` (102) |
 <!-- LISTAS:FIN -->

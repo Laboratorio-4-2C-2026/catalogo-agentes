@@ -47,6 +47,7 @@ valores:
     jest: ''
     nodejs: ''
     react: ''
+    python: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
@@ -63,6 +64,9 @@ valores:
     google-sheets: Google Sheets (por conexión MCP)
     slack: Slack (por conexión MCP)
     dart-mcp: ''
+    chrome: ''
+    discord: ''
+    google-drive: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
