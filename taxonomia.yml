@@ -41,6 +41,12 @@ valores:
     zod: ''
     n8n: ''
     supabase: ''
+    firebase: ''
+    firestore: ''
+    git: ''
+    jest: ''
+    nodejs: ''
+    react: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban

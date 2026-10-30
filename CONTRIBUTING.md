@@ -35,11 +35,11 @@ Preferí siempre estos valores. Si ninguno encaja, podés escribir uno nuevo: se
 <!-- LISTAS:INICIO -->
 | Campo | Valores (cantidad de piezas que lo usan) |
 |---|---|
-| `area` | `frontend` (3), `backend` (14), `mobile` (19), `datos` (2), `ia` (1), `qa` (14), `devops` (1), `seguridad` (2), `gestion` (5), `diseno` (4), `documentacion` (2) |
-| `fase` | `planificacion` (4), `analisis` (3), `diseno` (6), `desarrollo` (17), `testing` (8), `revision` (14), `despliegue` (1), `mantenimiento` (5) |
-| `tecnologias` | `agnostico` (7), `express` (10), `flutter` (18), `prisma` (4), `dart` (17), `docker` (1), `figma` (1), `javascript` (1), `postgresql` (3), `riverpod` (1), `supertest` (3), `typescript` (11), `vitest` (3), `zod` (1), `n8n` (1), `supabase` (1) |
-| `metodologia` | `scrum` (5), `kanban` (0), `agnostico` (1) |
-| `herramientas` | `claude-code` (41), `cursor` (0), `codex` (38), `otra` (2) |
-| `requiere` | `jira` (4), `github` (5), `figma` (1), `google-sheets` (3), `slack` (0), `dart-mcp` (2) |
-| `madurez` | `experimental` (0), `probado` (0), `usado-en-proyecto` (41) |
+| `area` | `frontend` (17), `backend` (32), `mobile` (19), `datos` (3), `ia` (6), `qa` (35), `devops` (9), `seguridad` (9), `gestion` (22), `diseno` (7), `documentacion` (10) |
+| `fase` | `planificacion` (16), `analisis` (13), `diseno` (12), `desarrollo` (38), `testing` (20), `revision` (31), `despliegue` (7), `mantenimiento` (6) |
+| `tecnologias` | `agnostico` (25), `express` (18), `flutter` (18), `prisma` (4), `dart` (17), `docker` (3), `figma` (2), `javascript` (1), `postgresql` (3), `riverpod` (1), `supertest` (3), `typescript` (43), `vitest` (3), `zod` (1), `n8n` (1), `supabase` (1), `firebase` (10), `firestore` (3), `git` (1), `jest` (4), `nodejs` (3), `react` (13) |
+| `metodologia` | `scrum` (58), `kanban` (0), `agnostico` (1) |
+| `herramientas` | `claude-code` (94), `cursor` (53), `codex` (38), `otra` (2) |
+| `requiere` | `jira` (4), `github` (15), `figma` (1), `google-sheets` (3), `slack` (0), `dart-mcp` (2) |
+| `madurez` | `experimental` (0), `probado` (0), `usado-en-proyecto` (94) |
 <!-- LISTAS:FIN -->
