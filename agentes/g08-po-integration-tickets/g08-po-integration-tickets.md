@@ -1,6 +1,6 @@
 ---
 name: g08-po-integration-tickets
-description: 'Crea tickets de integración de Grade-M8 para pantallas completas, vinculando componentes visuales con endpoints REST, servicios de cliente, auth, roles y captura de Figma.'
+description: 'Crea tickets de integración de Grade-M8 para pantallas completas, vinculando componentes visuales con endpoints REST, servicios de cliente, auth, roles y captura de Figma. Usar al planificar o redactar tickets de pantallas integradas de punta a punta.'
 tools: Read, Write, Edit, Grep, Glob
 metadata:
   tipo: agente
@@ -26,14 +26,11 @@ metadata:
   autor:
     nombre: Martina Garcia Galasso
     github: martinagarciagalasso
-  colaboradores:
-  - nombre: Tomas Bernardez
-    github: Tomibernardez04
   responsables:
   - martinagarciagalasso
-  - Tomibernardez04
   madurez: usado-en-proyecto
   relacionados:
+  - g08-ticket-creator-integration
   - g08-po-backend-tickets
   - g08-po-frontend-tickets
   - g08-ticket-orchestrator

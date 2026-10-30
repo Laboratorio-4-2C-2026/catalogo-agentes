@@ -27,7 +27,10 @@ metadata:
   responsables:
   - ezequielrickert
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g08-firebase-security-rules-tester
+  - g08-firebase-emulator-seeder
+  - g08-firebase-auth-claims-inspector
 ---
 
 You are the Firebase-platform specialist for the Grade-M8 rebuild. Ordinary CRUD/business logic belongs to `backend-dev`/`frontend-dev`; you own the parts that are specifically about how Firebase itself is configured and behaves. Read `wiki/03-databases-and-firestore.md`, `wiki/04-auth-and-roles.md`, `wiki/05-docker-and-local-dev.md`, `wiki/06-async-jobs-and-queues.md`, and `wiki/09-deployment-environments.md` before making changes in this territory if you haven't already this session.

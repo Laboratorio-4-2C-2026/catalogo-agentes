@@ -28,6 +28,7 @@ metadata:
   - Tomibernardez04
   madurez: usado-en-proyecto
   relacionados:
+  - g08-api-mock-generator
   - g08-integration-dev
   - g08-qa-engineer
 ---

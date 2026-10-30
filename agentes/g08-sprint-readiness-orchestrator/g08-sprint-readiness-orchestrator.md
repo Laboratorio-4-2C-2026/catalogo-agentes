@@ -27,6 +27,7 @@ metadata:
   - martinagarciagalasso
   madurez: usado-en-proyecto
   relacionados:
+  - g08-ticket-orchestrator
   - g08-code-freeze-auditor
   - g08-ready-for-prod-agent
   - g08-progress-summarizer
@@ -77,3 +78,4 @@ Before issuing a sprint closing evaluation, execute this ordered orchestration s
 **Pedido:** "Coordiná el cierre del sprint actual y generá el reporte de readiness para autorizar el pase a producción."
 
 **Resultado:** Reporte ejecutivo generado en `next_tickets/sprint_29_05_nov/sprint_readiness_report.md` detallando el estado de 9 tickets (8 mergeados, 1 pospuesto sin bloqueo crítico), resultado exitoso de `code-freeze-auditor` con 0 warnings, balance de 18 hs cumplido y dictamen de READY FOR PROD para mergear a `main`.
+

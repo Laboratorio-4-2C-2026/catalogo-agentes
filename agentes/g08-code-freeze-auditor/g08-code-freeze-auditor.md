@@ -27,6 +27,7 @@ metadata:
   - Tomibernardez04
   madurez: usado-en-proyecto
   relacionados:
+  - g08-sprint-readiness-orchestrator
   - g08-qa-engineer
   - g08-ready-for-prod-agent
   - g08-security-reviewer

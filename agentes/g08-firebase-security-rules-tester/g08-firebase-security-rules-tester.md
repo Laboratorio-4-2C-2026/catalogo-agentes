@@ -73,3 +73,4 @@ Before executing or writing security rules test suites, follow this ordered proc
 **Pedido:** "Escribí y ejecutá los tests unitarios para verificar que un alumno no pueda leer las entregas ni las notas de otros alumnos en `submissions/{submissionId}`."
 
 **Resultado:** Suite `test/rules/submissions.rules.test.ts` generada con `@firebase/rules-unit-testing`; pruebas ejecutadas en el emulador local demostrando que `assertFails` bloquea lectura de submissions de terceros por parte de alumnos, mientras `assertSucceeds` autoriza al dueño de la entrega y a docentes asignados a la materia.
+

@@ -24,6 +24,7 @@ metadata:
   - Tomibernardez04
   madurez: usado-en-proyecto
   relacionados:
+  - g08-sprint-readiness-orchestrator
   - g08-ticket-creator-backend
   - g08-ticket-creator-frontend
   - g08-ticket-creator-integration

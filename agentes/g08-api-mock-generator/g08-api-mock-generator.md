@@ -74,3 +74,4 @@ Before generating mock handlers or fixtures, execute this ordered inspection:
 **Pedido:** "Generá los mocks de MSW para el endpoint `GET /api/exams/:id/submissions` con escenarios de lista vacía, corrección en progreso y error 403 para que el frontend pueda maquetar la vista de auditoría docente."
 
 **Resultado:** Archivo de handlers `frontend/src/mocks/handlers/submissions.ts` creado con tipado estricto `SubmissionDTO[]`, soporte para conmutar entre estados vía headers/query params, demora de 200ms para probar skeletons, y registro en `frontend/src/mocks/handlers/index.ts`.
+

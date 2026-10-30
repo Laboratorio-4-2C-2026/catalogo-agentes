@@ -27,6 +27,7 @@ metadata:
   - Tomibernardez04
   madurez: usado-en-proyecto
   relacionados:
+  - g08-po-frontend-tickets
   - g08-ticket-creator-backend
   - g08-ticket-creator-integration
 ---

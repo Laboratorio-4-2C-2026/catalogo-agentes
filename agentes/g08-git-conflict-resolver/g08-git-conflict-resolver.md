@@ -72,3 +72,4 @@ Before editing conflict markers or staging merge resolutions, follow this ordere
 **Pedido:** "Resolvé el conflicto de merge en `backend/src/di/container.ts` y `errorMapping.ts` entre mi rama de reintentos y la rama de edición de rúbricas recién mergeada a dev."
 
 **Resultado:** Marcadores de conflicto removidos en ambos archivos; registro de `RetryService` e `InspectionRepository` integrados sin duplicaciones; caso `ExamLockedError` preservado en el `switch` de `errorMapping.ts`; y verificación de compilación `tsc --noEmit` completada con 0 errores.
+

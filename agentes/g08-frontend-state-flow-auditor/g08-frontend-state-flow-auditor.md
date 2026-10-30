@@ -73,3 +73,4 @@ Before greenlighting an interactive screen or data-fetching component, execute t
 **Pedido:** "Revisá la pantalla `TakeExamPage.tsx` para asegurar que el guardado automático de respuestas no sufra race conditions si el alumno navega rápido entre preguntas."
 
 **Resultado:** Auditoría completada: detectada race condition en `onAnswerChange` por falta de cancelación de promesas en vuelo; propuesto e implementado refactor con `AbortController` en el hook de guardado asíncrono; y añadido skeleton accesible durante el cálculo del puntaje preliminar.
+

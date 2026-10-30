@@ -71,3 +71,4 @@ Before evaluating role synchronization or token handling, execute this ordered i
 **Pedido:** "Auditá si los endpoints de administración y edición de rúbricas rechazan correctamente a usuarios con rol `student` y si los custom claims están sincronizados con la colección `/users` en los emuladores."
 
 **Resultado:** Reporte de auditoría de RBAC emitido: matriz de autorización ejecutada sobre 12 rutas protegidas confirmando 403 Forbidden para estudiantes; 1 inconsistencia detectada en usuario de prueba donde el claim en Auth era `student` pero el documento en Firestore decía `teacher`; script correctivo de sincronización ejecutado.
+

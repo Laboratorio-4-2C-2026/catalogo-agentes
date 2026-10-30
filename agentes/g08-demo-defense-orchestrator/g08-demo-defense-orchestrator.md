@@ -84,3 +84,4 @@ Before certifying the environment for a defense or milestone presentation, execu
 **Pedido:** "Prepará el entorno local y armá el guión técnico para la defensa final del módulo 4.5 ante los profesores."
 
 **Resultado:** Emuladores de Firebase reseteados y sembrados con 1 profesor, 1 ayudante y 3 alumnos de prueba; conexión con el túnel de LMStudio validada; y documento `next_tickets/demo_runbook_defensa.md` generado con credenciales deterministas, orden de navegación paso a paso y procedimiento de contingencia ante cortes de red.
+

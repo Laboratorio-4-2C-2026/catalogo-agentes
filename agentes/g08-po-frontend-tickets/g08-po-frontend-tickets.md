@@ -1,6 +1,6 @@
 ---
 name: g08-po-frontend-tickets
-description: 'Crea tickets de frontend de Grade-M8 para componentes de presentación desacoplados, alineados al design system y capturas de Figma, sin crear páginas ni rutas y sin dar código copy-paste.'
+description: 'Crea tickets de frontend de Grade-M8 para componentes de presentación desacoplados, alineados al design system y capturas de Figma, sin crear páginas ni rutas y sin dar código copy-paste. Usar al planificar o redactar tickets de componentes visuales de frontend.'
 tools: Read, Write, Edit, Grep, Glob
 metadata:
   tipo: agente
@@ -24,14 +24,12 @@ metadata:
   autor:
     nombre: Martina Garcia Galasso
     github: martinagarciagalasso
-  colaboradores:
-  - nombre: Tomas Bernardez
-    github: Tomibernardez04
   responsables:
   - martinagarciagalasso
-  - Tomibernardez04
   madurez: usado-en-proyecto
   relacionados:
+  - g08-ticket-creator-frontend
+  - g08-scaffold-component
   - g08-po-backend-tickets
   - g08-po-integration-tickets
   - g08-ticket-orchestrator

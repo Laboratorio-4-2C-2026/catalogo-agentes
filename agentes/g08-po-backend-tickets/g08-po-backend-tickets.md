@@ -1,6 +1,6 @@
 ---
 name: g08-po-backend-tickets
-description: 'Crea tickets de backend de Grade-M8 divididos por capas (controlador, servicio, repositorio, errores, tests) según las reglas de planificación del PO y WBS de 3 niveles, sin dar código copy-paste.'
+description: 'Crea tickets de backend de Grade-M8 divididos por capas (controlador, servicio, repositorio, errores, tests) según las reglas de planificación del PO y WBS de 3 niveles, sin dar código copy-paste. Usar al planificar o redactar tickets técnicos de backend.'
 tools: Read, Write, Edit, Grep, Glob
 metadata:
   tipo: agente
@@ -24,14 +24,11 @@ metadata:
   autor:
     nombre: Martina Garcia Galasso
     github: martinagarciagalasso
-  colaboradores:
-  - nombre: Tomas Bernardez
-    github: Tomibernardez04
   responsables:
   - martinagarciagalasso
-  - Tomibernardez04
   madurez: usado-en-proyecto
   relacionados:
+  - g08-ticket-creator-backend
   - g08-po-frontend-tickets
   - g08-po-integration-tickets
   - g08-ticket-orchestrator

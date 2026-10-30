@@ -28,6 +28,8 @@ metadata:
   - Tomibernardez04
   madurez: usado-en-proyecto
   relacionados:
+  - g08-demo-defense-orchestrator
+  - g08-firebase-auth-claims-inspector
   - g08-firebase-expert
   - g08-backend-test-engineer
 ---
