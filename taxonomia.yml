@@ -48,6 +48,8 @@ valores:
     nodejs: ''
     react: ''
     python: ''
+    nextjs: ''
+    playwright: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
@@ -67,6 +69,10 @@ valores:
     chrome: ''
     discord: ''
     google-drive: ''
+    engram: ''
+    linear: ''
+    playwright: ''
+    talksmith: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces

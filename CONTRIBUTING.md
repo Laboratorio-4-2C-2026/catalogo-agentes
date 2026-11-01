@@ -35,11 +35,11 @@ Preferí siempre estos valores. Si ninguno encaja, podés escribir uno nuevo: se
 <!-- LISTAS:INICIO -->
 | Campo | Valores (cantidad de piezas que lo usan) |
 |---|---|
-| `area` | `frontend` (18), `backend` (33), `mobile` (19), `datos` (3), `ia` (6), `qa` (38), `devops` (9), `seguridad` (9), `gestion` (30), `diseno` (7), `documentacion` (13) |
-| `fase` | `planificacion` (20), `analisis` (14), `diseno` (12), `desarrollo` (38), `testing` (21), `revision` (36), `despliegue` (8), `mantenimiento` (7) |
-| `tecnologias` | `agnostico` (34), `express` (18), `flutter` (18), `prisma` (4), `dart` (17), `docker` (3), `figma` (2), `javascript` (1), `postgresql` (3), `riverpod` (1), `supertest` (3), `typescript` (43), `vitest` (3), `zod` (1), `n8n` (1), `supabase` (1), `firebase` (10), `firestore` (3), `git` (1), `jest` (4), `nodejs` (3), `react` (13), `python` (1) |
-| `metodologia` | `scrum` (68), `kanban` (0), `agnostico` (1) |
-| `herramientas` | `claude-code` (104), `cursor` (53), `codex` (38), `otra` (2) |
-| `requiere` | `jira` (14), `github` (20), `figma` (1), `google-sheets` (3), `slack` (0), `dart-mcp` (2), `chrome` (2), `discord` (4), `google-drive` (1) |
-| `madurez` | `experimental` (2), `probado` (0), `usado-en-proyecto` (102) |
+| `area` | `frontend` (20), `backend` (37), `mobile` (19), `datos` (3), `ia` (8), `qa` (50), `devops` (9), `seguridad` (9), `gestion` (54), `diseno` (9), `documentacion` (21) |
+| `fase` | `planificacion` (31), `analisis` (22), `diseno` (15), `desarrollo` (41), `testing` (28), `revision` (53), `despliegue` (9), `mantenimiento` (10) |
+| `tecnologias` | `agnostico` (64), `express` (18), `flutter` (18), `prisma` (4), `dart` (17), `docker` (3), `figma` (2), `javascript` (1), `postgresql` (4), `riverpod` (1), `supertest` (3), `typescript` (44), `vitest` (3), `zod` (1), `n8n` (1), `supabase` (9), `firebase` (10), `firestore` (3), `git` (1), `jest` (4), `nodejs` (4), `react` (13), `python` (1), `nextjs` (6), `playwright` (1) |
+| `metodologia` | `scrum` (108), `kanban` (0), `agnostico` (1) |
+| `herramientas` | `claude-code` (144), `cursor` (53), `codex` (38), `otra` (2) |
+| `requiere` | `jira` (14), `github` (27), `figma` (1), `google-sheets` (3), `slack` (0), `dart-mcp` (2), `chrome` (4), `discord` (4), `google-drive` (1), `engram` (33), `linear` (22), `playwright` (1), `talksmith` (2) |
+| `madurez` | `experimental` (2), `probado` (0), `usado-en-proyecto` (142) |
 <!-- LISTAS:FIN -->
