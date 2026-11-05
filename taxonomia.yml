@@ -50,6 +50,8 @@ valores:
     python: ''
     nextjs: ''
     playwright: ''
+    nestjs: ''
+    tanstack-query: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
@@ -73,6 +75,7 @@ valores:
     linear: ''
     playwright: ''
     talksmith: ''
+    openrouter: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
