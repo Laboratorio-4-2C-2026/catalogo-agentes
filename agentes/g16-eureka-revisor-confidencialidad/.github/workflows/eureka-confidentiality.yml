@@ -1,0 +1,98 @@
+name: eureka-confidentiality
+
+# Agente de propósito específico: confidencialidad y acceso off-chain.
+# Que el contenido del documento y las claves no lleguen a nadie más que su
+# autor, sabiendo que lo que sube a Arweave no se borra nunca.
+#
+# La mitad on-chain —front-running, hash duplicado, eventos— es de
+# eureka-authorship. Los dos se reparten por `paths`.
+#
+# Las rutas son las de este repo: el front vive en la raíz (app/, lib/), no
+# bajo front/. supabase/ todavía no existe; está listado para que el día que
+# aparezcan las migraciones el agente se despierte solo.
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+    paths:
+      - "app/**"
+      - "lib/**"
+      - "supabase/**"
+      # La UI vive en visual_pages/, no en components/. Y test/ entra porque
+      # las suites de integración usan la service_role key contra una base
+      # real: un test también filtra.
+      - "visual_pages/**"
+      - "test/**"
+      # Un workflow saca secretos y código del perímetro igual que el código
+      # de producto, y con menos gente mirándolo. Entra en el alcance de este
+      # agente por eso, no por costumbre.
+      - ".github/workflows/**"
+
+concurrency:
+  group: eureka-confidentiality-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Eureka Confidentiality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Revisá este pull request como revisor de confidencialidad y acceso
+            del proyecto Eureka.
+
+            Tu alcance del diff son dos cosas:
+
+            1. **app/, lib/ y supabase/**: derivación de claves, cifrado,
+               subidas a Arweave, policies y migraciones de Supabase, rutas de
+               API, sesiones de Openfort y webhooks de MercadoPago.
+            2. **.github/workflows/**: a qué destinos externos escribe el
+               workflow, qué secretos quedan alcanzables desde un push a una
+               rama cualquiera, si usa `pull_request_target` con checkout del
+               código del PR, y si las acciones de terceros están pineadas.
+
+            Si el PR toca contratos Solidity, ignoralos: eso lo revisa otro
+            agente.
+
+            Leé y aplicá:
+            - .github/copilot-instructions.md — contexto del producto
+            - .github/instructions/crypto.instructions.md y
+              .github/instructions/data-api.instructions.md — reglas
+              obligatorias; usá cada una según el `applyTo` que declara
+            - .github/skills/confidentiality-review/SKILL.md — tu checklist, con
+              el orden de prioridad de los hallazgos
+
+            Reglas de salida:
+            - Un comentario por hallazgo, anclado a la línea exacta.
+            - Prefijá cada uno con [Crítico], [Alto], [Medio] o [Bajo].
+            - Explicá la consecuencia concreta para Eureka, no la clase
+              genérica de vulnerabilidad.
+            - Si es una sospecha y no un hallazgo confirmado, decilo.
+            - No comentes estilo ni naming.
+            - Si el diff no toca nada sensible, decilo en un solo comentario y
+              terminá.
+          # Mismo problema que en eureka-authorship, una vuelta más arriba.
+          # El agente terminó la review bien y dejó sus comentarios, pero el
+          # check quedó en rojo: reportó 37 turnos contra un tope de 30 (PR #7,
+          # 18 archivos). Este agente es el de `paths` más amplio de todos
+          # —app/, lib/, supabase/, visual_pages/, test/ y workflows—, así que
+          # es el que más seguido va a ver diffs grandes. 60 deja margen real;
+          # el techo de verdad es `timeout-minutes: 15`, no este número, porque
+          # el agente corta solo cuando termina.
+          claude_args: >-
+            --max-turns 60
+            --allowedTools "Read,Grep,Glob,Bash,mcp__github_inline_comment__create_inline_comment"

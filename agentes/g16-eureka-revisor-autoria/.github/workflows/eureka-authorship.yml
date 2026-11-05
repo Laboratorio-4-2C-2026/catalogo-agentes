@@ -1,0 +1,69 @@
+name: eureka-authorship
+
+# Agente de propósito específico: integridad de autoría on-chain.
+# Que nadie pueda robar, duplicar ni perder la prueba de quién registró primero.
+#
+# La mitad off-chain —claves, cifrado, Arweave, RLS, pagos— es de
+# eureka-confidentiality. Los dos se reparten por `paths`, así que un PR que
+# toca solo contratos paga una sola review.
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+    paths:
+      - "contracts/**"
+
+concurrency:
+  group: eureka-authorship-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Eureka Authorship
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Revisá este pull request como revisor de integridad de autoría del
+            proyecto Eureka.
+
+            Tu alcance son **solo los archivos Solidity y los tests de Foundry**
+            del diff. Si el PR toca cifrado, claves, Arweave, Supabase o pagos,
+            ignoralo: eso lo revisa otro agente.
+
+            Leé y aplicá:
+            - .github/copilot-instructions.md — contexto del producto
+            - .github/instructions/contracts.instructions.md — reglas
+              obligatorias de contratos
+            - .github/skills/authorship-review/SKILL.md — tu checklist, con el
+              orden de prioridad de los hallazgos
+
+            Reglas de salida:
+            - Un comentario por hallazgo, anclado a la línea exacta.
+            - Prefijá cada uno con [Crítico], [Alto], [Medio] o [Bajo].
+            - Explicá la consecuencia concreta para Eureka, no la clase
+              genérica de vulnerabilidad.
+            - Si es una sospecha y no un hallazgo confirmado, decilo.
+            - No comentes estilo ni naming.
+            - Si el diff no toca lógica de contratos, decilo en un solo
+              comentario y terminá.
+          # Las herramientas de lectura van explícitas: sin ellas el agente
+          # igual las intenta, se come el rechazo y gasta turnos. Con
+          # --max-turns 20 eso alcanzaba para pasarse del tope y dejar el check
+          # en rojo aunque la review hubiera salido bien.
+          claude_args: >-
+            --max-turns 30
+            --allowedTools "Read,Grep,Glob,Bash,mcp__github_inline_comment__create_inline_comment"

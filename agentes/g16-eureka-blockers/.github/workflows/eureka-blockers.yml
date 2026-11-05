@@ -1,0 +1,157 @@
+name: eureka-blockers
+
+# Agente de propósito específico: detección temprana de blockers.
+#
+# A diferencia de los dos revisores, este no mira código: mira el estado del
+# tablero y de la cola de PRs a lo largo del tiempo. Corre por reloj, no por
+# pull request.
+#
+# La detección la hace un script determinista y el agente solo tríagea lo que
+# ese script encontró. Es a propósito: un blocker inventado sería indistinguible
+# de uno real, y el detector perdería toda su utilidad el primer día.
+
+on:
+  schedule:
+    - cron: "0 12 * * 1-5" # 09:00 ART, de lunes a viernes
+  workflow_dispatch:
+    inputs:
+      horas_sin_review:
+        description: "Horas sin review humana para marcar un PR"
+        default: "48"
+      dias_sin_codigo:
+        description: "Días sin commits para marcar un ticket"
+        default: "7"
+
+concurrency:
+  group: eureka-blockers
+  cancel-in-progress: false
+
+jobs:
+  detectar:
+    name: Eureka Blockers
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Juntar los hechos
+        id: hechos
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HORAS_SIN_REVIEW: ${{ inputs.horas_sin_review || '48' }}
+          DIAS_SIN_CODIGO: ${{ inputs.dias_sin_codigo || '7' }}
+        run: |
+          bash .github/scripts/blockers-facts.sh "${{ github.repository }}" > facts.json
+          jq -c .resumen facts.json
+
+          # Si no hay nada marcado, no vale la pena gastar una corrida del
+          # agente: el reporte lo escribe el paso determinista.
+          hay=$(jq '[.resumen.prs_sin_review_humana, .resumen.issues_sin_codigo, .resumen.issues_que_rebotan] | add > 0' facts.json)
+          echo "hay_algo=$hay" >> "$GITHUB_OUTPUT"
+
+      - name: Triage con el agente
+        if: steps.hechos.outputs.hay_algo == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Sos el detector de blockers de Eureka, un proyecto universitario
+            donde Laboratorio 4 mantiene la calidad y Laboratorio 2 escribe el
+            producto.
+
+            Leé `facts.json` en la raíz del workspace. Contiene el estado de los
+            PRs y los tickets abiertos, ya medido contra los umbrales.
+
+            **No inventes nada.** Solo podés hablar de items que estén en ese
+            archivo. Si algo no está ahí, no existe para vos.
+
+            Escribí un reporte en `blockers-report.md` con esta forma:
+
+            1. Una línea de resumen: cuántos items están frenados y desde
+               cuándo el peor.
+            2. Una sección por cada item marcado, ordenada por cuánto tiempo
+               lleva frenado. Para cada uno: el link, una frase de por qué está
+               frenado, y **la acción concreta que lo destraba y quién debería
+               hacerla** (el autor, el asignado, o quien tenga la review
+               pedida). Si no hay a quién señalar, decilo.
+            3. Si algún item está marcado pero tenés razones para pensar que no
+               es un blocker real —un PR abierto a propósito como referencia,
+               un ticket que espera algo externo— decilo en vez de tratarlo
+               como urgente.
+
+            Sé breve: esto lo lee alguien en la daily. Nada de relleno, sin
+            repetir los números que ya están en la tabla, y en castellano.
+
+            No pongas título ni fecha: el reporte se publica dentro de una
+            sección que ya tiene encabezado, y el pie ya lleva la fecha.
+            Empezá directo por la línea de resumen.
+          claude_args: >-
+            --max-turns 20
+            --allowedTools "Read,Write,Grep,Glob,Bash"
+
+      - name: Publicar el reporte
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const facts = JSON.parse(fs.readFileSync('facts.json', 'utf8'));
+            const r = facts.resumen;
+            const marker = '<!-- blockers-report -->';
+
+            let cuerpo;
+            if (fs.existsSync('blockers-report.md')) {
+              cuerpo = fs.readFileSync('blockers-report.md', 'utf8');
+            } else {
+              cuerpo = 'Sin blockers detectados. Ningún PR lleva más de '
+                + `${facts.umbrales.horas_sin_review} h sin review humana, y ningún `
+                + `ticket lleva más de ${facts.umbrales.dias_sin_codigo} días sin código.`;
+            }
+
+            const tabla = [
+              '| | |', '|---|---|',
+              `| PRs abiertos | ${r.prs_abiertos} |`,
+              `| …sin review humana | ${r.prs_sin_review_humana} |`,
+              `| Tickets abiertos | ${r.issues_abiertos} |`,
+              `| …sin código | ${r.issues_sin_codigo} |`,
+              `| …que rebotan de estado | ${r.issues_que_rebotan} |`,
+            ].join('\n');
+
+            const body = `${marker}\n## Blockers\n\n${cuerpo}\n\n---\n\n${tabla}\n\n`
+              + `<sub>Actualizado ${facts.generado} · umbrales: `
+              + `${facts.umbrales.horas_sin_review} h sin review, `
+              + `${facts.umbrales.dias_sin_codigo} días sin código</sub>`;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'blockers-report',
+            });
+
+            if (issues.length > 0) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body,
+              });
+              core.notice(`Reporte actualizado en #${issues[0].number}`);
+            } else {
+              const { data: nuevo } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'Blockers detectados',
+                labels: ['blockers-report'],
+                body,
+              });
+              core.notice(`Reporte creado en #${nuevo.number}`);
+            }
