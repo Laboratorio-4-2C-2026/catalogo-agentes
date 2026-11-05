@@ -1,0 +1,70 @@
+---
+name: g11-pr-review
+description: Checklist de revisión de PRs de SportMatch con los estándares del equipo (bugs, seguridad, cumplimiento de RF, DoD). Usar en la revisión de cada PR; la invoca Copilot code review.
+metadata:
+  tipo: skill
+  area:
+  - qa
+  fase:
+  - revision
+  tecnologias:
+  - nestjs
+  - nextjs
+  - prisma
+  - typescript
+  herramientas:
+  - otra
+  requiere:
+  - github
+  grupo: "11"
+  autor:
+    nombre: Matías Chialva
+    github: Matichialvaa
+  colaboradores:
+  - nombre: Ignacio Chevallier Boutell
+    github: IgnacioChevallier
+  responsables:
+  - Matichialvaa
+  madurez: usado-en-proyecto
+  relacionados:
+  - g11-qa-review
+  - g07-code-review-tl
+---
+# Skill: Revisión de PR — SportMatch
+
+Cuando revises un Pull Request de SportMatch, aplicá este checklist además del análisis estándar. Reportá cada hallazgo con `archivo:línea`, severidad (`BLOCKER / MAJOR / MINOR / NIT`) y una sugerencia concreta.
+
+## 1. Bugs y lógica
+- Casos borde no manejados, condiciones invertidas, off-by-one, manejo de nulos, promesas sin `await`, recursos sin cerrar.
+
+## 2. Cumplimiento del requerimiento
+- Identificá el RF asociado (RF-01…RF-06, ver AGENTS.md §2) desde el título/rama del PR.
+- Verificá los criterios de aceptación uno por uno. **Marcá explícitamente cualquier AC que el PR no cubra.**
+- Si el PR no mapea a ningún RF → `MAJOR`: posible trabajo fuera de backlog (problema de trazabilidad).
+
+## 3. Seguridad
+- Credenciales/API keys hardcodeadas → `BLOCKER`.
+- Inputs de usuario sin validar; queries sin parametrizar (inyección) → `BLOCKER/MAJOR`.
+- Datos personales expuestos sin control (viola RNF-03 Privacidad) → `MAJOR`.
+
+## 4. Resiliencia (RNF-04)
+- Errores no capturados que puedan tumbar toda la app en vez de degradar la función afectada.
+
+## 5. Mantenibilidad (RNF-05)
+- Funciones largas, duplicación, nombres poco claros, código comentado/muerto, falta de tipos, TODOs sin ticket.
+
+## 6. Convenciones del equipo
+- Formato de commits `tipo(RF-xx): ...`, nombre de rama, un PR por historia (AGENTS.md §6).
+
+## Regla de oro
+No mergees ni apliques cambios de forma autónoma. Comentá con evidencia y, si un `BLOCKER` amerita seguimiento, sugerí el texto de una tarjeta para Linear. La decisión es humana ("Lab4 no codifica").
+
+## Salida
+No resumas lo que hace el PR: quien revisa ya lo sabe. Cerrá con el **veredicto**:
+Aprobar / Aprobar con cambios menores / Solicitar cambios.
+
+## Ejemplo de uso
+
+**Pedido:** Copilot code review revisa la PR `feat(RF-05): aceptar solicitudes`.
+
+**Resultado:** Hallazgos con `archivo:línea`, severidad (BLOCKER, MAJOR, MINOR o NIT) y una sugerencia concreta sobre bugs, criterios de aceptación del RF-05 no cubiertos, seguridad, resiliencia, mantenibilidad y convenciones. Cierra con el veredicto: Aprobar, Aprobar con cambios menores o Solicitar cambios.
