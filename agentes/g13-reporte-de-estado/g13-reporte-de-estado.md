@@ -28,6 +28,7 @@ metadata:
   - g07-sprint-status-report
   - g15-weekly-status-report
   - g11-weekly-status
+  - g13-documentador-de-progreso
 ---
 
 # Reporte de estado del proyecto

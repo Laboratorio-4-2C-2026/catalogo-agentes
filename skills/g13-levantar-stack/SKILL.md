@@ -36,6 +36,7 @@ metadata:
   - g13-validar-branch
   - g11-ver-pr-en-vivo
   - g08-firebase-emulator-seeder
+  - g13-onboarding-de-repo
 ---
 
 # Levantar el stack local en la branch actual

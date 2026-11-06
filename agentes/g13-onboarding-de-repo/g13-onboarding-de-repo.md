@@ -31,6 +31,7 @@ metadata:
   - g15-onboarding-doc-builder
   - g13-curador-de-contexto
   - g13-levantar-stack
+  - g13-tutor-del-proyecto
 ---
 
 # Onboarding de repo

@@ -5,6 +5,8 @@ tools: Read, Grep, Glob, Bash
 metadata:
   tipo: agente
   area:
+  - backend
+  - frontend
   - documentacion
   fase:
   - desarrollo
