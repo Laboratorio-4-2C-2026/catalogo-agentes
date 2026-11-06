@@ -1,0 +1,196 @@
+name: eureka-progreso
+
+# Agente de propósito específico: el reporte semanal de progreso para la cátedra.
+#
+# Corre por reloj, como el detector de blockers, y comparte su principio: la
+# evidencia la junta un script determinista y el agente solo la narra. Un agente
+# que pueda consultar la API por su cuenta también puede completar los huecos de una
+# semana floja, y este reporte se entrega.
+#
+# A diferencia de blockers, que mantiene un único issue vivo, este abre uno nuevo
+# por semana: el valor del reporte está en la serie, no en la última foto.
+
+on:
+  # El equipo se junta los jueves. Corriendo el viernes a la mañana, la ventana
+  # de siete días cierra después de esa reunión: el reporte llega con lo que
+  # pasó hasta el jueves inclusive y sirve para arrancar la semana siguiente.
+  # Si se mueve el día de la reunión, mover también este cron.
+  schedule:
+    - cron: "0 12 * * 5" # 09:00 ART, viernes
+  workflow_dispatch:
+    inputs:
+      dias_ventana:
+        description: "Días hacia atrás que cubre el reporte"
+        default: "7"
+
+concurrency:
+  group: eureka-progreso
+  cancel-in-progress: false
+
+jobs:
+  reportar:
+    name: Eureka Progreso
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Juntar la evidencia
+        id: evidencia
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIAS_VENTANA: ${{ inputs.dias_ventana || '7' }}
+        run: |
+          bash .github/scripts/progreso-facts.sh "${{ github.repository }}" > progreso.json
+          jq -c .resumen progreso.json
+
+          # Una semana sin nada no justifica una corrida del agente, pero sí un
+          # reporte: si las semanas vacías no publicaran, no se distinguiría una
+          # semana sin trabajo de un workflow roto.
+          echo "hubo=$(jq -r '.resumen.hubo_actividad' progreso.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Redactar con el agente
+        if: steps.evidencia.outputs.hubo == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Sos el documentador de progreso de Eureka, un proyecto universitario
+            donde Laboratorio 4 mantiene la calidad y Laboratorio 2 escribe el
+            producto. Escribís el reporte semanal que lee la cátedra.
+
+            Leé `progreso.json` en la raíz del workspace. Tiene todo lo que pasó
+            en la ventana: PRs mergeados y abiertos, issues, commits, lo que
+            quedó de arrastre y los hallazgos que dejaron nuestros agentes de
+            review.
+
+            **No inventes nada.** Solo podés hablar de lo que está en ese
+            archivo. No infieras qué se estuvo trabajando a partir de los
+            títulos, no supongas por qué algo quedó abierto, y no rellenes una
+            semana floja: si se hizo poco, el reporte dice que se hizo poco. La
+            cátedra compara estos reportes entre semanas, así que uno inflado
+            hace más daño que uno pobre.
+
+            Escribí el reporte en `progreso-report.md` con estas secciones:
+
+            ## Resumen
+            Dos o tres frases: qué avanzó esta semana y en qué estado quedó el
+            proyecto. Sin repetir los números de la tabla.
+
+            ## Qué se completó
+            Los PRs mergeados y los issues cerrados, **en lenguaje de negocio**:
+            qué capacidad quedó disponible, no qué archivos se tocaron. Agrupá
+            por tema si hay más de tres. Linkeá cada uno.
+
+            ## Qué quedó en curso
+            PRs abiertos e issues nuevos que siguen sin cerrar. Si algo del
+            arrastre lleva mucho tiempo abierto, marcalo — es la señal de que
+            el trabajo se acumula en vez de cerrarse.
+
+            ## Calidad
+            Qué encontraron los agentes de review esta semana, por severidad.
+            Si hubo hallazgos críticos o altos, decí en qué PRs. Si el conteo es
+            cero, decilo tal cual: puede significar que no hubo PRs de código,
+            no que el código esté limpio.
+
+            Los hallazgos `sin_severidad` son comentarios de algún revisor
+            automático que no usa nuestro prefijo `[Crítico]`/`[Alto]`/…, como
+            Copilot. Contalos aparte y aclaralo en una frase; no los repartas
+            entre las severidades ni los trates como si fueran críticos.
+
+            ## Señales de atención
+            Solo lo que se desprenda de los datos: arrastre creciente, PRs que
+            tardan en mergearse, semanas sin commits. Si no hay ninguna, escribí
+            "Ninguna." y terminá. No inventes riesgos para llenar la sección.
+
+            En castellano, y breve: esto se lee en una reunión. Sin relleno y sin
+            adjetivos de más.
+
+            No pongas título ni fecha: el reporte se publica dentro de un issue
+            que ya los lleva. Empezá directo por `## Resumen`.
+          claude_args: >-
+            --max-turns 20
+            --allowedTools "Read,Write,Grep,Glob,Bash"
+
+      - name: Publicar el reporte
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const facts = JSON.parse(fs.readFileSync('progreso.json', 'utf8'));
+            const r = facts.resumen;
+            const h = facts.hallazgos_de_agentes;
+
+            const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun',
+                           'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            const dia = (iso) => {
+              const d = new Date(iso);
+              return `${d.getUTCDate()} ${MESES[d.getUTCMonth()]}`;
+            };
+            const pl = (n, sing, plur) => `${n} ${n === 1 ? sing : plur}`;
+
+            // Las cuatro severidades van siempre, incluso en cero: estos reportes
+            // se comparan entre semanas y una columna que aparece y desaparece no
+            // se puede seguir. Los comentarios sin severidad se suman solo cuando
+            // los hay, pero tienen que estar: si no, el desglose no da el total y
+            // la cátedra lee una tabla que no cierra.
+            const desglose = [
+              pl(h.critico, 'crítico', 'críticos'),
+              pl(h.alto, 'alto', 'altos'),
+              pl(h.medio, 'medio', 'medios'),
+              pl(h.bajo, 'bajo', 'bajos'),
+            ].concat(h.sin_severidad > 0 ? [`${h.sin_severidad} sin severidad`] : []).join(', ');
+            const rango = `${dia(facts.ventana.desde)} – ${dia(facts.ventana.hasta)}`;
+            const anio = new Date(facts.ventana.hasta).getUTCFullYear();
+
+            // Tres casos distintos, y conviene no confundirlos: el agente
+            // escribió el reporte, no hubo nada que reportar, o el agente falló.
+            // El tercero tiene que verse como una falla y no como una semana
+            // tranquila: un reporte que dice "sin actividad" arriba de una tabla
+            // con veinte commits es una mentira a la cátedra.
+            let cuerpo;
+            if (fs.existsSync('progreso-report.md')) {
+              cuerpo = fs.readFileSync('progreso-report.md', 'utf8');
+            } else if (!r.hubo_actividad) {
+              cuerpo = '## Resumen\n\nSemana sin actividad registrada: ningún PR '
+                + 'mergeado o abierto, ningún issue movido y ningún commit en '
+                + `\`${facts.ventana.rama}\`.`;
+            } else {
+              cuerpo = '## Resumen\n\n> **El agente no dejó reporte.** Hubo actividad '
+                + 'en la semana —los números de abajo salen del script y son '
+                + 'correctos—, pero la redacción falló. Revisá el log de la corrida '
+                + 'y volvé a dispararlo desde Actions.';
+            }
+
+            const tabla = [
+              '| | |', '|---|---|',
+              `| PRs mergeados | ${r.prs_mergeados} |`,
+              `| PRs abiertos en la semana | ${r.prs_nuevos} |`,
+              `| Issues cerrados | ${r.issues_cerrados} |`,
+              `| Issues nuevos | ${r.issues_nuevos} |`,
+              `| Arrastre (abiertos de antes) | ${r.arrastre} |`,
+              `| Commits en \`${facts.ventana.rama}\` | ${r.commits} |`,
+              `| Líneas | +${r.lineas_agregadas} / −${r.lineas_borradas} |`,
+              `| Hallazgos de los agentes | ${h.total} (${desglose}) |`,
+            ].join('\n');
+
+            const body = `${cuerpo}\n\n---\n\n${tabla}\n\n`
+              + `<sub>Generado ${facts.generado} · ventana de ${facts.ventana.dias} días</sub>`;
+
+            const { data: nuevo } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Progreso semanal · ${rango} ${anio}`,
+              labels: ['reporte-semanal'],
+              body,
+            });
+            core.notice(`Reporte publicado en #${nuevo.number}`);
