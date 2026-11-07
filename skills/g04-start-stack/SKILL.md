@@ -1,6 +1,6 @@
 ---
 name: g04-start-stack
-description: Levanta y verifica todo el stack de desarrollo local del repositorio, usando primero la receta guardada en STACK_STARTUP.md y descubriendo el stack solo si no existe o falla. Se ejecuta a mano con /g04-start-stack; no se activa sola.
+description: Levanta y verifica todo el stack de desarrollo local del repositorio, usando primero la receta guardada en STACK_STARTUP.md y descubriendo el stack solo si no existe o falla. Usar cuando se necesita el entorno local corriendo; se ejecuta a mano con /g04-start-stack y no se activa sola.
 disable-model-invocation: true
 effort: low
 allowed-tools: Bash(${CLAUDE_SKILL_DIR}/scripts/fast_path.py *)

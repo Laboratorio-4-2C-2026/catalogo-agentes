@@ -1,6 +1,6 @@
 ---
 name: g04-feature-planning
-description: Planifica e implementa funcionalidades, arreglos, refactors y cambios técnicos con un flujo interactivo de descubrimiento y aprobación, en Plan Mode, antes de escribir código. Requiere tener Plan Mode activo. Usar al arrancar el desarrollo de una funcionalidad.
+description: Planifica e implementa funcionalidades, arreglos, refactors y cambios técnicos con un flujo interactivo de descubrimiento y aprobación, antes de escribir código. Usar al arrancar el desarrollo de una funcionalidad, con Plan Mode activo.
 metadata:
   tipo: skill
   area:
