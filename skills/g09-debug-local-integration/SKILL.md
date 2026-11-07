@@ -1,9 +1,9 @@
 ---
-name: debug-local-integration
+name: g09-debug-local-integration
 description: Diagnosticar fallas de integración local entre el frontend React y el backend Spring Boot de Zervi, incluyendo red, CORS, autenticación Auth0 y errores HTTP. Usar para identificar la causa con evidencia; implementar correcciones solo cuando se solicite.
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 metadata:
-  tipo: agente
+  tipo: skill
   area:
   - frontend
   - backend
@@ -23,7 +23,7 @@ metadata:
   herramientas:
   - codex
   requiere: []
-  grupo: "zervi"
+  grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
@@ -31,8 +31,10 @@ metadata:
   - MaximoSallemi
   madurez: usado-en-proyecto
   relacionados:
-  - check-front-back-contract
-  - fix-review-findings
+  - g09-check-front-back-contract
+  - g09-fix-review-findings
+  - g09-review-ticket-pr
+  - g09-ticket-test-matrix
 ---
 
 # Debug Local Integration
@@ -63,3 +65,13 @@ When frontend and backend changes live on different branches, compare their cont
 ## Report
 
 Lead with the most likely root cause and the evidence that proves it. Then give the smallest corrective action and a safe verification step. List alternatives only when evidence cannot distinguish them, ordered by likelihood. Clearly separate diagnosis from any unrequested implementation.
+
+## Ejemplo de uso
+
+**Pedido**
+
+> Desde React recibo un 401 al listar turnos en local. Seguí el request desde el navegador hasta Spring Boot.
+
+**Salida esperada**
+
+Un diagnóstico que identifica dónde se rechaza el request, la evidencia disponible y una prueba para confirmar la causa.

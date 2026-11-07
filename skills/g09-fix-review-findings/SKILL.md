@@ -1,9 +1,9 @@
 ---
-name: fix-review-findings
+name: g09-fix-review-findings
 description: Validar observaciones de revisión de PRs de Zervi contra el código vigente, aplicar las correcciones justificadas y preparar respuestas para GitHub. Usar al resolver comentarios de revisión del backend o frontend.
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 metadata:
-  tipo: agente
+  tipo: skill
   area:
   - frontend
   - backend
@@ -22,7 +22,7 @@ metadata:
   - codex
   requiere:
   - github
-  grupo: "zervi"
+  grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
@@ -30,8 +30,9 @@ metadata:
   - MaximoSallemi
   madurez: usado-en-proyecto
   relacionados:
-  - ticket-test-matrix
-  - pre-pr-gate
+  - g09-ticket-test-matrix
+  - g09-pre-pr-gate
+  - g09-review-ticket-pr
 ---
 
 # Fix Review Findings
@@ -70,3 +71,13 @@ Return:
 2. tests and checks run;
 3. unresolved or rejected findings with evidence;
 4. one concise GitHub-ready reply per original comment.
+
+## Ejemplo de uso
+
+**Pedido**
+
+> Revisá el comentario de la PR que pide validar fechas pasadas. Si sigue vigente, corregilo y prepará la respuesta.
+
+**Salida esperada**
+
+El estado del hallazgo, el cambio aplicado si corresponde, la prueba de verificación y un borrador de respuesta para GitHub.

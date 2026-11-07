@@ -1,13 +1,13 @@
 ---
-name: pre-pr-gate
+name: g09-pre-pr-gate
 description: Verificar que una branch de Zervi esté lista para abrir o actualizar una PR, revisando alcance, contratos, migraciones, seguridad y checks aplicables a backend y frontend. Usar antes de enviar cambios a revisión.
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 metadata:
-  tipo: agente
+  tipo: skill
   area:
   - frontend
   - backend
-  - calidad
+  - qa
   fase:
   - revision
   tecnologias:
@@ -23,7 +23,7 @@ metadata:
   - codex
   requiere:
   - github
-  grupo: "zervi"
+  grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
@@ -31,9 +31,10 @@ metadata:
   - MaximoSallemi
   madurez: usado-en-proyecto
   relacionados:
-  - check-front-back-contract
-  - ticket-test-matrix
-  - fix-review-findings
+  - g09-check-front-back-contract
+  - g09-ticket-test-matrix
+  - g09-fix-review-findings
+  - g09-review-ticket-pr
 ---
 
 # Pre-PR Gate
@@ -70,3 +71,13 @@ Return exactly one readiness verdict:
 - **Not ready** — list blocking findings in priority order.
 
 Include the target/base used, commits reviewed, verification results, unverified checks, and a concise PR summary when useful. Keep style-only notes separate from blockers.
+
+## Ejemplo de uso
+
+**Pedido**
+
+> Revisá mi rama antes de abrir la PR. Cambié un DTO de turnos y agregué una migración Flyway.
+
+**Salida esperada**
+
+Un veredicto de preparación con el impacto en consumidores, los controles ejecutados y los pendientes que impiden abrir la PR.
