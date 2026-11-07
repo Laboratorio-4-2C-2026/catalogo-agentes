@@ -39,7 +39,6 @@ metadata:
   - g09-pre-pr-gate
   - g09-debug-local-integration
 ---
-
 # Review Ticket PR
 
 Revisar la implementación de la branch actual contra el ticket proporcionado y devolver únicamente problemas concretos, introducidos por la PR y suficientemente importantes para corregir.

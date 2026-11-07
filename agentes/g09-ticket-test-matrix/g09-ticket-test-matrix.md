@@ -39,7 +39,6 @@ metadata:
   - g09-review-ticket-pr
   - g09-debug-local-integration
 ---
-
 # Ticket Test Matrix
 
 Read the complete ticket and separate normative requirements from examples, assumptions, and out-of-scope items.

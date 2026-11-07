@@ -35,7 +35,6 @@ metadata:
   - g09-ticket-test-matrix
   - g09-review-ticket-pr
 ---
-
 # Check Front/Back Contract
 
 Determine whether the two sides can interoperate as implemented, not merely whether their tickets look similar.

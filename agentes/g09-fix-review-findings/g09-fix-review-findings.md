@@ -34,7 +34,6 @@ metadata:
   - g09-pre-pr-gate
   - g09-review-ticket-pr
 ---
-
 # Fix Review Findings
 
 Treat every review comment as a hypothesis until the current code, ticket, and runtime behavior support it.

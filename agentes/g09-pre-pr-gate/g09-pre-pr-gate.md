@@ -36,7 +36,6 @@ metadata:
   - g09-fix-review-findings
   - g09-review-ticket-pr
 ---
-
 # Pre-PR Gate
 
 Decide whether the branch is ready to review and merge, while preserving the user's working tree.

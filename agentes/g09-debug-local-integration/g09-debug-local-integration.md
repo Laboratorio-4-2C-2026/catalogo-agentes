@@ -36,7 +36,6 @@ metadata:
   - g09-review-ticket-pr
   - g09-ticket-test-matrix
 ---
-
 # Debug Local Integration
 
 Trace the failing request end to end before proposing a fix.

@@ -37,7 +37,6 @@ metadata:
   - g09-review-ticket-pr
   - g08-git-conflict-resolver
 ---
-
 # Resolve PR Merge Conflicts
 
 Resolve conflicts semantically. A conflict-free file is not correct if it silently drops behavior from either side.

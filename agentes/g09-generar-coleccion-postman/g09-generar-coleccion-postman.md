@@ -4,23 +4,33 @@ description: Generar una colección Postman ejecutable para un ticket de Zervi c
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 metadata:
   tipo: skill
-  area: [backend, qa]
-  fase: [desarrollo, revision]
-  tecnologias: [postman, kotlin, spring-boot, postgresql]
-  metodologia: [scrum]
-  herramientas: [codex]
+  area:
+  - backend
+  - qa
+  fase:
+  - desarrollo
+  - revision
+  tecnologias:
+  - postman
+  - kotlin
+  - spring-boot
+  - postgresql
+  metodologia:
+  - scrum
+  herramientas:
+  - codex
   requiere: []
   grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
-  responsables: [MaximoSallemi]
+  responsables:
+  - MaximoSallemi
   madurez: prototipo
   relacionados:
-  - g09-ticket-test-matrix
-  - g09-check-front-back-contract
+  - ticket-test-matrix
+  - check-front-back-contract
 ---
-
 # Generar una colección Postman
 
 1. Leer el ticket o contrato recibido. Si solo se recibe una clave, recuperar el ticket con el MCP de Atlassian. Contrastar cada criterio con las rutas, DTOs, permisos y migraciones vigentes. Señalar cualquier discrepancia y conservar la expectativa del contrato en la prueba.
