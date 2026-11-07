@@ -24,6 +24,7 @@ valores:
     revision: Code review, revisión de entregables, cierres de sprint
     despliegue: Publicar, CI/CD, releases
     mantenimiento: Corrección de errores, refactors, documentación posterior
+    integracion: ''
   tecnologias:
     agnostico: Sirve para cualquier tecnología
     express: ''
@@ -52,6 +53,13 @@ valores:
     playwright: ''
     nestjs: ''
     tanstack-query: ''
+    auth0: ''
+    flyway: ''
+    junit: ''
+    kotlin: ''
+    postman: ''
+    spring-boot: ''
+    testcontainers: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
@@ -81,6 +89,7 @@ valores:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
     usado-en-proyecto: Se usó en el proyecto real
+    prototipo: ''
 alias:
   area:
     front: frontend
