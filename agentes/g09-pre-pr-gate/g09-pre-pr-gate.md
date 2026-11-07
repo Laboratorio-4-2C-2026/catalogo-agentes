@@ -1,5 +1,5 @@
 ---
-name: pre-pr-gate
+name: g09-pre-pr-gate
 description: Verificar que una branch de Zervi esté lista para abrir o actualizar una PR, revisando alcance, contratos, migraciones, seguridad y checks aplicables a backend y frontend. Usar antes de enviar cambios a revisión.
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 metadata:
@@ -7,7 +7,7 @@ metadata:
   area:
   - frontend
   - backend
-  - calidad
+  - qa
   fase:
   - revision
   tecnologias:
@@ -23,7 +23,7 @@ metadata:
   - codex
   requiere:
   - github
-  grupo: "zervi"
+  grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
@@ -35,7 +35,6 @@ metadata:
   - ticket-test-matrix
   - fix-review-findings
 ---
-
 # Pre-PR Gate
 
 Decide whether the branch is ready to review and merge, while preserving the user's working tree.

@@ -1,5 +1,5 @@
 ---
-name: debug-local-integration
+name: g09-debug-local-integration
 description: Diagnosticar fallas de integración local entre el frontend React y el backend Spring Boot de Zervi, incluyendo red, CORS, autenticación Auth0 y errores HTTP. Usar para identificar la causa con evidencia; implementar correcciones solo cuando se solicite.
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 metadata:
@@ -23,7 +23,7 @@ metadata:
   herramientas:
   - codex
   requiere: []
-  grupo: "zervi"
+  grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
@@ -34,7 +34,6 @@ metadata:
   - check-front-back-contract
   - fix-review-findings
 ---
-
 # Debug Local Integration
 
 Trace the failing request end to end before proposing a fix.

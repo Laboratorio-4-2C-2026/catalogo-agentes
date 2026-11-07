@@ -1,5 +1,5 @@
 ---
-name: resolve-pr-merge-conflicts
+name: g09-resolve-pr-merge-conflicts
 description: Resolver conflictos de merge en branches de PRs de Zervi preservando la intención de ambos cambios y validando la integración del backend y frontend. Usar ante PRs con conflictos u operaciones Git detenidas por conflictos.
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 metadata:
@@ -24,7 +24,7 @@ metadata:
   - codex
   requiere:
   - github
-  grupo: "zervi"
+  grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
@@ -35,7 +35,6 @@ metadata:
   - check-front-back-contract
   - pre-pr-gate
 ---
-
 # Resolve PR Merge Conflicts
 
 Resolve conflicts semantically. A conflict-free file is not correct if it silently drops behavior from either side.

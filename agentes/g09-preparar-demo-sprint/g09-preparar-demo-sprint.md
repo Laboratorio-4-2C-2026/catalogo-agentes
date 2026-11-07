@@ -4,21 +4,31 @@ description: Preparar un guion de demo del sprint de Zervi a partir de tickets d
 tools: Read, Grep, Glob, Bash, Skill
 metadata:
   tipo: agente
-  area: [gestion, calidad]
-  fase: [revision]
-  tecnologias: [agnostico]
-  metodologia: [scrum]
-  herramientas: [codex]
-  requiere: [jira, github]
+  area:
+  - gestion
+  - qa
+  fase:
+  - revision
+  tecnologias:
+  - agnostico
+  metodologia:
+  - scrum
+  herramientas:
+  - codex
+  requiere:
+  - jira
+  - github
   grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
-  responsables: [MaximoSallemi]
+  responsables:
+  - MaximoSallemi
   madurez: prototipo
-  relacionados: [g09-reporte-de-estado, ticket-test-matrix]
+  relacionados:
+  - g09-reporte-de-estado
+  - ticket-test-matrix
 ---
-
 # Preparar la demo del sprint
 
 1. Identificar sprint, entorno de demo y tiempo disponible. Usar el sprint activo si no se indica otro. Con el MCP de Atlassian resolver el proyecto Zervi y paginar los tickets del sprint. Leer criterios de aceptación y agrupar los tickets por funcionalidad visible para quien asiste.

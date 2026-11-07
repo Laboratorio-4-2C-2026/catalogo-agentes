@@ -4,21 +4,30 @@ description: Preparar el reporte de estado de Zervi para Equipo09 cruzando los t
 tools: Read, Grep, Glob, Bash, Skill
 metadata:
   tipo: agente
-  area: [gestion]
-  fase: [revision]
-  tecnologias: [agnostico]
-  metodologia: [scrum]
-  herramientas: [codex]
-  requiere: [jira, github]
+  area:
+  - gestion
+  fase:
+  - revision
+  tecnologias:
+  - agnostico
+  metodologia:
+  - scrum
+  herramientas:
+  - codex
+  requiere:
+  - jira
+  - github
   grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
-  responsables: [MaximoSallemi]
+  responsables:
+  - MaximoSallemi
   madurez: prototipo
-  relacionados: [review-ticket-pr, pre-pr-gate]
+  relacionados:
+  - review-ticket-pr
+  - pre-pr-gate
 ---
-
 # Reporte de estado de Equipo09
 
 Preparar el reporte en español para el sprint o período solicitado. Usar el sprint activo de Zervi por defecto e indicar la fecha de corte en horario argentino.

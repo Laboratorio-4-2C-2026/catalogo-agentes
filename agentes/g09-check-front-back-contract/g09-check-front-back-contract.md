@@ -1,5 +1,5 @@
 ---
-name: check-front-back-contract
+name: g09-check-front-back-contract
 description: Comparar los contratos entre el frontend React/TypeScript y el backend Kotlin/Spring Boot de Zervi, incluso en distintas branches, e identificar incompatibilidades concretas de la API. Usar para verificar la integración entre ambas capas.
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 metadata:
@@ -23,7 +23,7 @@ metadata:
   - codex
   requiere:
   - github
-  grupo: "zervi"
+  grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
@@ -34,7 +34,6 @@ metadata:
   - debug-local-integration
   - ticket-test-matrix
 ---
-
 # Check Front/Back Contract
 
 Determine whether the two sides can interoperate as implemented, not merely whether their tickets look similar.

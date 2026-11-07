@@ -1,5 +1,5 @@
 ---
-name: review-ticket-pr
+name: g09-review-ticket-pr
 description: Revisar branches o PRs de Zervi contra tickets de Jira, especificaciones o criterios de aceptación y entregar hallazgos accionables en Markdown listo para GitHub. Usar para revisar implementación, contratos entre frontend React/TypeScript y backend Kotlin/Spring Boot, seguridad, persistencia, pruebas y compatibilidad entre branches.
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 metadata:
@@ -7,7 +7,7 @@ metadata:
   area:
   - frontend
   - backend
-  - calidad
+  - qa
   fase:
   - revision
   tecnologias:
@@ -25,7 +25,7 @@ metadata:
   requiere:
   - github
   - jira
-  grupo: "zervi"
+  grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
@@ -38,7 +38,6 @@ metadata:
   - fix-review-findings
   - pre-pr-gate
 ---
-
 # Review Ticket PR
 
 Revisar la implementación de la branch actual contra el ticket proporcionado y devolver únicamente problemas concretos, introducidos por la PR y suficientemente importantes para corregir.

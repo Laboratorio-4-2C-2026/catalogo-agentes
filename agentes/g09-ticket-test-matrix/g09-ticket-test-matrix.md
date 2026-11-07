@@ -1,11 +1,11 @@
 ---
-name: ticket-test-matrix
+name: g09-ticket-test-matrix
 description: Convertir tickets o especificaciones de Zervi en una matriz trazable de pruebas y auditar la cobertura real del backend Kotlin/Spring Boot y frontend React/TypeScript. Usar para planificar pruebas de aceptación o revisar cobertura; implementar pruebas solo cuando se solicite.
 tools: Read, Write, Edit, Grep, Glob, Bash, Skill
 metadata:
   tipo: agente
   area:
-  - calidad
+  - qa
   - frontend
   - backend
   fase:
@@ -26,7 +26,7 @@ metadata:
   - codex
   requiere:
   - jira
-  grupo: "zervi"
+  grupo: "09"
   autor:
     nombre: Máximo Sallemi
     github: MaximoSallemi
@@ -37,7 +37,6 @@ metadata:
   - check-front-back-contract
   - pre-pr-gate
 ---
-
 # Ticket Test Matrix
 
 Read the complete ticket and separate normative requirements from examples, assumptions, and out-of-scope items.
