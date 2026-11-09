@@ -29,6 +29,7 @@ metadata:
   madurez: usado-en-proyecto
   relacionados:
   - g11-revisar-diseno
+  - g05-watchparty-web-api-integration
 ---
 
 # watchparty-ui

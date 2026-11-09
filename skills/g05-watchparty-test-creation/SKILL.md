@@ -29,6 +29,7 @@ metadata:
   relacionados:
   - g03-javascript-typescript-vitest
   - g03-supertest-api-testing
+  - g03-express-test-builder-agent
 ---
 
 # Creación y estructura de tests de WatchParty

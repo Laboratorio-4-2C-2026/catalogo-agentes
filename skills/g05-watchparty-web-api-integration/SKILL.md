@@ -27,6 +27,8 @@ metadata:
   madurez: experimental
   relacionados:
   - g11-revisar-react-query
+  - g05-watchparty-ui
+  - g05-watchparty-bug-diagnosis
 ---
 
 # Integración de la web con la API

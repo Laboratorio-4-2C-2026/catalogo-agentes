@@ -28,6 +28,7 @@ metadata:
   madurez: experimental
   relacionados:
   - g15-bug-investigator
+  - g05-watchparty-web-api-integration
 ---
 
 # Diagnóstico de errores de WatchParty
