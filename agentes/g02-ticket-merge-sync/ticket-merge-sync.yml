@@ -1,0 +1,35 @@
+# Plantilla: copiar a .github/workflows/ y el script a .github/scripts/ en proyecto-zest/zest.
+# Requiere el secret MULTICA_TOKEN (token personal de Multica, formato mul_...).
+name: Ticket merge sync
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [dev]
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Multica CLI
+        run: |
+          eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+          brew install multica-ai/tap/multica
+          echo "$(brew --prefix)/bin" >> "$GITHUB_PATH"
+      - name: Authenticate
+        env:
+          MULTICA_TOKEN: ${{ secrets.MULTICA_TOKEN }}
+        run: |
+          multica login --token "$MULTICA_TOKEN"
+          multica workspace switch zest
+      - name: Move ticket to done
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.ref }}
+          PR_HEAD: ${{ github.event.pull_request.head.ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: python3 .github/scripts/ticket_merge_sync.py event --apply
