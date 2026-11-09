@@ -60,6 +60,8 @@ valores:
     postman: ''
     spring-boot: ''
     testcontainers: ''
+    tailwindcss: ''
+    vite: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
