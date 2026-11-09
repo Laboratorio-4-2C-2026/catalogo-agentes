@@ -1,27 +1,31 @@
 ---
 name: g10-weekly-sheet-checker
-description: >-
-  Verificar si el reporte semanal de una planilla está completo para el período
-  correcto, recordar campos pendientes y proponer semáforos, avances, fechas
-  y comentarios con evidencia de Jira y GitHub. Usar para revisar un tablero
-  semanal o preparar su actualización.
+description: Verificar si el reporte semanal de una planilla está completo para el período correcto, recordar campos pendientes y proponer semáforos, avances, fechas y comentarios con evidencia de Jira y GitHub. Usar para revisar un tablero semanal o preparar su actualización.
 metadata:
   tipo: skill
-  area: [gestion]
-  fase: [revision]
-  tecnologias: [agnostico]
-  metodologia: agnostico
-  herramientas: [codex]
-  requiere: [google-sheets, jira, github]
+  area:
+  - gestion
+  fase:
+  - revision
+  tecnologias:
+  - agnostico
+  metodologia:
+  - agnostico
+  herramientas:
+  - codex
+  requiere:
+  - google-sheets
+  - jira
+  - github
   grupo: "10"
   autor:
     nombre: Marcos Carrizo Aslanian
     github: MarcosCarrizoA
-  responsables: [MarcosCarrizoA]
+  responsables:
+  - MarcosCarrizoA
   madurez: experimental
   relacionados: []
 ---
-
 # Weekly Sheet Checker
 
 Comprobar el reporte de la semana correspondiente y preparar valores sugeridos para que el usuario pueda completarlo. Mantener la skill general: proyecto, planilla, calendario, fuentes y horario pertenecen al contexto de cada tarea.

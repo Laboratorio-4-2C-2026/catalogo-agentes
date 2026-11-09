@@ -1,23 +1,30 @@
 ---
 name: g10-blocker-detector
-description: "Encontrar bloqueos y dependencias que detienen tickets de un sprint usando Jira, comentarios y PR de GitHub. Usar para revisar impedimentos o vigilar bloqueos; distinguir bloqueos confirmados de señales de riesgo."
+description: Encontrar bloqueos y dependencias que detienen tickets de un sprint usando Jira, comentarios y PR de GitHub. Usar para revisar impedimentos o vigilar bloqueos; distinguir bloqueos confirmados de señales de riesgo.
 metadata:
   tipo: skill
-  area: [gestion]
-  fase: [revision]
-  tecnologias: [agnostico]
-  metodologia: scrum
-  herramientas: [codex]
-  requiere: [jira, github]
+  area:
+  - gestion
+  fase:
+  - revision
+  tecnologias:
+  - agnostico
+  metodologia:
+  - scrum
+  herramientas:
+  - codex
+  requiere:
+  - jira
+  - github
   grupo: "10"
   autor:
     nombre: Marcos Carrizo Aslanian
     github: MarcosCarrizoA
-  responsables: [MarcosCarrizoA]
+  responsables:
+  - MarcosCarrizoA
   madurez: experimental
   relacionados: []
 ---
-
 # Blocker Detector
 
 Identificar qué impide avanzar, qué evidencia lo confirma y qué decisión puede destrabarlo.

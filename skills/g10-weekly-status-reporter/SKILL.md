@@ -1,23 +1,30 @@
 ---
 name: g10-weekly-status-reporter
-description: "Preparar un informe semanal de un sprint de software combinando Jira y GitHub con enlaces a avances, bloqueos, riesgos y próximos pasos. Usar para cortes o períodos semanales solicitados; publicar solo con aprobación."
+description: Preparar un informe semanal de un sprint de software combinando Jira y GitHub con enlaces a avances, bloqueos, riesgos y próximos pasos. Usar para cortes o períodos semanales solicitados; publicar solo con aprobación.
 metadata:
   tipo: skill
-  area: [gestion]
-  fase: [revision]
-  tecnologias: [agnostico]
-  metodologia: scrum
-  herramientas: [codex]
-  requiere: [jira, github]
+  area:
+  - gestion
+  fase:
+  - revision
+  tecnologias:
+  - agnostico
+  metodologia:
+  - scrum
+  herramientas:
+  - codex
+  requiere:
+  - jira
+  - github
   grupo: "10"
   autor:
     nombre: Marcos Carrizo Aslanian
     github: MarcosCarrizoA
-  responsables: [MarcosCarrizoA]
+  responsables:
+  - MarcosCarrizoA
   madurez: experimental
   relacionados: []
 ---
-
 # Weekly Status Reporter
 
 Preparar un reporte breve y verificable que el PM pueda revisar y compartir.

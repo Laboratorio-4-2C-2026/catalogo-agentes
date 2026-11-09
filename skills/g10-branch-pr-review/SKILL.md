@@ -1,27 +1,28 @@
 ---
 name: g10-branch-pr-review
-description: >-
-  Revisa una branch o PR contra el ticket y los criterios de aceptación, no
-  contra nits de estilo. Usar cuando el usuario pide revisar una branch, un
-  PR, un ticket, criterios de aceptación, si está para aprobar, qué está mal,
-  o un comment para dejar en el PR.
+description: Revisa una branch o PR contra el ticket y los criterios de aceptación, no contra nits de estilo. Usar cuando el usuario pide revisar una branch, un PR, un ticket, criterios de aceptación, si está para aprobar, qué está mal, o un comment para dejar en el PR.
 metadata:
   tipo: skill
-  area: [qa]
-  fase: [revision]
-  tecnologias: [agnostico]
-  metodologia: agnostico
-  herramientas: [codex]
+  area:
+  - qa
+  fase:
+  - revision
+  tecnologias:
+  - agnostico
+  metodologia:
+  - agnostico
+  herramientas:
+  - codex
   requiere: []
   grupo: "10"
   autor:
     nombre: Marcos Carrizo Aslanian
     github: MarcosCarrizoA
-  responsables: [MarcosCarrizoA]
+  responsables:
+  - MarcosCarrizoA
   madurez: experimental
   relacionados: []
 ---
-
 # Review de branch / PR
 
 El usuario pega el ticket y, a veces, un review de un bot. Juzgá el código. El veredicto es si cumple el ticket.

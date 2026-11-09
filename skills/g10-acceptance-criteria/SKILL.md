@@ -1,23 +1,28 @@
 ---
 name: g10-acceptance-criteria
-description: "Definir y mejorar criterios de aceptación de funcionalidades, bugs y tickets a partir de requisitos, diseños y arquitectura existente. Usar al preparar o aclarar trabajo; no para dictaminar el cierre de un PR."
+description: Definir y mejorar criterios de aceptación de funcionalidades, bugs y tickets a partir de requisitos, diseños y arquitectura existente. Usar al preparar o aclarar trabajo; no para dictaminar el cierre de un PR.
 metadata:
   tipo: skill
-  area: [gestion]
-  fase: [analisis]
-  tecnologias: [agnostico]
-  metodologia: agnostico
-  herramientas: [codex]
+  area:
+  - gestion
+  fase:
+  - analisis
+  tecnologias:
+  - agnostico
+  metodologia:
+  - agnostico
+  herramientas:
+  - codex
   requiere: []
   grupo: "10"
   autor:
     nombre: Marcos Carrizo Aslanian
     github: MarcosCarrizoA
-  responsables: [MarcosCarrizoA]
+  responsables:
+  - MarcosCarrizoA
   madurez: experimental
   relacionados: []
 ---
-
 # Criterios de aceptación
 
 Convertir lo que necesita el usuario en condiciones breves, observables y suficientes para implementar y aceptar una entrega. Mantener el alcance y el nivel de detalle pedidos; no convertir cada ticket en una especificación exhaustiva.

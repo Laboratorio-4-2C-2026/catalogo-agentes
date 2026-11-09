@@ -1,23 +1,30 @@
 ---
 name: g10-developer-feedback
-description: "Evaluar el trabajo observable de cada desarrollador con Jira y GitHub, generar una nota de 0 a 10 con evidencia y dar feedback individual. Usar para evaluar contribuciones de un sprint o período, con capacidad, dependencias y datos incompletos explícitos."
+description: Evaluar el trabajo observable de cada desarrollador con Jira y GitHub, generar una nota de 0 a 10 con evidencia y dar feedback individual. Usar para evaluar contribuciones de un sprint o período, con capacidad, dependencias y datos incompletos explícitos.
 metadata:
   tipo: skill
-  area: [gestion]
-  fase: [revision]
-  tecnologias: [agnostico]
-  metodologia: scrum
-  herramientas: [codex]
-  requiere: [jira, github]
+  area:
+  - gestion
+  fase:
+  - revision
+  tecnologias:
+  - agnostico
+  metodologia:
+  - scrum
+  herramientas:
+  - codex
+  requiere:
+  - jira
+  - github
   grupo: "10"
   autor:
     nombre: Marcos Carrizo Aslanian
     github: MarcosCarrizoA
-  responsables: [MarcosCarrizoA]
+  responsables:
+  - MarcosCarrizoA
   madurez: experimental
   relacionados: []
 ---
-
 # Developer Feedback
 
 Preparar para el PM una evaluación individual del trabajo de cada desarrollador durante un sprint o período. Dar una nota numérica fundamentada, confianza, fortalezas y mejoras accionables. Escribir en el idioma del usuario.

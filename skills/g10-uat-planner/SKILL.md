@@ -1,27 +1,29 @@
 ---
 name: g10-uat-planner
-description: >-
-  Preparar guiones de pruebas de aceptación de usuario (UAT) desde requisitos
-  y criterios acordados, con roles, datos, pasos y resultados esperados.
-  Usar para planificar validación funcional, pruebas manuales o demos de
-  aceptación de una entrega.
+description: Preparar guiones de pruebas de aceptación de usuario (UAT) desde requisitos y criterios acordados, con roles, datos, pasos y resultados esperados. Usar para planificar validación funcional, pruebas manuales o demos de aceptación de una entrega.
 metadata:
   tipo: skill
-  area: [qa]
-  fase: [planificacion, testing]
-  tecnologias: [agnostico]
-  metodologia: agnostico
-  herramientas: [codex]
+  area:
+  - qa
+  fase:
+  - planificacion
+  - testing
+  tecnologias:
+  - agnostico
+  metodologia:
+  - agnostico
+  herramientas:
+  - codex
   requiere: []
   grupo: "10"
   autor:
     nombre: Marcos Carrizo Aslanian
     github: MarcosCarrizoA
-  responsables: [MarcosCarrizoA]
+  responsables:
+  - MarcosCarrizoA
   madurez: experimental
   relacionados: []
 ---
-
 # UAT Planner
 
 Transformar el alcance acordado en un recorrido que una persona pueda ejecutar y evaluar. Responder en el idioma del usuario, con el detalle necesario para reproducir la prueba.

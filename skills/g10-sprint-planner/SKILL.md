@@ -1,23 +1,30 @@
 ---
 name: g10-sprint-planner
-description: "Proponer el alcance, las estimaciones, las subtareas y la distribución de un sprint de software a partir de Jira y la disponibilidad del equipo. Usar al planificar o replanificar; no para el monitoreo diario."
+description: Proponer el alcance, las estimaciones, las subtareas y la distribución de un sprint de software a partir de Jira y la disponibilidad del equipo. Usar al planificar o replanificar; no para el monitoreo diario.
 metadata:
   tipo: skill
-  area: [gestion]
-  fase: [planificacion]
-  tecnologias: [agnostico]
-  metodologia: scrum
-  herramientas: [codex]
-  requiere: [jira, github]
+  area:
+  - gestion
+  fase:
+  - planificacion
+  tecnologias:
+  - agnostico
+  metodologia:
+  - scrum
+  herramientas:
+  - codex
+  requiere:
+  - jira
+  - github
   grupo: "10"
   autor:
     nombre: Marcos Carrizo Aslanian
     github: MarcosCarrizoA
-  responsables: [MarcosCarrizoA]
+  responsables:
+  - MarcosCarrizoA
   madurez: experimental
   relacionados: []
 ---
-
 # Sprint Planner
 
 Preparar un plan viable que permita al PM decidir qué comprometer y qué dejar fuera del sprint.

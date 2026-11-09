@@ -1,23 +1,31 @@
 ---
 name: g10-jira-ticket-builder
-description: "Convertir requisitos, ideas o bugs en borradores de tickets y subtareas de Jira con criterios de aceptación y dependencias. Crear o actualizar los borradores aprobados cuando el usuario lo autorice."
+description: Convertir requisitos, ideas o bugs en borradores de tickets y subtareas de Jira con criterios de aceptación y dependencias. Crear o actualizar los borradores aprobados cuando el usuario lo autorice.
 metadata:
   tipo: skill
-  area: [gestion]
-  fase: [analisis, planificacion]
-  tecnologias: [agnostico]
-  metodologia: agnostico
-  herramientas: [codex]
-  requiere: [jira, github]
+  area:
+  - gestion
+  fase:
+  - analisis
+  - planificacion
+  tecnologias:
+  - agnostico
+  metodologia:
+  - agnostico
+  herramientas:
+  - codex
+  requiere:
+  - jira
+  - github
   grupo: "10"
   autor:
     nombre: Marcos Carrizo Aslanian
     github: MarcosCarrizoA
-  responsables: [MarcosCarrizoA]
+  responsables:
+  - MarcosCarrizoA
   madurez: experimental
   relacionados: []
 ---
-
 # Jira Ticket Builder
 
 Convertir una necesidad concreta en tickets que el equipo pueda implementar y verificar.

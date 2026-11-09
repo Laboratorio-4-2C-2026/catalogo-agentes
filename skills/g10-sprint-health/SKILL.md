@@ -1,23 +1,30 @@
 ---
 name: g10-sprint-health
-description: "Evaluar el estado de un sprint con Jira, ramas, commits y PR de GitHub, estimando avance técnico aproximado cuando se solicita. Usar en controles diarios o revisiones de salud; no para crear el plan inicial."
+description: Evaluar el estado de un sprint con Jira, ramas, commits y PR de GitHub, estimando avance técnico aproximado cuando se solicita. Usar en controles diarios o revisiones de salud; no para crear el plan inicial.
 metadata:
   tipo: skill
-  area: [gestion]
-  fase: [revision]
-  tecnologias: [agnostico]
-  metodologia: scrum
-  herramientas: [codex]
-  requiere: [jira, github]
+  area:
+  - gestion
+  fase:
+  - revision
+  tecnologias:
+  - agnostico
+  metodologia:
+  - scrum
+  herramientas:
+  - codex
+  requiere:
+  - jira
+  - github
   grupo: "10"
   autor:
     nombre: Marcos Carrizo Aslanian
     github: MarcosCarrizoA
-  responsables: [MarcosCarrizoA]
+  responsables:
+  - MarcosCarrizoA
   madurez: experimental
   relacionados: []
 ---
-
 # Sprint Health
 
 Dar al PM una lectura del avance y de las decisiones que amenazan el objetivo del sprint.
