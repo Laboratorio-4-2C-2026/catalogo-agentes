@@ -22,7 +22,8 @@ metadata:
   responsables:
   - inesgassiebayle
   madurez: probado
-  relacionados: []
+  relacionados:
+  - g02-ticket-reminder-agent
 ---
 # Recordatorio de tickets del jueves — Zest
 

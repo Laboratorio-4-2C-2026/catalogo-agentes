@@ -25,6 +25,7 @@ metadata:
   madurez: experimental
   relacionados:
   - g03-revisor-de-fichas
+  - g02-catalog-publisher-agent
 ---
 # Publicador en el Catálogo Común de Agentes — grupo 02 (Zest)
 

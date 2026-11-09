@@ -27,6 +27,7 @@ metadata:
   relacionados:
   - g11-repo-onboarding
   - g13-onboarding-de-repo
+  - g02-zest-onboarding-agent
 ---
 # Onboarding de Zest — guía para gente nueva
 

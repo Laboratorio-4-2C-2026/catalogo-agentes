@@ -24,7 +24,8 @@ metadata:
   responsables:
   - inesgassiebayle
   madurez: experimental
-  relacionados: []
+  relacionados:
+  - g02-demo-data-generator-agent
 ---
 # Generador de datos de demo — Zest
 

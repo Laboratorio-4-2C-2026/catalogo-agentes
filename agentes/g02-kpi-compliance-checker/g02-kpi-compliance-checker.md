@@ -1,6 +1,6 @@
 ---
 name: g02-kpi-compliance-checker
-description: Chequea a diario en el panel de Lab4 KPIs que Zest tenga el día COMPLETO y, si no, crea un issue y suscribe al equipo.
+description: 'Usar cuando haya que controlar a diario si Zest reportó el día COMPLETO en el panel de Lab4 KPIs. Agente que ejecuta la skill g02-kpi-compliance-check: si el día no está completo, crea un issue en Multica y suscribe al equipo.'
 skills:
 - g02-kpi-compliance-check
 metadata:
@@ -26,6 +26,7 @@ metadata:
   madurez: probado
   relacionados:
   - g11-explicar-kpi
+  - g02-kpi-compliance-check
 ---
 # KPI Compliance Checker
 

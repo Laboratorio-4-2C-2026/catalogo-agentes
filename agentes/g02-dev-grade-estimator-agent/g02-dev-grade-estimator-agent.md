@@ -1,6 +1,6 @@
 ---
 name: g02-dev-grade-estimator-agent
-description: Estima una nota orientativa de cada dev según el cumplimiento de sus tickets en Multica y la dificultad de lo que terminó.
+description: Usar cuando el equipo pida una nota orientativa de cada dev según el cumplimiento de sus tickets y la dificultad de lo que terminó. Agente que ejecuta la skill g02-dev-grade-estimator con datos de Multica y comenta el resultado solo en el issue que lo pidió.
 skills:
 - g02-dev-grade-estimator
 metadata:
@@ -24,7 +24,9 @@ metadata:
   responsables:
   - inesgassiebayle
   madurez: probado
-  relacionados: []
+  relacionados:
+  - g02-dev-grade-estimator
+  - g02-ticket-time-estimator-agent
 ---
 # Dev Grade Estimator
 

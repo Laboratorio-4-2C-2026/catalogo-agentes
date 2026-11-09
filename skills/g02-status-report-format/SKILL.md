@@ -29,6 +29,7 @@ metadata:
   - g03-status-schedule
   - g03-status-incidents
   - g11-weekly-status
+  - g02-status-report-updater
 ---
 # Status Report semanal — Zest (Equipo 02)
 

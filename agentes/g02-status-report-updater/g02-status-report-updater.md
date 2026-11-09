@@ -1,6 +1,6 @@
 ---
 name: g02-status-report-updater
-description: 'Cada jueves carga el status semanal en la pestaña "Equipo 02" del Tablero de Estado del Proyecto: propone el semáforo con motivo y acción, actualiza el Cronograma y agrega o cierra Incidentes, a partir de los tickets de Multica, los PRs de GitHub y las re'
+description: 'Usar cuando llegue el jueves y haya que cargar el status semanal de Zest en la pestaña del equipo del Tablero de Estado del Proyecto. Agente que ejecuta la skill g02-status-report-format: propone el semáforo, actualiza el cronograma y los incidentes y comenta el resultado en el issue.'
 skills:
 - g02-status-report-format
 metadata:
@@ -31,6 +31,7 @@ metadata:
   - g03-status-schedule
   - g03-status-incidents
   - g11-weekly-status
+  - g02-status-report-format
 ---
 # Status Report Updater
 

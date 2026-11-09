@@ -1,6 +1,6 @@
 ---
 name: g02-branch-cleanup-agent
-description: Una vez por semana lista las branches del repo (mergeadas, abandonadas y activas) en la planilla Zest — Limpieza de branches. No borra nada.
+description: 'Usar una vez por semana para revisar las branches del repo de Zest. Agente que ejecuta la skill g02-branch-cleanup: las lista como mergeadas, abandonadas o activas en la planilla de limpieza de branches, sin borrar nada.'
 skills:
 - g02-branch-cleanup
 metadata:
@@ -28,6 +28,7 @@ metadata:
   madurez: experimental
   relacionados:
   - g13-validar-branch
+  - g02-branch-cleanup
 ---
 # Branch Cleanup
 

@@ -24,7 +24,8 @@ metadata:
   responsables:
   - inesgassiebayle
   madurez: experimental
-  relacionados: []
+  relacionados:
+  - g02-console-check-agent
 ---
 # Chequeo semanal de errores de consola — Zest
 

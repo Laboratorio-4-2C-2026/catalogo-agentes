@@ -1,6 +1,6 @@
 ---
 name: g02-demo-data-generator-agent
-description: A pedido, lee la estructura de la base en el repo y genera un paquete listo para cargar con recetas reales, colecciones y usuarios ficticios con fotos.
+description: 'Usar cuando pidan datos para poblar la base de Zest. Agente que ejecuta la skill g02-demo-data-generator: lee el esquema del repo y genera un paquete de recetas, colecciones y usuarios ficticios con fotos, sin cargarlo en ninguna base.'
 skills:
 - g02-demo-data-generator
 metadata:
@@ -26,7 +26,8 @@ metadata:
   responsables:
   - inesgassiebayle
   madurez: experimental
-  relacionados: []
+  relacionados:
+  - g02-demo-data-generator
 ---
 # Demo Data Generator
 

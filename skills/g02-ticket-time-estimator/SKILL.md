@@ -24,6 +24,7 @@ metadata:
   madurez: experimental
   relacionados:
   - g11-estimar-ticket
+  - g02-ticket-time-estimator-agent
 ---
 # Estimador de duración de tickets — Zest
 

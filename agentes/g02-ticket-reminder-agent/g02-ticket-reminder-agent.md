@@ -1,6 +1,6 @@
 ---
 name: g02-ticket-reminder-agent
-description: Los martes avisa en Multica a los devs qué tickets que vencen el jueves todavía no terminaron.
+description: Usar los martes para avisar en Multica a los devs qué tickets que vencen el jueves todavía no terminaron. Agente que ejecuta la skill g02-ticket-reminder y comenta un recordatorio en cada ticket pendiente.
 skills:
 - g02-ticket-reminder
 metadata:
@@ -24,7 +24,8 @@ metadata:
   responsables:
   - inesgassiebayle
   madurez: probado
-  relacionados: []
+  relacionados:
+  - g02-ticket-reminder
 ---
 # Ticket Reminder
 

@@ -22,7 +22,8 @@ metadata:
   responsables:
   - inesgassiebayle
   madurez: probado
-  relacionados: []
+  relacionados:
+  - g02-dev-grade-estimator-agent
 ---
 # Estimador de nota para devs — Zest
 

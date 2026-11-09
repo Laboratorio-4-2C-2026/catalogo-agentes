@@ -1,6 +1,6 @@
 ---
 name: g02-ticket-time-estimator-agent
-description: Estima cuántos días hábiles va a durar un ticket, para cada persona y para el equipo, con el historial de Multica.
+description: Usar cuando te asignen o mencionen en un ticket de Zest y haga falta estimar cuántos días hábiles va a durar, para cada persona y para el equipo. Agente que ejecuta la skill g02-ticket-time-estimator con el historial de Multica y comenta la estimación en el ticket.
 skills:
 - g02-ticket-time-estimator
 metadata:
@@ -26,6 +26,8 @@ metadata:
   madurez: experimental
   relacionados:
   - g11-estimar-ticket
+  - g02-ticket-time-estimator
+  - g02-dev-grade-estimator-agent
 ---
 # Ticket Time Estimator
 

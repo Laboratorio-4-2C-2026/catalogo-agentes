@@ -1,6 +1,6 @@
 ---
 name: g02-catalog-publisher-agent
-description: 'Sube y actualiza los agentes y skills del grupo 02 en el Catálogo Común de Agentes de la materia: los exporta de Multica, les arma la ficha, valida y abre el PR.'
+description: 'Usar cuando haya que subir o actualizar los agentes y skills del grupo 02 en el Catálogo Común de Agentes de la materia. Agente que ejecuta la skill g02-catalog-publisher en tres fases con confirmación del equipo: prepara las fichas, sube y abre el PR, y lo mergea.'
 skills:
 - g02-catalog-publisher
 metadata:
@@ -27,6 +27,7 @@ metadata:
   madurez: experimental
   relacionados:
   - g03-revisor-de-fichas
+  - g02-catalog-publisher
 ---
 # Catalog Publisher
 

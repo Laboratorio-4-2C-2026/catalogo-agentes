@@ -1,6 +1,6 @@
 ---
 name: g02-zest-onboarding-agent
-description: Responde preguntas de alguien nuevo en el equipo sobre Zest, con el repo, los documentos, Multica y la planilla, citando siempre la fuente.
+description: Usar cuando alguien nuevo en el equipo tenga preguntas sobre Zest (producto, equipo, cómo levantar la app, dónde está cada cosa). Agente que ejecuta la skill g02-zest-onboarding y responde con el repo, los documentos y Multica, citando siempre la fuente.
 skills:
 - g02-zest-onboarding
 metadata:
@@ -29,6 +29,7 @@ metadata:
   relacionados:
   - g11-repo-onboarding
   - g13-onboarding-de-repo
+  - g02-zest-onboarding
 ---
 # Zest Onboarding
 

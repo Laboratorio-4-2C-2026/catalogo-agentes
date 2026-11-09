@@ -24,6 +24,7 @@ metadata:
   madurez: probado
   relacionados:
   - g11-explicar-kpi
+  - g02-kpi-compliance-checker
 ---
 # Chequeo diario de cumplimiento de KPIs — Zest (Equipo 2)
 

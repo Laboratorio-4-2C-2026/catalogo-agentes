@@ -1,6 +1,6 @@
 ---
 name: g02-console-check-agent
-description: Una vez por semana levanta la app en local, recorre los flujos de los tickets cerrados en la semana y crea un issue si hay errores o warnings de consola.
+description: 'Usar una vez por semana cuando haga falta verificar que la app de Zest no tire errores de consola. Agente que ejecuta la skill g02-console-check: levanta la app en local, recorre los flujos de los tickets cerrados y crea un issue si hay errores o warnings.'
 skills:
 - g02-console-check
 metadata:
@@ -26,7 +26,8 @@ metadata:
   responsables:
   - inesgassiebayle
   madurez: experimental
-  relacionados: []
+  relacionados:
+  - g02-console-check
 ---
 # Console Check
 

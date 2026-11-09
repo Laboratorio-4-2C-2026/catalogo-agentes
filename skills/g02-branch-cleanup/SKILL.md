@@ -26,6 +26,7 @@ metadata:
   madurez: experimental
   relacionados:
   - g13-validar-branch
+  - g02-branch-cleanup-agent
 ---
 # Limpieza de branches — Zest
 
