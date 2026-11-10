@@ -62,6 +62,9 @@ valores:
     testcontainers: ''
     tailwindcss: ''
     vite: ''
+    github-actions: ''
+    k6: ''
+    turborepo: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
@@ -87,6 +90,7 @@ valores:
     talksmith: ''
     openrouter: ''
     multica: ''
+    supabase: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
