@@ -1,24 +1,34 @@
 ---
 name: g10-jira-control-reaperturas
-description: "Guía para configurar una automatización de Jira que identifica tickets reabiertos después de su finalización y registra situaciones de retrabajo."
+description: Guía para configurar una automatización de Jira que identifica tickets reabiertos después de su finalización y registra situaciones de retrabajo.
 metadata:
+  tipo: skill
+  grupo: "10"
 tipo: skill
-area: [gestion, qa]
-fase: [revision, mantenimiento]
-tecnologias: [agnostico]
-metodologia: [kanban]
-herramientas: [otra]
-requiere: [jira]
+area:
+- gestion
+- qa
+fase:
+- revision
+- mantenimiento
+tecnologias:
+- agnostico
+metodologia:
+- kanban
+herramientas:
+- otra
+requiere:
+- jira
 grupo: "10"
-autor:
+autor: null
 nombre: Azul Garber
 github: amgarber
-responsables: [amgarber]
+responsables:
+- amgarber
 madurez: experimental
 relacionados:
 - g10-jira-pr-merged
 ---
-
 # Control automático de tickets reabiertos
 
 ## Objetivo

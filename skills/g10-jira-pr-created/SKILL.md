@@ -1,25 +1,36 @@
 ---
 name: g10-jira-pr-created
-description: "Guía para configurar y verificar una automatización de Jira que mueve un ticket a En revisión cuando se crea un Pull Request vinculado en GitHub."
+description: Guía para configurar y verificar una automatización de Jira que mueve un ticket a En revisión cuando se crea un Pull Request vinculado en GitHub.
 metadata:
+  tipo: skill
+  grupo: "10"
 tipo: skill
-area: [gestion, devops]
-fase: [desarrollo, revision]
-tecnologias: [git]
-metodologia: [kanban]
-herramientas: [otra]
-requiere: [jira, github]
+area:
+- gestion
+- devops
+fase:
+- desarrollo
+- revision
+tecnologias:
+- git
+metodologia:
+- kanban
+herramientas:
+- otra
+requiere:
+- jira
+- github
 grupo: "10"
-autor:
+autor: null
 nombre: Azul Garber
 github: amgarber
-responsables: [amgarber]
+responsables:
+- amgarber
 madurez: usado-en-proyecto
 relacionados:
 - g10-jira-branch-en-curso
 - g10-jira-pr-merged
 ---
-
 # Actualización automática del estado al crear un Pull Request
 
 ## Objetivo

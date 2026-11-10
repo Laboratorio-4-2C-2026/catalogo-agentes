@@ -1,24 +1,33 @@
 ---
 name: g10-jira-auditoria-fechas
-description: "Guía para configurar una automatización de Jira que registra cambios en la fecha de vencimiento de los tickets y facilita la trazabilidad del cronograma."
+description: Guía para configurar una automatización de Jira que registra cambios en la fecha de vencimiento de los tickets y facilita la trazabilidad del cronograma.
 metadata:
+  tipo: skill
+  grupo: "10"
 tipo: skill
-area: [gestion]
-fase: [planificacion, mantenimiento]
-tecnologias: [agnostico]
-metodologia: [kanban]
-herramientas: [otra]
-requiere: [jira]
+area:
+- gestion
+fase:
+- planificacion
+- mantenimiento
+tecnologias:
+- agnostico
+metodologia:
+- kanban
+herramientas:
+- otra
+requiere:
+- jira
 grupo: "10"
-autor:
+autor: null
 nombre: Azul Garber
 github: amgarber
-responsables: [amgarber]
+responsables:
+- amgarber
 madurez: experimental
 relacionados:
 - g10-jira-asignacion-automatica
 ---
-
 # Auditoría automática de cambios de fecha en Jira
 
 ## Objetivo

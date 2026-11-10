@@ -1,24 +1,33 @@
 ---
 name: g10-jira-inactividad-tickets
-description: "Guía para configurar una automatización de Jira que detecta tickets En curso sin actualizaciones durante cinco días y registra una alerta de seguimiento."
+description: Guía para configurar una automatización de Jira que detecta tickets En curso sin actualizaciones durante cinco días y registra una alerta de seguimiento.
 metadata:
+  tipo: skill
+  grupo: "10"
 tipo: skill
-area: [gestion]
-fase: [desarrollo, mantenimiento]
-tecnologias: [agnostico]
-metodologia: [kanban]
-herramientas: [otra]
-requiere: [jira]
+area:
+- gestion
+fase:
+- desarrollo
+- mantenimiento
+tecnologias:
+- agnostico
+metodologia:
+- kanban
+herramientas:
+- otra
+requiere:
+- jira
 grupo: "10"
-autor:
+autor: null
 nombre: Azul Garber
 github: amgarber
-responsables: [amgarber]
+responsables:
+- amgarber
 madurez: experimental
 relacionados:
 - g10-jira-branch-en-curso
 ---
-
 # Detección automática de tickets sin actividad
 
 ## Objetivo
