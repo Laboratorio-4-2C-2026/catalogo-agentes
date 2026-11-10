@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Zest "Citrus" palette as RGB channels, so Tailwind opacity modifiers work. */
+:root {
+  --background: 250 247 242; /* #faf7f2 */
+  --foreground: 44 44 44; /* #2c2c2c */
+  --card: 255 255 255;
+  --muted: 241 235 224; /* #f1ebe0 */
+  --muted-foreground: 122 117 108; /* #7a756c */
+  --border: 231 224 211; /* #e7e0d3 */
+  --grapefruit: 232 65 90; /* #e8415a */
+  --coral: 242 115 90; /* #f2735a */
+  --lemon: 245 200 66; /* #f5c842 */
+  --lime: 125 194 66; /* #7dc242 */
+}
+
+/* Dark slides (cover, demo, closing) flip the neutral roles only. */
+.theme-dark {
+  --background: 28 26 24;
+  --foreground: 250 247 242;
+  --card: 40 37 34;
+  --muted: 52 48 44;
+  --muted-foreground: 184 176 164;
+  --border: 70 65 59;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #111;
+  color: rgb(var(--foreground));
+  font-family: Geist, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+body.print {
+  background: #fff;
+  overflow: visible;
+}
+
+@page {
+  size: 1920px 1080px;
+  margin: 0;
+}

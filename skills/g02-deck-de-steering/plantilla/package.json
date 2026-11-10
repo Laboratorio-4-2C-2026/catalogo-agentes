@@ -1,0 +1,31 @@
+{
+  "name": "zest-deck",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --port 4173",
+    "check": "npm run build && node scripts/check.mjs",
+    "pdf": "npm run build && node scripts/export-pdf.mjs",
+    "add-bit": "node scripts/add-bit.mjs"
+  },
+  "dependencies": {
+    "@gsap/react": "2.1.2",
+    "gsap": "3.13.0",
+    "motion": "12.23.12",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.23",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "4.7.0",
+    "autoprefixer": "10.4.21",
+    "postcss": "8.5.6",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.8.3",
+    "vite": "6.3.5"
+  }
+}
