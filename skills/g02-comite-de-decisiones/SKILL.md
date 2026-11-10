@@ -23,6 +23,9 @@ metadata:
   - ClaraLopez1
   madurez: usado-en-proyecto
   relacionados:
+  - g02-comite-abogado-del-diablo
+  - g02-comite-aliado
+  - g02-comite-neutral
   - g08-devils-advocate
   - g11-analizar-cambio-alcance
   - g02-control-de-cambios
@@ -126,13 +129,12 @@ the user doesn't read the agreement as three copies of the same opinion.
 - Nobody in the committee invents data: missing numbers are listed under "Lo
   que no sabemos", not estimated silently.
 
-## Instalación de los subagentes
+## Los tres subagentes
 
-Los tres miembros del comité son subagentes de Claude Code y están en
-[`agents/`](./agents). Copialos a `.claude/agents/` del repo donde vayas a usar
-la skill. En sus archivos dicen `support/skills/decision-committee.md`: si la
-skill vive en otra ruta, pasales la ruta real en el pedido (la skill ya lo
-indica).
+Cada miembro del comité es un agente propio del catálogo:
+`g02-comite-abogado-del-diablo`, `g02-comite-aliado` y `g02-comite-neutral`. Copialos a
+`.claude/agents/` del repo donde vayas a usar la skill y lanzalos en paralelo con esos
+nombres, pasándoles la misma decisión, los mismos datos y la ruta de este `SKILL.md`.
 
 ## Ejemplo de uso
 
