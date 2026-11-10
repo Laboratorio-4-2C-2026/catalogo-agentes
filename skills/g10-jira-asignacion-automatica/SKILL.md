@@ -1,31 +1,21 @@
 ---
 name: g10-jira-asignacion-automatica
-description: Guía para configurar y verificar una automatización programada de Jira que asigna tickets desde el campo Dev planificado y los mueve de Backlog a Por hacer cuando llega su fecha de inicio.
+description: "Guía para configurar y verificar una automatización programada de Jira que asigna tickets desde el campo Dev planificado y los mueve de Backlog a Por hacer cuando llega su fecha de inicio."
 metadata:
   tipo: skill
+  area: [gestion]
+  fase: [planificacion, desarrollo]
+  tecnologias: [agnostico]
+  metodologia: [kanban]
+  herramientas: [otra]
+  requiere: [jira]
   grupo: "10"
-tipo: skill
-area:
-- gestion
-fase:
-- planificacion
-- desarrollo
-tecnologias:
-- agnostico
-metodologia:
-- kanban
-herramientas:
-- otra
-requiere:
-- jira
-grupo: "10"
-autor: null
-nombre: Azul Garber
-github: amgarber
-responsables:
-- amgarber
-madurez: usado-en-proyecto
-relacionados: []
+  autor:
+    nombre: Azul Garber
+    github: amgarber
+  responsables: [amgarber]
+  madurez: usado-en-proyecto
+  relacionados: []
 ---
 # Asignación automática de tickets desde Backlog
 

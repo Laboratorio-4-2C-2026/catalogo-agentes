@@ -1,34 +1,22 @@
 ---
 name: g10-jira-pr-merged
-description: Guía para configurar una automatización de Jira que finaliza tickets en revisión cuando se fusiona un Pull Request vinculado.
+description: "Guía para configurar una automatización de Jira que finaliza tickets en revisión cuando se fusiona un Pull Request vinculado."
 metadata:
   tipo: skill
+  area: [gestion, devops]
+  fase: [revision, desarrollo]
+  tecnologias: [git]
+  metodologia: [kanban]
+  herramientas: [otra]
+  requiere: [jira, github]
   grupo: "10"
-tipo: skill
-area:
-- gestion
-- devops
-fase:
-- revision
-- desarrollo
-tecnologias:
-- git
-metodologia:
-- kanban
-herramientas:
-- otra
-requiere:
-- jira
-- github
-grupo: "10"
-autor: null
-nombre: Azul Garber
-github: amgarber
-responsables:
-- amgarber
-madurez: usado-en-proyecto
-relacionados:
-- g10-jira-branch-en-curso
+  autor:
+    nombre: Azul Garber
+    github: amgarber
+  responsables: [amgarber]
+  madurez: usado-en-proyecto
+  relacionados:
+  - g10-jira-branch-en-curso
 ---
 # Finalización automática de tickets al fusionar un Pull Request
 

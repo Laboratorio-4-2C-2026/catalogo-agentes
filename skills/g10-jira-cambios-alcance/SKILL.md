@@ -1,32 +1,22 @@
 ---
 name: g10-jira-cambios-alcance
-description: Guía para configurar una automatización de Jira que identifica tickets creados después de una fecha de corte y los marca para revisar posibles cambios de alcance.
+description: "Guía para configurar una automatización de Jira que identifica tickets creados después de una fecha de corte y los marca para revisar posibles cambios de alcance."
 metadata:
   tipo: skill
+  area: [gestion]
+  fase: [planificacion, analisis]
+  tecnologias: [agnostico]
+  metodologia: [kanban]
+  herramientas: [otra]
+  requiere: [jira]
   grupo: "10"
-tipo: skill
-area:
-- gestion
-fase:
-- planificacion
-- analisis
-tecnologias:
-- agnostico
-metodologia:
-- kanban
-herramientas:
-- otra
-requiere:
-- jira
-grupo: "10"
-autor: null
-nombre: Azul Garber
-github: amgarber
-responsables:
-- amgarber
-madurez: experimental
-relacionados:
-- g10-jira-asignacion-automatica
+  autor:
+    nombre: Azul Garber
+    github: amgarber
+  responsables: [amgarber]
+  madurez: experimental
+  relacionados:
+  - g10-jira-asignacion-automatica
 ---
 # Identificación automática de posibles cambios de alcance
 

@@ -1,32 +1,22 @@
 ---
 name: g10-jira-notificaciones
-description: Guía para configurar una automatización de Jira que envía recordatorios por correo sobre tickets asignados que vencen al día siguiente y todavía no están finalizados.
+description: "Guía para configurar una automatización de Jira que envía recordatorios por correo sobre tickets asignados que vencen al día siguiente y todavía no están finalizados."
 metadata:
   tipo: skill
+  area: [gestion]
+  fase: [desarrollo, mantenimiento]
+  tecnologias: [agnostico]
+  metodologia: [kanban]
+  herramientas: [otra]
+  requiere: [jira]
   grupo: "10"
-tipo: skill
-area:
-- gestion
-fase:
-- desarrollo
-- mantenimiento
-tecnologias:
-- agnostico
-metodologia:
-- kanban
-herramientas:
-- otra
-requiere:
-- jira
-grupo: "10"
-autor: null
-nombre: Azul Garber
-github: amgarber
-responsables:
-- amgarber
-madurez: usado-en-proyecto
-relacionados:
-- g10-jira-asignacion-automatica
+  autor:
+    nombre: Azul Garber
+    github: amgarber
+  responsables: [amgarber]
+  madurez: usado-en-proyecto
+  relacionados:
+  - g10-jira-asignacion-automatica
 ---
 # Recordatorios automáticos de vencimiento en Jira
 

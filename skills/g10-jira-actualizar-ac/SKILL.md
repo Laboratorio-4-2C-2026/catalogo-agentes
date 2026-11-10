@@ -1,34 +1,22 @@
 ---
 name: g10-jira-actualizar-ac
-description: Guía para configurar una automatización de Jira que envía horas registradas y estimaciones de subtareas a Google Apps Script mediante una solicitud HTTP POST para apoyar el análisis de valor ganado.
+description: "Guía para configurar una automatización de Jira que envía horas registradas y estimaciones de subtareas a Google Apps Script mediante una solicitud HTTP POST para apoyar el análisis de valor ganado."
 metadata:
   tipo: skill
+  area: [gestion, datos]
+  fase: [analisis, mantenimiento]
+  tecnologias: [agnostico]
+  metodologia: [kanban]
+  herramientas: [otra]
+  requiere: [jira, google-sheets]
   grupo: "10"
-tipo: skill
-area:
-- gestion
-- datos
-fase:
-- analisis
-- mantenimiento
-tecnologias:
-- agnostico
-metodologia:
-- kanban
-herramientas:
-- otra
-requiere:
-- jira
-- google-sheets
-grupo: "10"
-autor: null
-nombre: Azul Garber
-github: amgarber
-responsables:
-- amgarber
-madurez: experimental
-relacionados:
-- g10-jira-asignacion-automatica
+  autor:
+    nombre: Azul Garber
+    github: amgarber
+  responsables: [amgarber]
+  madurez: experimental
+  relacionados:
+  - g10-jira-asignacion-automatica
 ---
 # Envío automático de horas trabajadas para valor ganado
 

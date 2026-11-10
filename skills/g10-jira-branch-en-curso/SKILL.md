@@ -1,33 +1,22 @@
 ---
 name: g10-jira-branch-en-curso
-description: Guía para configurar una automatización de Jira que mueve un ticket de Por hacer a En curso al crear una branch.
+description: "Guía para configurar una automatización de Jira que mueve un ticket de Por hacer a En curso al crear una branch."
 metadata:
   tipo: skill
+  area: [gestion, devops]
+  fase: [desarrollo]
+  tecnologias: [git]
+  metodologia: [kanban]
+  herramientas: [otra]
+  requiere: [jira, github]
   grupo: "10"
-tipo: skill
-area:
-- gestion
-- devops
-fase:
-- desarrollo
-tecnologias:
-- git
-metodologia:
-- kanban
-herramientas:
-- otra
-requiere:
-- jira
-- github
-grupo: "10"
-autor: null
-nombre: Azul Garber
-github: amgarber
-responsables:
-- amgarber
-madurez: usado-en-proyecto
-relacionados:
-- g10-jira-asignacion-automatica
+  autor:
+    nombre: Azul Garber
+    github: amgarber
+  responsables: [amgarber]
+  madurez: usado-en-proyecto
+  relacionados:
+  - g10-jira-asignacion-automatica
 ---
 # Branch created → En curso
 
