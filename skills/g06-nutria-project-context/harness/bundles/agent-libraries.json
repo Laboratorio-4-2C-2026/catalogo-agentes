@@ -1,0 +1,186 @@
+{
+  "development": {
+    "backend": {
+      "skills": [
+        "architecture-adr",
+        "neon-prisma-safety",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "neon",
+        "engram",
+        "codegraph"
+      ]
+    },
+    "frontend": {
+      "skills": [
+        "google-modern-web-guidance",
+        "stitch-ui-workflow",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram",
+        "codegraph",
+        "agentation"
+      ],
+      "runtime_tools": [
+        "Agentation"
+      ]
+    },
+    "review": {
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ]
+    },
+    "linear_time_registration": {
+      "skills": [
+        "linear-delivery-ops",
+        "time-reporting"
+      ],
+      "mcps": [
+        "linear",
+        "engram"
+      ]
+    },
+    "frontend_checker_lite": {
+      "skills": [
+        "google-modern-web-guidance",
+        "stitch-ui-workflow",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram",
+        "codegraph",
+        "agentation"
+      ],
+      "runtime_tools": [
+        "Agentation"
+      ]
+    }
+  },
+  "management": {
+    "project-manager": {
+      "skills": [
+        "linear-delivery-ops",
+        "time-reporting",
+        "engram-memory-protocol"
+      ],
+      "mcps": [
+        "linear",
+        "engram"
+      ]
+    },
+    "product-owner": {
+      "skills": [
+        "product-backlog",
+        "nutria-project-context",
+        "stitch-ui-workflow"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram"
+      ]
+    },
+    "technical-lead": {
+      "skills": [
+        "architecture-adr",
+        "neon-prisma-safety",
+        "pr-release-guardrails",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "neon",
+        "engram",
+        "codegraph"
+      ]
+    },
+    "qa-manager": {
+      "skills": [
+        "qa-playwright-evidence",
+        "product-backlog"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram"
+      ]
+    },
+    "linear-tracker": {
+      "skills": [
+        "linear-delivery-ops",
+        "time-reporting",
+        "documentation-evidence"
+      ],
+      "mcps": [
+        "linear",
+        "google-drive",
+        "engram"
+      ]
+    },
+    "portfolio-planner": {
+      "skills": [
+        "linear-delivery-ops",
+        "time-reporting",
+        "documentation-evidence"
+      ],
+      "mcps": [
+        "linear",
+        "google-drive",
+        "engram"
+      ]
+    },
+    "frontend_checker": {
+      "skills": [
+        "google-modern-web-guidance",
+        "stitch-ui-workflow",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram",
+        "codegraph",
+        "agentation"
+      ],
+      "runtime_tools": [
+        "Agentation"
+      ]
+    },
+    "management_review": {
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "documentation-evidence",
+        "codegraph-guidance",
+        "engram-memory-protocol"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ]
+    }
+  }
+}

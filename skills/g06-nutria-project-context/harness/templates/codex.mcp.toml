@@ -1,0 +1,20 @@
+[mcp_servers.linear]
+url = "https://mcp.linear.app/mcp"
+
+[mcp_servers.neon]
+url = "https://mcp.neon.tech/mcp"
+
+[mcp_servers.stitch]
+url = "https://stitch.googleapis.com/mcp"
+
+[mcp_servers.engram]
+command = "__NUTRIA_ENGRAM_COMMAND__"
+args = ["mcp", "--tools=agent"]
+
+[mcp_servers.codegraph]
+command = "__NUTRIA_CODEGRAPH_COMMAND__"
+args = ["serve", "--mcp"]
+
+[mcp_servers.agentation]
+command = "npx"
+args = ["--yes", "agentation-mcp", "server"]

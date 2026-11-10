@@ -1,0 +1,10 @@
+{
+  "required_connectors": {
+    "google_drive": {
+      "purpose": "Read and update the canonical Google Sheets Gantt referenced by management/links.md.",
+      "required_for": ["portfolio_planner", "linear_tracker"],
+      "authentication": "Workspace administrator connects the Google Drive connector; credentials are never stored in this repository.",
+      "guardrail": "Only Portfolio Planner edits schedule fields. Linear Tracker reconciles and reports discrepancies."
+    }
+  }
+}
