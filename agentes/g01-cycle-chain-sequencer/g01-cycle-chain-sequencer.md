@@ -1,6 +1,6 @@
 ---
 name: g01-cycle-chain-sequencer
-description: "Propone el orden de merge de tickets CIN de un ciclo o epic segun sus dependencias, etiquetando cada arista como confirmada, declarada en texto o inferida por modulos compartidos. Usarlo en la planificacion del ciclo o antes de un epic de varios tickets."
+description: "Usar cuando se planifica un ciclo o un epic de varios tickets y hay que decidir el orden de merge. Propone el orden de los tickets CIN segun sus dependencias, etiquetando cada arista como confirmada, declarada en texto o inferida por modulos compartidos."
 tools: Read, Grep, Glob, Bash(git log --oneline:*), Bash(git log --name-only:*), mcp__linear-cinematch__list_cycles, mcp__linear-cinematch__list_issues, mcp__linear-cinematch__get_issue, mcp__linear-cinematch__list_comments, mcp__linear-cinematch__list_issue_statuses, mcp__linear-cinematch__list_projects, mcp__linear-cinematch__list_milestones
 model: sonnet
 metadata:

@@ -1,6 +1,6 @@
 ---
 name: g01-checkpoint-reconciler
-description: "Cruza el estado de los tickets de un ciclo o hito de Linear con los commits (CIN-NN) presentes en main y devuelve una tabla de contradicciones y de trabajo mergeado detras de feature flags. Usarlo antes de un status de sprint, una demo o un cierre de ciclo."
+description: "Usar cuando se pide el estado de un checkpoint o sprint, una actualizacion para stakeholders o antes de cerrar un ciclo. Cruza los tickets de un ciclo o hito de Linear con los commits (CIN-NN) presentes en main y devuelve una tabla de contradicciones y de trabajo mergeado detras de feature flags."
 tools: Read, Grep, Glob, mcp__linear-cinematch__list_cycles, mcp__linear-cinematch__list_milestones, mcp__linear-cinematch__list_issues, mcp__linear-cinematch__get_project
 model: sonnet
 metadata:

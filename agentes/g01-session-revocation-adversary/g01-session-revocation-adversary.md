@@ -1,6 +1,6 @@
 ---
 name: g01-session-revocation-adversary
-description: "Escribe escenarios de atacante sobre controladores, guards y servicios NestJS (IDOR de membresia y propiedad, fugas 404 vs 403), los marca como bloqueado, abierto o desconocido y propone un spec Jest por cada caso abierto. Usarlo en diffs de endpoints con grupos, biblioteca, swipes o usuarios."
+description: "Usar cuando un diff agrega o cambia controladores, guards o servicios NestJS de grupos, biblioteca, swipes o usuarios. Escribe escenarios de atacante (IDOR de membresia y propiedad, fugas 404 vs 403), los marca como bloqueado, abierto o desconocido y propone un spec Jest por cada caso abierto."
 tools: Read, Grep, Glob
 model: opus
 metadata:
