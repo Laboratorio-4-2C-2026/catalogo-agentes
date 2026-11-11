@@ -16,7 +16,9 @@ metadata:
   - codex
   requiere: []
   grupo: 09
-  autor: null
+  autor:
+    nombre: Agustín Martínez
+    github: Agustin5421
   responsables:
   - Agustin5421
   madurez: experimental
