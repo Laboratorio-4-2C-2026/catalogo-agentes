@@ -24,6 +24,7 @@ metadata:
   madurez: usado-en-proyecto
   relacionados:
   - g14-curador-de-contexto-multiherramienta
+  - g13-curador-de-contexto
 ---
 
 # Curador de contexto de los desarrolladores (Guardián de convenciones)

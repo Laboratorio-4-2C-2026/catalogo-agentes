@@ -1,6 +1,6 @@
 ---
 name: g14-destilador-de-bitacora
-description: Captura aprendizajes operativos al cerrar una sesión (un hecho por archivo, título como afirmación verificable) y al cierre de un hito los destila en lecciones consultables, evitando duplicados.
+description: Captura aprendizajes operativos al cerrar una sesión (un hecho por archivo, título como afirmación verificable) y al cierre de un hito los destila en lecciones consultables, evitando duplicados. Usala al terminar una sesión de trabajo o un hito, cuando hay un aprendizaje que no debería perderse.
 metadata:
   tipo: skill
   area:
@@ -25,6 +25,7 @@ metadata:
   madurez: experimental
   relacionados:
   - g12-registrar-decision
+  - g13-lecciones-aprendidas
 ---
 
 # Destilador de bitácora

@@ -1,6 +1,6 @@
 ---
 name: g14-planes-de-trabajo-de-direccion
-description: "Descompone entregables del equipo de dirección (tickets, QA, documentación, automatización permitida) en un plan ejecutable antes de editar, que termina en especificación y criterios de aceptación. No distribuye capacidad ni tickets de desarrollo por semana, ni escribe código de producto."
+description: "Descompone entregables del equipo de dirección (tickets, QA, documentación, automatización permitida) en un plan ejecutable antes de editar, que termina en especificación y criterios de aceptación. No distribuye capacidad ni tickets de desarrollo por semana, ni escribe código de producto. Usala antes de empezar una tarea de dirección que tiene varios pasos o entregables, para tener el plan escrito antes de editar."
 metadata:
   tipo: skill
   area:

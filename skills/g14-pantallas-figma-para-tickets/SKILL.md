@@ -29,6 +29,8 @@ metadata:
   - g14-redactor-de-tickets-ejecutables
   - g04-imagenes-para-ticket
   - g12-revisar-diseno
+  - g03-figma-inspect-design
+  - g13-figma-fidelity-review
 ---
 
 # Pantallas de Figma para tickets

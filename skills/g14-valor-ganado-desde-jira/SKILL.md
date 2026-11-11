@@ -28,6 +28,9 @@ metadata:
   - g14-preparador-de-steering
   - g02-valor-ganado-evm
   - g12-calcular-valor-ganado
+  - g15-evm-calculator
+  - g13-agente-evm
+  - g01-cinematch-steering-evm
 ---
 
 # Valor ganado desde Jira

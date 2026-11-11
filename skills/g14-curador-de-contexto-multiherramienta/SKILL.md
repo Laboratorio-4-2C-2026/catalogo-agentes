@@ -26,6 +26,7 @@ metadata:
   madurez: usado-en-proyecto
   relacionados:
   - g14-curador-de-contexto-devs
+  - g13-curador-de-contexto
 ---
 
 # Curador de contexto
