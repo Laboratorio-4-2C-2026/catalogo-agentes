@@ -1,0 +1,41 @@
+name: Cron de Respaldo - PRs con conflicto o pendientes
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  cron-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout vaivendev
+        uses: actions/checkout@v4
+
+      - name: Checkout del kit de contexto (ai-config/docs)
+        uses: actions/checkout@v4
+        with:
+          repository: vaiven-austral/ai-config
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          path: ai-config
+          sparse-checkout: docs
+        continue-on-error: true
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Correr cron-check
+        run: python3 scripts/cron-check.py
+        env:
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-flash-latest' }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          TARGET_REPO: "vaiven-austral/vaiven-app"
+          BOT_LOGIN: "vaivendev"
+          AI_CONFIG_DIR: ${{ github.workspace }}/ai-config

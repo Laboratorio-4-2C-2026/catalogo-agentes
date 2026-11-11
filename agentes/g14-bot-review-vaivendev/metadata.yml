@@ -1,0 +1,33 @@
+name: g14-bot-review-vaivendev
+description: Bot de GitHub Actions que revisa cada PR del repo de producto con un LLM (OpenRouter, Gemini de respaldo), con los criterios del ticket de Jira y solo los documentos del kit de contexto que tocan las rutas del diff; audita la DoD, exige evidencia literal del diff en cada comentario y aplica topes por tipo. Usalo cuando dirección quiere review automática con humano en el loop sin escribir código de producto.
+metadata:
+  tipo: agente
+  area:
+  - qa
+  - devops
+  - ia
+  fase:
+  - revision
+  tecnologias:
+  - python
+  - react
+  - supabase
+  - n8n
+  metodologia:
+  - scrum
+  herramientas:
+  - otra
+  requiere:
+  - github
+  - jira
+  - openrouter
+  - gemini
+  grupo: "14"
+  autor:
+    nombre: Martina de Jesus
+    github: mardejesus
+  colaboradores: []
+  responsables:
+  - mardejesus
+  madurez: usado-en-proyecto
+  relacionados: []
