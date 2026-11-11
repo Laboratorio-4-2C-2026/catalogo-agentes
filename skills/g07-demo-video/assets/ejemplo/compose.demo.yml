@@ -1,0 +1,4 @@
+# Override para la demo: la DB no publica puerto (el 5432 del host lo usa otro proyecto).
+services:
+  database:
+    ports: !reset []
