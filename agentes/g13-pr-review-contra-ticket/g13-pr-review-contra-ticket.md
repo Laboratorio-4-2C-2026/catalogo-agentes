@@ -33,6 +33,7 @@ metadata:
   - g04-pr-review-ticket-scope
   - g11-pr-business-translator
   - g13-validar-branch
+  - g13-guiones-uat
 ---
 
 # PR Review contra el ticket

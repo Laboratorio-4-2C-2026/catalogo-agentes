@@ -1,6 +1,6 @@
 ---
 name: g13-revisor-de-performance
-description: 'Agente de GitHub Actions que busca en el diff de la PR los patrones que hacen lenta una app: N+1, queries dentro de loops, consultas sin acotar, payloads grandes y re-renders evitables en React. Se omite solo si el diff no toca services, repositories, controllers, Prisma o fetching. Análisis estático, no mide en runtime.'
+description: 'Agente de GitHub Actions que busca en el diff de la PR los patrones que hacen lenta una app: N+1, queries dentro de loops, consultas sin acotar, payloads grandes y re-renders evitables en React. Se omite solo si el diff no toca services, repositories, controllers, Prisma o fetching. Análisis estático, no mide en runtime. Usar cuando se quiere frenar lo obvio de performance en el review de cada PR.'
 metadata:
   tipo: agente
   area:

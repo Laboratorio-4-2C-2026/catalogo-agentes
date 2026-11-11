@@ -28,6 +28,7 @@ metadata:
   relacionados:
   - g03-express-testing-agent
   - g15-test-quality-analyst
+  - g13-generador-de-unit-tests
 ---
 
 # Testing

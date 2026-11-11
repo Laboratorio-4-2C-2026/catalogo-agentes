@@ -31,6 +31,8 @@ metadata:
   - g10-uat-planner
   - g15-pr-uat-contrast
   - g13-preparador-de-steering
+  - g13-pr-review-contra-ticket
+  - g15-functional-uat-executor
 ---
 
 # Guiones UAT
