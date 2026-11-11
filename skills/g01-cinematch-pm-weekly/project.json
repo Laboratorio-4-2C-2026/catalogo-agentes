@@ -1,0 +1,47 @@
+{
+  "timezone": "America/Argentina/Buenos_Aires",
+  "drive": {
+    "files": {
+      "tablero": "<Tablero file name>.xlsx",
+      "evm": "<team EVM workbook name>.xlsx",
+      "evm_catedra": "<cátedra EVM workbook name>.xlsx",
+      "gantt": "<gantt workbook name>.xlsx"
+    }
+  },
+  "sheets": {
+    "tablero_tab": "<Equipo NN>",
+    "evm": "<EVM sheet>",
+    "evm_catedra": "<cátedra EVM sheet>",
+    "evm_settings": "<assumptions and rates sheet>",
+    "budget": "<budget sheet>",
+    "gantt": "<gantt sheet>"
+  },
+  "github": {
+    "app_repository": "<owner>/<repo>",
+    "app_default_branch": "main",
+    "kpi_workflow": "KPI Report",
+    "kpi_repository": "lab4-kpis/kpis",
+    "kpi_branch": "data"
+  },
+  "kpi_compliance_url": "https://lab4-kpis.github.io/kpis/#/cumplimiento",
+  "linear": {
+    "team_key": "<TEAM KEY>"
+  },
+  "calendar": {
+    "project_week_one_starts": "2026-08-20",
+    "todo_week_one_starts": "2026-08-13",
+    "tablero_week_one_monday": "2026-08-10",
+    "sprints": [
+      { "name": "Sprint 1", "starts": "2026-08-20", "ends": "2026-09-17" },
+      { "name": "Sprint 2", "starts": "2026-09-17", "ends": "2026-10-15" },
+      { "name": "Sprint 3", "starts": "2026-10-15", "ends": "2026-11-12" }
+    ],
+    "milestones": [
+      { "date": "2026-09-17", "name": "Entrega 1 + Steering 1" },
+      { "date": "2026-10-01", "name": "Challenge sorpresa 1" },
+      { "date": "2026-10-15", "name": "Entrega 2 + Steering 2" },
+      { "date": "2026-10-29", "name": "Challenge sorpresa 2" },
+      { "date": "2026-11-12", "name": "Entrega 3 + Steering 3" }
+    ]
+  }
+}
