@@ -1,0 +1,3 @@
+interface:
+  display_name: "Deployment Handoff"
+  short_description: "Prepara guías verificables de despliegue para el equipo"

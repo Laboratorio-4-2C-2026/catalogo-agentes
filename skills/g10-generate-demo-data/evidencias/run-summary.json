@@ -1,0 +1,34 @@
+{
+  "dataset": {
+    "status": "valid-local-dataset",
+    "ruleChecksPassed": 13,
+    "counts": {
+      "User": 600,
+      "StudentProfile": 600,
+      "Subject": 5000,
+      "Schedule": 5000,
+      "Trip": 5000,
+      "TripPassenger": 5000,
+      "TravelIntent": 5000,
+      "TravelMatch": 5000,
+      "KpiEvent": 23315,
+      "DailyMetric": 391
+    }
+  },
+  "tests": {
+    "command": "node --test artifacts/demo-data/generate.test.mjs",
+    "passed": 12,
+    "failed": 0
+  },
+  "format": {
+    "tool": "Prettier",
+    "result": "passed",
+    "scope": "Only artifacts/demo-data source files"
+  },
+  "media": {
+    "browserDecoded": 198,
+    "distinctPhotos": 183,
+    "evidence": "avatars-contact-sheet.png"
+  },
+  "loadState": "Prepared locally; no accounts, uploads or business records created externally"
+}

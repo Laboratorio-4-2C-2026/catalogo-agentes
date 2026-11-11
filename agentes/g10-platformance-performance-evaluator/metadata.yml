@@ -1,0 +1,27 @@
+name: g10-platformance-performance-evaluator
+description: Agente General de Platformance para evaluar producto, proyecto, ingeniería y contribuciones observables a partir de evidencia. Usar para producir un
+  reporte estructurado con confianza, limitaciones y recomendaciones, con revisión humana en la aplicación.
+metadata:
+  tipo: agente
+  area:
+  - gestion
+  - datos
+  fase:
+  - revision
+  tecnologias:
+  - agnostico
+  metodologia:
+  - agnostico
+  herramientas:
+  - otra
+  requiere:
+  - platformance
+  grupo: "10"
+  autor:
+    nombre: Pedro Ramirez Neira
+    github: pedroramirezneira
+  responsables:
+  - pedroramirezneira
+  madurez: usado-en-proyecto
+  relacionados:
+  - g10-developer-feedback

@@ -1,0 +1,3 @@
+interface:
+  display_name: "Sprint Planner"
+  short_description: "Planifica entregas según capacidad y dependencias"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Revision de PR contra ticket"
+  short_description: "Revisa codigo, requisitos y funcionamiento de una PR"
+  default_prompt: "Usa $g10-review-pr-ticket PR=80 ticket=KAN-175 para revisar el codigo, contrastarlo con el ticket y probar su funcionamiento."

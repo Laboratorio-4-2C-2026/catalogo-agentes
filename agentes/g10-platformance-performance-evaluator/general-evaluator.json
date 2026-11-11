@@ -1,0 +1,13 @@
+{
+  "name": "General",
+  "scope": "GROUP",
+  "effort": "MEDIUM",
+  "avatar": 1,
+  "personality": "Direct",
+  "guidelines": {
+    "emphasis": [],
+    "notes": "* Aclaración: Pedro AI es un bot para acelerar los reviews."
+  },
+  "rules": [],
+  "questions": []
+}

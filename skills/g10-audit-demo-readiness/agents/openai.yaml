@@ -1,0 +1,7 @@
+interface:
+  display_name: "Auditar preparación de demo"
+  short_description: "Recorridos y evidencia para una demo funcional"
+  default_prompt: "Usá $g10-audit-demo-readiness para comprobar los escenarios de presentación de esta aplicación y entregar evidencia y problemas priorizados."
+
+policy:
+  allow_implicit_invocation: true

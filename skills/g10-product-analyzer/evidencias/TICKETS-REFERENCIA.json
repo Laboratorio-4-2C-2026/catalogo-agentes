@@ -1,0 +1,36 @@
+{
+  "retrievedOn": "2026-11-10",
+  "source": "Jira, consulta de solo lectura",
+  "issues": [
+    {
+      "key": "KAN-164",
+      "url": "https://conexia-lab.atlassian.net/browse/KAN-164",
+      "summary": "[BE] Persistir ubicación de pasajeros en viajes",
+      "description": "Conservar en la participación del pasajero la información de origen y destino utilizada al aceptar un match, para que el viaje pueda mostrar dónde recoger y dejar a cada pasajero.\n\nActualmente `TripPassenger` solo relaciona `tripId` y `userId`, mientras que la ubicación pertenece a `TravelIntent`, por lo que esa información no queda asociada de forma permanente a la participación.\n\nEstos datos (ubicaciones) se deben enviar al buscar el detalle del viaje en el FrontEnd y se deberan mostrar en la UI para cada pasajero. \n\n## Criterios de aceptación\n\n* Al aceptar un match se conserva el origen del pasajero.\n* Se conserva el destino del pasajero.\n* Se conservan las coordenadas necesarias de ambos puntos.\n* La información queda asociada a `TripPassenger` o a una relación equivalente persistente.\n* Consultar un viaje permite obtener la ubicación de cada pasajero.\n* Cambios posteriores sobre otras entidades no hacen perder la ubicación utilizada para ese viaje.\n* Las participaciones manuales siguen siendo compatibles.\n\n",
+      "reporter": "pedroramirezneira",
+      "status": "Finalizado",
+      "created": "2026-10-12T21:23:01.890-0300",
+      "updated": "2026-10-14T23:53:53.632-0300"
+    },
+    {
+      "key": "KAN-167",
+      "url": "https://conexia-lab.atlassian.net/browse/KAN-167",
+      "summary": "[FE] Completar información de Viajes y simplificar Matches",
+      "description": "Completar las pantallas actuales de Viajes y Matches de acuerdo con el flujo vigente.\n\n## Criterios de aceptación\n\n* En Viajes se muestran las `TravelIntent` activas creadas por el usuario.\n* Las intenciones se diferencian claramente de los viajes donde participa como conductor o pasajero.\n* Se utiliza la API de intenciones ya existente.\n* Se eliminan las píldoras/filtros actuales de la pantalla Matches.\n* El resto de la estructura visual existente se mantiene.\n* No se modifica el flujo de `Necesito un viaje`, que actualmente funciona correctamente.\n\n",
+      "reporter": "pedroramirezneira",
+      "status": "Finalizado",
+      "created": "2026-10-12T21:23:25.888-0300",
+      "updated": "2026-10-14T23:12:53.220-0300"
+    },
+    {
+      "key": "KAN-154",
+      "url": "https://conexia-lab.atlassian.net/browse/KAN-154",
+      "summary": "[FE] Implementar publicación de intención de viaje",
+      "description": "Permitir que un pasajero publique una intención desde la sección Viajes, reutilizando al máximo el formulario y los componentes existentes de publicación de viajes.\n\n**Criterios de aceptación**\n\n* Desde Viajes existe una acción clara como `Necesito un viaje`.\n* El formulario reutiliza componentes del flujo de Publicar viaje siempre que sea posible.\n* Permite ingresar origen, destino, fecha/hora de salida y fecha/hora de llegada.\n* Consume la API de creación de `TravelIntent`.\n* Si backend devuelve 400 por una dirección no reconocida, se muestra el error sin perder los datos ingresados.\n* Una creación correcta deja la intención activa.\n\n**Nice to have / reutilización de información**\n\n* Si el usuario tiene `originAddress` cargada en su perfil, utilizarla como origen inicial.\n* Si existen horarios cargados, permitir utilizarlos para precargar la información aplicable.\n* Aplicar el mismo criterio al flujo existente de publicación de viajes si todavía no lo hace.\n* Los valores precargados siempre son editables.\n* La ausencia de información previa nunca impide completar el formulario manualmente.\n\n",
+      "reporter": "pedroramirezneira",
+      "status": "Finalizado",
+      "created": "2026-10-02T14:15:42.939-0300",
+      "updated": "2026-10-12T16:14:44.847-0300"
+    }
+  ]
+}

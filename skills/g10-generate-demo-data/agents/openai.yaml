@@ -1,0 +1,7 @@
+interface:
+  display_name: "Generar datos de demo"
+  short_description: "Datos realistas y generadores reproducibles para demos"
+  default_prompt: "Usá $g10-generate-demo-data para preparar datos realistas y un generador reproducible siguiendo mis instrucciones y las reglas del proyecto."
+
+policy:
+  allow_implicit_invocation: true

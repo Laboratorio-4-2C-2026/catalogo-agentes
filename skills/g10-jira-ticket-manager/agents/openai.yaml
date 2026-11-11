@@ -1,0 +1,3 @@
+interface:
+  display_name: "Jira Ticket Manager"
+  short_description: "Prepara y registra tickets Jira con aprobación"
