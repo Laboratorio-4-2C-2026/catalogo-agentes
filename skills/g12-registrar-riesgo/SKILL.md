@@ -1,9 +1,6 @@
 ---
 name: g12-registrar-riesgo
 description: Suma un riesgo nuevo como fila del risk log del sprint, con probabilidad, impacto, respuesta y contingencia, sin duplicar uno abierto ni contradecir lo ya decidido. Usar cuando aparece algo que todavía no pasó pero puede afectar el plan, o para actualizar o cerrar un riesgo existente.
-owner: '@n-mangini'
-role: pm
-created: '2026-11-09'
 metadata:
   tipo: skill
   area:

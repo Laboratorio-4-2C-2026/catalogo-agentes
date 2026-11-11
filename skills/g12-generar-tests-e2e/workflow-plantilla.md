@@ -20,7 +20,7 @@ que cada equipo enchufe Claude, Codex, Cursor u otro sin reescribir el resto.
   reemplazar el `case` del último step por el comando de su runner.
 - La skill `generar-tests-e2e` se trae en el job (clone del catálogo). En
   CI no hay symlink: se copia el contenido a `.agents/skills/` (path
-  genérico, no `.claude/skills/`). Si `splitit-agents` es privado, crear el
+  genérico, no `.claude/skills/`). Si el catálogo es privado, crear el
   secret `CATALOG_TOKEN` (PAT de solo lectura, `contents: read` alcanza) en
   este repo — el step del clone ya lo usa si existe.
 
@@ -64,20 +64,24 @@ jobs:
 
       - name: Traer la skill del catálogo
         env:
-          # Si splitit-agents es privado, crear un PAT de solo lectura (repo:read
+          # Si el catálogo es privado, crear un PAT de solo lectura (repo:read
           # alcanza) y guardarlo en el secret CATALOG_TOKEN de este repo. Si es
           # público, GITHUB_TOKEN por defecto alcanza para el clone anónimo.
           CATALOG_TOKEN: ${{ secrets.CATALOG_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          git clone --depth 1 "https://x-access-token:${CATALOG_TOKEN}@github.com/<org>/splitit-agents" /tmp/splitit-agents
+          git clone --depth 1 "https://x-access-token:${CATALOG_TOKEN}@github.com/Laboratorio-4-2C-2026/catalogo-agentes" /tmp/catalogo-agentes
           mkdir -p .agents/skills
-          cp -r /tmp/splitit-agents/skills/tl/generar-tests-e2e .agents/skills/
+          cp -r /tmp/catalogo-agentes/skills/g12-generar-tests-e2e .agents/skills/
 
       - name: Armar el prompt
+        env:
+          COMMENT: ${{ github.event.comment.body }}
         run: |
+          flag=""
+          if [ "$COMMENT" = "/e2e --dry-run" ]; then flag=" --dry-run"; fi
           cat > /tmp/e2e-prompt.md <<EOF
-          Seguí las instrucciones de .agents/skills/generar-tests-e2e/SKILL.md.
-          Invocación: /generar-tests-e2e ${{ github.repository }}#${{ steps.pr.outputs.number }}
+          Seguí las instrucciones de .agents/skills/g12-generar-tests-e2e/SKILL.md.
+          Invocación: /generar-tests-e2e ${{ github.repository }}#${{ steps.pr.outputs.number }}${flag}
           Estás en la rama de esa PR. Commits y push van a esta rama, no a la default.
           EOF
 

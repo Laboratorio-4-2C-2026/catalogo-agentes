@@ -1,9 +1,6 @@
 ---
 name: g12-armar-tickets-semanales
 description: Planifica y redacta tickets semanales según las prioridades, capacidad real, especialidades y convenciones de un equipo. Usar al elegir alcance, estimar, dividir o cargar trabajo; no para implementarlo.
-owner: '@husseymarcos'
-role: pm
-created: '2026-09-08'
 metadata:
   tipo: skill
   area:

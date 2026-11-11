@@ -1,9 +1,6 @@
 ---
 name: g12-construir-pantalla
-description: Construye en el prototipo la pantalla de una historia que todavia no tiene ninguna, y la enchufa al canvas con su direccion estable. Usar cuando una historia del backlog no aparece en el canvas, cuando hay un frame de Figma que hay que pasar al prototipo, o cuando el PO pide una pantalla nueva.
-owner: '@n-mangini'
-role: po
-created: '2026-09-10'
+description: Construye en el prototipo la pantalla de una historia que todavía no tiene ninguna, y la enchufa al canvas con su dirección estable. Usar cuando una historia del backlog no aparece en el canvas, cuando hay un frame de Figma que hay que pasar al prototipo, o cuando el PO pide una pantalla nueva.
 metadata:
   tipo: skill
   area:

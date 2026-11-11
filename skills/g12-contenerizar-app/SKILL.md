@@ -1,9 +1,6 @@
 ---
 name: g12-contenerizar-app
 description: Conteneriza las apps de un repo (una sola app o monorepo con varias, p. ej. front y back) y arma el pipeline de GitHub Actions que construye cada imagen y la publica en GHCR. Usar al pedir "dockerizá/contenerizá esto", "armá las imágenes", "publicá en GHCR" o antes de desplegar en un host de contenedores (Azure Container Apps, App Service, Cloud Run, etc.).
-owner: '@lucasmonteverdi1'
-role: tl
-created: '2026-09-25'
 metadata:
   tipo: skill
   area:
@@ -33,7 +30,7 @@ metadata:
 
 # Contenerizar una app y publicarla en GHCR
 
-Esta skill corre **en el repo de aplicación**, no en `splitit-agents`. No asume
+Esta skill corre **en el repo de aplicación** y la corre un dev del equipo de desarrollo. No asume
 lenguaje, framework ni estructura: todo sale de lo que haya en el repo.
 
 Entrega, por cada app: un `Dockerfile` + `.dockerignore` que buildean y corren,

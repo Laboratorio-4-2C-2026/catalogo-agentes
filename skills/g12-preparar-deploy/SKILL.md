@@ -1,9 +1,6 @@
 ---
 name: g12-preparar-deploy
 description: Revisa un cambio antes de desplegarlo y devuelve un go/no-go con evidencia por punto — cambios de esquema y su migración, estado en memoria que se pierde al reiniciar, variables de entorno por ambiente, dominios y cookies, jobs programados y vuelta atrás. Usar antes de desplegar o reiniciar un servicio; no despliega ni corrige.
-owner: '@lucasmonteverdi1'
-role: tl
-created: '2026-11-09'
 metadata:
   tipo: skill
   area:

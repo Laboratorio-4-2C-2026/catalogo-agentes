@@ -1,9 +1,6 @@
 ---
 name: g12-generar-informe-desempeno
 description: Prepara un informe de desempeño con la rúbrica acordada, evidencia del trabajo realizado y evaluación guiada del responsable. Usar al evaluar una persona durante un período; no inventa criterios ni puntajes.
-owner: '@husseymarcos'
-role: pm
-created: '2026-10-01'
 metadata:
   tipo: skill
   area:

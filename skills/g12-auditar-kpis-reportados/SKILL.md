@@ -1,9 +1,6 @@
 ---
 name: g12-auditar-kpis-reportados
 description: Revisa qué métricas o KPIs llegaron de verdad a su destino (plataforma, dashboard, base) en un rango de días y devuelve los huecos — días sin dato, KPIs faltantes, valores fuera de rango, ambiente equivocado, diferencias entre lo calculado y lo enviado — con causa probable y si corresponde abrir incidente. Usar antes de una entrega o reunión de seguimiento, o cuando se sospecha un día incompleto; no reenvía nada.
-owner: '@lucasmonteverdi1'
-role: pm
-created: '2026-11-09'
 metadata:
   tipo: skill
   area:

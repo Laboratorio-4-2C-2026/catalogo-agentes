@@ -1,9 +1,6 @@
 ---
 name: g12-to-canvas
 description: Convierte una app mockeada (prototipo navegable generado con IA) en un canvas de pantallas legible como herramienta de diseño, con una dirección estable por historia. Usar cuando un PO tiene un prototipo funcionando y necesita que sirva de especificación visual del backlog, en lugar de un Figma.
-owner: '@n-mangini'
-role: po
-created: '2026-08-27'
 metadata:
   tipo: skill
   area:
@@ -287,7 +284,7 @@ Además, probar la ficha en un navegador real:
 - un link a otra pantalla no cambia la URL del iframe y conserva el estado local;
 - una navegación programática (`router.push` o equivalente) tampoco cambia el `pathname`.
 
-Y confirmar que los tokens sobreviven al build de producción, que es lo que sostiene el
+Y confirmar que los tokens sobreviven al build del prototipo, que es lo que sostiene el
 argumento contra Dev Mode:
 
 ```bash

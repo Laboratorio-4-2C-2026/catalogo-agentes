@@ -1,9 +1,6 @@
 ---
 name: g12-generar-tests-e2e
-description: Genera tests E2E para una feature de una PR abierta en un repo de aplicación, los pushea, y si fallan por un bug (no por el armado del test) pushea el fix en un commit aparte. Usar al comentar /e2e en una PR lista para review, o al pedir "generame los E2E de esta PR".
-owner: '@lucasmonteverdi1'
-role: tl
-created: '2026-08-21'
+description: Genera tests E2E para una feature de una PR abierta en un repo de aplicación, los pushea, y si fallan por un bug (no por el armado del test) pushea el fix en un commit aparte. Usar cuando un dev comenta /e2e en una PR lista para review, o al pedir "generame los E2E de esta PR".
 metadata:
   tipo: skill
   area:
@@ -12,6 +9,8 @@ metadata:
   - testing
   tecnologias:
   - playwright
+  - cypress
+  - github-actions
   metodologia:
   - scrum
   herramientas:
@@ -34,11 +33,9 @@ metadata:
 
 # Generar tests E2E de una PR
 
-Esta skill corre **en el repo de aplicación**, no en `splitit-agents`. Este
-repo es el catálogo: acá vive la instrucción, pero el checkout, el framework
-E2E y la PR real están en el otro repo. No asumir contexto de `splitit-agents`
-(next.config, agents/, etc.) salvo que la PR en cuestión sea de este mismo
-repo.
+Esta skill corre **en el repo de aplicación**, no en el catálogo: acá vive la
+instrucción, pero el checkout, el framework E2E y la PR real están en el otro
+repo. La corre un dev del equipo de desarrollo.
 
 Se invoca de dos formas: manual (parado en el repo de app, con el dev
 pidiéndolo) o automática (ver `workflow-plantilla.md` en esta carpeta: un

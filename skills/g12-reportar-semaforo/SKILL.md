@@ -1,9 +1,6 @@
 ---
 name: g12-reportar-semaforo
 description: Arma el estado semanal del proyecto para la cátedra o los directores, con alcance, cronograma, costo, riesgos e incidentes en verde, amarillo o rojo, escrito a alto nivel. Usar al preparar el reporte de estado de la semana, un steering o una consulta de cómo va el proyecto.
-owner: '@n-mangini'
-role: pm
-created: '2026-11-09'
 metadata:
   tipo: skill
   area:
@@ -60,10 +57,10 @@ Si la semana no está cerrada en el seguimiento, avisar y correr antes `cerrar-s
 Si el proyecto ya tiene umbrales propios, mandan esos.
 
 El alcance se mide contra el **plan vigente**, no contra la línea base original: en SplitIt
-rige el presupuesto v2 hasta que los directores decidan otro (decisión del 2026-10-22).
+es el presupuesto vigente según el decision log.
 
 Un número que sale bien por un motivo engañoso se aclara al lado: un CPI alto con horas sin
-usar es capacidad desperdiciada, no eficiencia. Si falta un dato, la dimensión va en gris
+usar es capacidad sin usar, no eficiencia. Si falta un dato, la dimensión va en gris
 con "sin dato" y el motivo.
 
 ## 3. Escribir
@@ -73,7 +70,7 @@ no está en verde, agregar qué se está haciendo y para cuándo.
 
 Escribir a alto nivel: sin SPT-xx, sin números de PR, sin nombres de tecnologías ni de
 archivos. Nombrar las funcionalidades como las ve el usuario ("el acceso sin cuenta", "el
-ingreso con Google"). Usar "llevó más/menos de lo previsto".
+ingreso con Google"). Usar "llevó más/menos de lo previsto", para no atribuir el desvío a una persona.
 
 Ejemplo de línea: "🟡 Cronograma · SPI 0,85. La carga de gastos no llegó a
 mergearse antes del cierre y se entregó dos días después; el valor se recupera la semana siguiente."

@@ -1,9 +1,6 @@
 ---
 name: g12-triar-reporte-de-bug
 description: Convierte un reporte de bug (herramienta de reportes, chat, captura o relato) en un veredicto — bug, comportamiento esperado, duplicado, no reproduce o problema de ambiente — con pasos de reproducción, el requisito que rompe, severidad y un borrador de issue listo para cargar. Usar cuando llega un reporte y hay que decidir qué hacer con él; no corrige el bug.
-owner: '@lucasmonteverdi1'
-role: qa
-created: '2026-11-09'
 metadata:
   tipo: skill
   area:

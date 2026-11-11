@@ -1,9 +1,6 @@
 ---
 name: g12-reportar-incidente
 description: Convierte el relato de un incidente en un registro factual con impacto, estado, criticidad, fechas y resolución. Adapta el formato al proyecto; no diagnostica ni corrige la falla. Usar cuando una falla ya ocurrió y hay que dejarla registrada en el log de incidentes.
-owner: '@husseymarcos'
-role: pm
-created: '2026-09-08'
 metadata:
   tipo: skill
   area:
@@ -72,7 +69,7 @@ sin incluir credenciales ni datos personales innecesarios.
 Usar la plantilla existente. En ausencia de una, entregar:
 
 | Descripción e impacto | Estado | Criticidad | Ocurrencia | Registro | Límite | Cierre | Responsable | Resolución y evidencia |
-|---|---|---|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|---|---|
 
 Completar una fila por incidente, dejando visibles los datos no informados. Debajo,
 señalar contradicciones o datos necesarios para clasificarlo. Entregar un borrador útil

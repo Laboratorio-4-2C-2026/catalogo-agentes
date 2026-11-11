@@ -1,9 +1,6 @@
 ---
 name: g12-reparar-secuencia-de-prs
 description: Repara una secuencia de dos PRs dependientes mergeadas en orden incorrecto cuando un revert hizo desaparecer funcionalidad de main, sin reescribir la historia. Usar cuando una PR desapareció tras un revert o cuando reabrir su rama vieja no trae los cambios.
-owner: '@lucasmonteverdi1'
-role: tl
-created: '2026-09-03'
 metadata:
   tipo: skill
   area:
@@ -41,7 +38,7 @@ real).
 
 No asume ningún repositorio, lenguaje ni ticket en particular. Corre en
 **el repo de aplicación** donde ocurrió el mergeo, no en el catálogo de
-skills.
+skills. La corre un dev del equipo de desarrollo.
 
 ## Cuándo no usarla
 
@@ -85,7 +82,7 @@ Identificar, en orden cronológico real:
 - Los commits/merges de cada PR involucrada (`git log --grep`, o
   `gh pr view <N> --json mergeCommit,commits` si hay GitHub CLI y remoto).
 - Si alguna PR fue revertida (`git log --grep="Revert"` o buscar el
-  mensaje), y qué commit exacto reasegura el revert — `git show
+  mensaje), y cuál es el commit exacto del revert — `git show
   --stat <revert>` muestra qué archivos tocó.
 - Si tras el revert se mergeó otra rama que además tocó archivos
   compartidos con la PR revertida (superposición de archivos entre

@@ -40,7 +40,7 @@ modificar, eliminar, saldo por integrante, pagos sugeridos, conversión de moned
 que agarrara SPLT-015 no tenía nada que mirar.
 
 Mientras tanto, el mock que el PO había construido con IA para validar el producto ya
-tenía todas esas pantallas implementadas.
+tenía todas esas pantallas prototipadas.
 
 ---
 
@@ -60,7 +60,7 @@ La metodología consiste en darle al prototipo esa presentación.
 
 ---
 
-## Las tres fases
+## Las fases
 
 ### Fase 0 — Las historias (el PO, en el roadmap de la org)
 
@@ -177,31 +177,24 @@ se pueden probar sus controles sin perder la referencia visual saltando a otra p
 
 ---
 
-## Por qué esto no rompe la frontera de rol
+## El prototipo es una herramienta de diseño
 
-La objeción esperable es que un PO no toca código. La respuesta no es discutir la
-doctrina, es encuadrar bien el artefacto:
+**El PO no entrega código del producto. Entrega un prototipo navegable.** El prototipado es
+trabajo de discovery del PO; que la herramienta sea un prototipo navegable en vez de Figma es
+una decisión de herramienta.
 
-**El PO no entrega un repo. Entrega un producto navegable.** El prototipado es trabajo de
-discovery, canónicamente del PO. Que la herramienta haya sido Next en vez de Figma es una
-decisión de herramienta, no un cruce de rol — nadie acusa a un PO de tocar código cuando
-prototipa en Figma, y Figma también produce artefactos ejecutables.
+**El prototipo no es el incremento.** Se publica como prototipo con datos de ejemplo, no tiene
+backend y no es la app en producción. El equipo de desarrollo no lo extiende: lo
+reimplementa en la app real. Es descartable por diseño.
 
-La distinción que lo blinda: **el prototipo no es el incremento.** No se despliega a
-producción, no tiene backend, y el equipo de desarrollo no lo extiende — lo reimplementa.
-Es descartable por diseño.
-
-Fórmula para un acta: *"prototipo navegable de validación, construido con asistencia de
-IA, usado como especificación visual mientras el diseño formal alcanza al backlog."*
-
-Y en la práctica los devs reciben **menos** acceso que antes: no el repo, solo la URL.
+Los devs no reciben el repo del prototipo, solo la URL.
 
 ---
 
 ## La objeción del Dev Mode
 
-Es la única objeción con filo: *"nosotros usamos el Dev Mode de Figma para sacar layouts y
-estilos"*. Se da vuelta sola, porque **Dev Mode existe para adivinar código a partir de un
+Es la objeción más frecuente: *"nosotros usamos el Dev Mode de Figma para sacar layouts y
+estilos"*. La respuesta es que **Dev Mode existe para adivinar código a partir de un
 dibujo**, y acá el dibujo no existe: existe la implementación.
 
 | Dev Mode da | El prototipo da |
@@ -209,14 +202,11 @@ dibujo**, y acá el dibujo no existe: existe la implementación.
 | `#21B894` como color de un rectángulo | `--primary: #21b894`, token con nombre, ya cableado |
 | `border-radius: 20px` | `--radius: 1.25rem` y el componente que lo consume |
 | El ícono exportado como SVG | Un paquete de npm que ya tienen instalado |
-| CSS generado, absoluto y sin responsive | El componente responsive real |
+| CSS generado, absoluto y sin responsive | El componente responsive del prototipo |
 
-Verificado en SplitIt: el build de producción **conserva los nombres de las variables CSS**.
-Un dev abre el deploy, inspecciona un elemento, y ve `--primary`, `--secondary`, `--radius`
+Verificado en SplitIt: el build del prototipo **conserva los nombres de las variables CSS**.
+Un dev abre el deploy del prototipo, inspecciona un elemento, y ve `--primary`, `--secondary`, `--radius`
 tal cual. No necesita el repo.
-
-Efecto lateral que vale la pena: acostumbra a los devs a las DevTools, que van a usar toda
-su carrera, en lugar de a una herramienta que depende de que alguien pague la licencia.
 
 ---
 

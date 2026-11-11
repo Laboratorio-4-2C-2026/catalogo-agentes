@@ -1,9 +1,6 @@
 ---
 name: g12-preparar-demo
 description: Prepara un guion verificable de demo de un producto con recorrido, datos de prueba, tiempos, evidencia y alternativa ante fallas, ajustado al estado del producto. Usar antes de mostrar el producto en una demo ante la cátedra, un cliente o un steering.
-owner: '@husseymarcos'
-role: po
-created: '2026-11-05'
 metadata:
   tipo: skill
   area:

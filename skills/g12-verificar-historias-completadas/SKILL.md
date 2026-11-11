@@ -1,9 +1,6 @@
 ---
 name: g12-verificar-historias-completadas
 description: Cruza cada historia abierta del roadmap contra el código real de SplitIt (PR mergeada, endpoint y UI en main) para detectar las que ya están completas pero siguen abiertas, y las cierra con evidencia una vez confirmadas. Usar periódicamente, o cuando el estado del roadmap parece desactualizado respecto del repo de aplicación.
-owner: '@lucasmonteverdi1'
-role: pm
-created: '2026-10-05'
 metadata:
   tipo: skill
   area:

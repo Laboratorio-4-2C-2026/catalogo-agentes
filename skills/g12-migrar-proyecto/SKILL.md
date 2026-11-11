@@ -1,9 +1,6 @@
 ---
 name: g12-migrar-proyecto
 description: Migra el esqueleto técnico de un monorepo A (Spring Boot + Next.js) a un proyecto B — layout, manifiestos, lockfiles, Docker y andamiaje JWT — sin copiar ejercicios, datos ni secretos, y cierra con un informe de la migración. Usar al arrancar un repo nuevo que reutiliza el stack de la capacitación (Sistema de Biblioteca), o cuando pidan migrar/copiar la config de un proyecto A a un B.
-owner: '@lucasmonteverdi1'
-role: tl
-created: '2026-08-20'
 metadata:
   tipo: skill
   area:
@@ -22,7 +19,8 @@ metadata:
   herramientas:
   - claude-code
   - codex
-  requiere: []
+  requiere:
+  - linear
   grupo: '12'
   autor:
     nombre: Lucas Monteverdi
@@ -39,6 +37,8 @@ Trasladar el **esqueleto técnico** de un monorepo de capacitación (Next.js App
 Router + Spring Boot/JPA + Spring Security/JWT + Postgres vía docker-compose)
 al proyecto real. No migra features ni dominio: migra cableado (versiones,
 carpetas, scripts, config) para que B arranque sin reconstruir eso a mano.
+
+La corre un dev del equipo de desarrollo en el repo de aplicación.
 
 ## Cuándo no usarla
 

@@ -1,9 +1,6 @@
 ---
 name: g12-asignar-capacidad-sobrante
 description: Propone qué hace un dev con las horas que le sobran en la semana, en este orden — adelantar un ticket de la semana siguiente, tomar un bug o tiempo libre — sin meter alcance que no era plan. Usar cuando un dev termina antes, cuando su semana tiene menos horas asignadas que su capacidad, o al planificar la semana.
-owner: '@n-mangini'
-role: pm
-created: '2026-11-09'
 metadata:
   tipo: skill
   area:

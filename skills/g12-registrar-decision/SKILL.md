@@ -1,9 +1,6 @@
 ---
 name: g12-registrar-decision
 description: Documenta una decisión o sesión de trabajo con contexto, alternativas y consecuencias, adaptándose al decision log o formato ADR del proyecto. Usar después de una sesión o reunión en la que se decidió, definió o encontró algo que tiene que quedar registrado.
-owner: '@husseymarcos'
-role: pm
-created: '2026-11-05'
 metadata:
   tipo: skill
   area:

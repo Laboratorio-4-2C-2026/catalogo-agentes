@@ -1,9 +1,6 @@
 ---
 name: g12-revisar-pr
-description: Revisa un PR contra las convenciones del repositorio y los criterios de la historia. Devuelve hallazgos en español, líneas exactas y comentarios listos para copiar.
-owner: '@husseymarcos'
-role: tl
-created: '2026-11-05'
+description: Revisa un PR contra las convenciones del repositorio y los criterios de la historia. Devuelve hallazgos en español, líneas exactas y comentarios listos para copiar. Usar cuando un PR está listo para revisión técnica.
 metadata:
   tipo: skill
   area:

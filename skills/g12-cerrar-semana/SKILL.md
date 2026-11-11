@@ -1,9 +1,6 @@
 ---
 name: g12-cerrar-semana
 description: Cierra la semana en el seguimiento del sprint con PV, EV y AC acumulados, y escribe el resumen en la celda Notas con SPI, CPI, qué se entregó, qué faltó y las horas de cada dev. Usar el día de corte semanal, o cuando el PM pide completar la fila de una semana.
-owner: '@n-mangini'
-role: pm
-created: '2026-11-09'
 metadata:
   tipo: skill
   area:
@@ -66,11 +63,11 @@ Una celda, en este orden:
 3. Cada dev: horas reales contra planeadas, qué entregó, qué adelantó y qué bugs tomó.
 4. Qué faltó, con su valor en horas y cuándo se espera.
 
-Tono: "llevó más/menos de lo previsto", nunca "sobreestimó/subestimó". Un CPI alto con
+Tono: "llevó más/menos de lo previsto", nunca "sobreestimó/subestimó", para no atribuir el desvío a una persona. Un CPI alto con
 capacidad sin usar se explica como tal, no como eficiencia. Los números van con coma decimal.
 
-Ejemplo: "SPI 0,92 · CPI 1,04. Se entregó casi todo lo planeado y un dev adelantó
-trabajo de la semana siguiente. Dev 1: 8 h contra 5: …".
+Ejemplo: "SPI 1,02 · CPI 0,95. Se entregaron los tickets planeados y uno de la semana
+siguiente. Dev A: 4 h contra 6: …".
 
 ## 3. Devolver
 

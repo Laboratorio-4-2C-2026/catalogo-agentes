@@ -1,9 +1,6 @@
 ---
 name: g12-orientar-sprint
 description: Cruza Linear, el repo de aplicación SplitIt, el roadmap de historias y el canvas para mostrar el estado completo del proyecto y orientar qué priorizar en las próximas 1-2 semanas, dejando las user stories priorizadas para el PM y la recomendación de canvas para devs/PO. Usar al empezar una sesión de PO, antes de elegir qué construir o iterar en el canvas.
-owner: '@lucasmonteverdi1'
-role: po
-created: '2026-09-27'
 metadata:
   tipo: skill
   area:
@@ -99,9 +96,7 @@ para la priorización del paso 4.
 
 Para saber cuál es el sprint en curso —insumo del calendario, no frontera de la lista—:
 
-- La fuente que manda es el GitHub Project/Gantt del roadmap
-  (`https://github.com/orgs/SplitItLab/projects/1/views/2`, misma fuente que usa
-  `armar-tickets-semanales`) — ahí el sprint activo está marcado explícitamente, no inferido.
+- La fuente que manda es el GitHub Project/Gantt del roadmap — ahí el sprint activo está marcado explícitamente, no inferido.
 - Si el Project no está accesible y hay un solo milestone abierto, usarlo como sprint en
   curso — es evidencia inequívoca.
 - Si el Project no está accesible y hay **más de un milestone abierto**, no elegir uno solo:
@@ -154,7 +149,7 @@ grep -rn "stories:" splitit-poc/lib/*.ts 2>/dev/null || find splitit-poc -iname 
 
 Si el mapa no existe todavía en el repo local (por ejemplo, si `to-canvas` corrió sobre el
 deploy pero el checkout local no lo tiene), decirlo y verificar directamente contra el deploy
-(`splitit-canvas.vercel.app/canvas`) en vez de asumir una convención de ruta. Una historia
+(`<deploy-del-canvas>/canvas`) en vez de asumir una convención de ruta. Una historia
 puede vivir en varias pantallas y una pantalla puede cubrir varias historias (`Screen.stories:
 Story[]`, ver `to-canvas`): la pregunta correcta es "¿`screensOfStory(SPLT-XXX)` devuelve algo,
 y con qué `canvasHref`?", no "¿existe `/canvas/SPLT-XXX`?".

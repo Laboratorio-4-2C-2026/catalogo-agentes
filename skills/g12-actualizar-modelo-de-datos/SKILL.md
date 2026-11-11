@@ -1,9 +1,6 @@
 ---
 name: g12-actualizar-modelo-de-datos
 description: Crea o actualiza el documento del modelo de datos de un proyecto (diagrama ER en Mermaid más notas) a partir de las migraciones reales de la rama principal, marcando qué cambió desde la versión anterior y cualquier diferencia entre migraciones y modelos del código. Usar cuando se mergea una migración o antes de diseñar algo que toca la base.
-owner: '@lucasmonteverdi1'
-role: tl
-created: '2026-11-09'
 metadata:
   tipo: skill
   area:
@@ -41,7 +38,8 @@ vista lo que cambió.
 
 ## Entrada
 
-- El repo de la aplicación, actualizado a la rama principal.
+- El repo de la aplicación, actualizado a la rama principal. Solo se lee: el documento vive
+  en el repo de documentación del proyecto.
 - El documento existente, si lo hay. Si no se indica, buscar un `erDiagram` de Mermaid o un
   archivo de modelo de datos en el repo (o en el repo de documentación del proyecto) y
   preguntar si es ese. Si no hay, se crea uno nuevo donde el usuario diga.

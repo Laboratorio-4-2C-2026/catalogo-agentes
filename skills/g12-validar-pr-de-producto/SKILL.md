@@ -1,9 +1,6 @@
 ---
 name: g12-validar-pr-de-producto
 description: Hace la validación de producto de una PR — prueba la historia desde la preview, cruza cada criterio de aceptación, revisa que sea un slice vertical y marca solo lo técnico que rompe algo — y deja un comentario en la PR. Usar cuando una PR de una historia está lista para revisar, o al pedir "validá esta PR".
-owner: '@n-mangini'
-role: qa
-created: '2026-11-09'
 metadata:
   tipo: skill
   area:

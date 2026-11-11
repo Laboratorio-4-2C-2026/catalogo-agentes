@@ -1,9 +1,6 @@
 ---
 name: g12-armar-linktree
 description: Arma una página de links del proyecto con la estructura de Linktree y la identidad visual de la app — producción, prototipo, catálogo, KPIs, repo y equipo — en un único HTML estático. Usar al preparar una entrega, una presentación o cualquier lugar donde haya que mostrar el proyecto con un solo link.
-owner: '@n-mangini'
-role: pm
-created: '2026-11-09'
 metadata:
   tipo: skill
   area:
