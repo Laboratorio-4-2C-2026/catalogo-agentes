@@ -1,0 +1,42 @@
+{
+  "title": "SEMANA",
+  "start": "2026-08-20",
+  "weeks": [["W1","20-08"],["W2","27-08"],["W3","03-09"],["W4","10-09"],["W5","17-09"],["W6","24-09"],["W7","01-10"],["W8","08-10"],["W9","15-10"],["W10","22-10"],["W11","29-10"],["W12","05-11"]],
+  "today_week": 9,
+  "deliveries": [
+    {"label": "Entrega 1 · 17-SEP", "week": 5},
+    {"label": "HOY · ENTREGA 2 · 15-OCT", "week": 9, "style": "today"},
+    {"label": "ENTREGA 3 · 12-NOV", "week": 13, "style": "end"}
+  ],
+  "sections": [
+    {"title": "ALCANCE BASE · 182 PTS", "color": "base", "rows": [
+      {"name": "Infraestructura y CI/CD", "pts": "42 pts", "segments": [[1,4,"done"],[5,5,"done"],[7,7,"done"]],
+       "milestones": [{"name": "1 · Setup inicial e infraestructura", "base": "29-08", "actual": "31-08", "kind": "done"}]},
+      {"name": "Registro, login y perfil", "pts": "30 pts", "segments": [[2,3,"done"],[6,7,"done"]],
+       "milestones": [{"name": "2 · Módulo Auth", "base": "13-09", "actual": "16-09", "kind": "done"},
+                      {"name": "4.2 · Usuarios y Preferencias", "base": "04-10", "actual": "01-10", "kind": "done"}]},
+      {"name": "Ficha de película", "pts": "19 pts", "segments": [[4,4,"done"],[5,5,"done"]]},
+      {"name": "Feed swipe y recomendación", "pts": "20 pts", "segments": [[4,4,"done"],[5,6,"done"]],
+       "milestones": [{"name": "3 · Feed inicial y Swipe", "base": "20-09", "actual": "14-09", "kind": "done"},
+                      {"name": "4.3 · Feed y Recomendaciones V1", "base": "11-10", "actual": "15-10", "kind": "done"}]},
+      {"name": "Trailers", "pts": "7 pts", "segments": [[7,7,"done"]],
+       "milestones": [{"name": "4.1 · Módulo Películas", "base": "04-10", "actual": "15-10", "kind": "done"}]},
+      {"name": "Biblioteca (listas)", "pts": "16 pts", "segments": [[7,8,"done"]],
+       "milestones": [{"name": "4.4 · Perfil y Listas personales", "base": "18-10", "actual": "15-10", "kind": "done"}]},
+      {"name": "Búsqueda semántica (LLM)", "pts": "14 pts", "segments": [[7,8,"done"]]},
+      {"name": "Grupos, match y votación", "pts": "34 pts", "segments": [[8,8,"done"],[9,12,"crit"]],
+       "milestones": [{"name": "4.6 · Grupos y Sesiones", "base": "01-11", "actual": "29-10", "kind": "crit"},
+                      {"name": "4.7 · Matching, Votación y Ganador", "base": "08-11", "actual": "12-11", "kind": "crit"}]}
+    ]},
+    {"title": "ALCANCE INCORPORADO · 28,5 PTS (v2)", "color": "inc", "rows": [
+      {"name": "RAG · grounding de búsqueda", "pts": "11 pts", "segments": [[9,10,"inc"]],
+       "milestones": [{"name": "4.5 · Búsqueda con IA y RAG", "base": "01-11", "actual": "29-10", "kind": "pend"}]},
+      {"name": "Filtros de recomendación", "pts": "6 pts", "segments": [[11,11,"inc"]]},
+      {"name": "Taste compatibility score", "pts": "6 pts", "segments": [[12,12,"inc"]],
+       "milestones": [{"name": "4.8 · Filtros y Taste Compatibility", "base": "15-11", "actual": "12-11", "kind": "pend"}]},
+      {"name": "Landing page", "pts": "2 pts", "segments": [[6,6,"incdone"]]},
+      {"name": "Reporte de KPIs (challenge)", "pts": "3,5 pts", "segments": [[9,9,"inc"]]},
+      {"name": "Where to watch (TMDB)", "pts": "6 pts", "dim": true, "note": "POSTERGADO · C4 · −6 pts (ADR del challenge)"}
+    ]}
+  ]
+}
