@@ -91,6 +91,7 @@ valores:
     openrouter: ''
     multica: ''
     supabase: ''
+    platformance: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
