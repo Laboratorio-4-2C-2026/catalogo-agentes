@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "linear": {
+      "type": "http",
+      "url": "https://mcp.linear.app/mcp"
+    },
+    "neon": {
+      "type": "http",
+      "url": "https://mcp.neon.tech/mcp"
+    },
+    "stitch": {
+      "type": "http",
+      "url": "https://stitch.googleapis.com/mcp"
+    },
+    "engram": {
+      "command": "__NUTRIA_ENGRAM_COMMAND__",
+      "args": [
+        "mcp",
+        "--tools=agent"
+      ]
+    },
+    "codegraph": {
+      "command": "__NUTRIA_CODEGRAPH_COMMAND__",
+      "args": [
+        "serve",
+        "--mcp"
+      ]
+    },
+    "agentation": {
+      "command": "npx",
+      "args": [
+        "--yes",
+        "agentation-mcp",
+        "server"
+      ]
+    }
+  }
+}

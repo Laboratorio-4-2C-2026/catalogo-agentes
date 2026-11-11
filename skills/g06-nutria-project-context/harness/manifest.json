@@ -1,0 +1,979 @@
+{
+  "source_repository": "https://github.com/nutria-lab/ai-harness",
+  "source_revision": "4e3652d4dbf38d8746626401126aa0e1b4139c89",
+  "source_version": "1.0.4",
+  "assignment": "Role-based ownership explicitly requested for this catalog submission; not a reconstruction of historical authorship.",
+  "maturity": "experimental: per-piece production usage has not been confirmed.",
+  "tooling": "Codex, Claude Code and Antigravity CLI are source-supported targets; installer dry-runs are not proof of per-piece runtime execution.",
+  "excludes": [
+    "harness installer",
+    "tool bootstrapper",
+    "npm publication workflow",
+    "local state",
+    "credentials"
+  ],
+  "entries": [
+    {
+      "tipo": "skill",
+      "name": "g06-architecture-adr",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "skills/architecture-adr/SKILL.md",
+      "catalog_path": "skills/g06-architecture-adr/SKILL.md",
+      "source_sha256": "f5f76433f0536330492ede2779389648f16127b44baad032a8fe89e5288ee788"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-audit",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/audit/SKILL.md",
+      "catalog_path": "skills/g06-audit/SKILL.md",
+      "source_sha256": "616e74f59da25ae72f5c853b7c9cfc4317400d224ff162abd67293b6f3ee1c82"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-codegraph-guidance",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "skills/codegraph-guidance/SKILL.md",
+      "catalog_path": "skills/g06-codegraph-guidance/SKILL.md",
+      "source_sha256": "e49aaaad678f88a3c173dc07cd1310479da5d16200bd6314a0885ff837f4ff92"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-design-qa",
+      "role": "QA",
+      "owner": {
+        "nombre": "Tais Marambio",
+        "github": "TaisMarambio"
+      },
+      "source_path": "skills/design-qa/SKILL.md",
+      "catalog_path": "skills/g06-design-qa/SKILL.md",
+      "source_sha256": "a761ed96e1e91905e7e6f32ab95e8dc6d0cca2036556d4d63945b25efd3eaa5c"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-documentation-evidence",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "skills/documentation-evidence/SKILL.md",
+      "catalog_path": "skills/g06-documentation-evidence/SKILL.md",
+      "source_sha256": "a295c7aa6576d930ebe70c179d37f57fb4b230204116253bd2542e587441262a"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-engram-memory-protocol",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "skills/engram-memory-protocol/SKILL.md",
+      "catalog_path": "skills/g06-engram-memory-protocol/SKILL.md",
+      "source_sha256": "af7e65ce0908bcbd0181a3373b19230189da0ff4dfa25f00e9a5aad61d0c4a35"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-gentle-ai-engram",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "skills/gentle-ai-engram/SKILL.md",
+      "catalog_path": "skills/g06-gentle-ai-engram/SKILL.md",
+      "source_sha256": "2aab8be1996c2aeea7f149b3bb14d0395273c51096117ef9590cb99a2df1a235"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-get-context",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/get-context/SKILL.md",
+      "catalog_path": "skills/g06-get-context/SKILL.md",
+      "source_sha256": "19a38a3ac4443cb477a01c2303e77c891c304234a195dd2da248e3e736b22679"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-google-modern-web-guidance",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "skills/google-modern-web-guidance/SKILL.md",
+      "catalog_path": "skills/g06-google-modern-web-guidance/SKILL.md",
+      "source_sha256": "a495bcd61660b2dc16d76d3bae434dc0a808fb2b276c37719306de1cd46948fe"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-ideate",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/ideate/SKILL.md",
+      "catalog_path": "skills/g06-ideate/SKILL.md",
+      "source_sha256": "595f83f18e22b19f32fe858530f17572d3ec25d7c7f3b2dc305eca41e5435d33"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-image-to-code",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/image-to-code/SKILL.md",
+      "catalog_path": "skills/g06-image-to-code/SKILL.md",
+      "source_sha256": "e0acaa600fda4b87b58774cf60a5fda8b98e18990d4d51920ec40773dd97971c"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-index",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/index/SKILL.md",
+      "catalog_path": "skills/g06-index/SKILL.md",
+      "source_sha256": "8f9f19273ee34a06298ed93f8d70a9c17b3d4ce66f061b024f6d1038b138e5f7"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-linear-delivery-ops",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "skills/linear-delivery-ops/SKILL.md",
+      "catalog_path": "skills/g06-linear-delivery-ops/SKILL.md",
+      "source_sha256": "37c01a639514c6f5c5fd15e6dea86a62660120716a9881ebdc09275cf728ed52"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-meal-plan-ai-safety",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "skills/meal-plan-ai-safety/SKILL.md",
+      "catalog_path": "skills/g06-meal-plan-ai-safety/SKILL.md",
+      "source_sha256": "1e69c4df85b5826defa235433f167464b27a35b153beadfd457ec3d29ebfb3ff"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-neon-prisma-safety",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "skills/neon-prisma-safety/SKILL.md",
+      "catalog_path": "skills/g06-neon-prisma-safety/SKILL.md",
+      "source_sha256": "2bebdce6e3d1465199eab5756af31e1c20f11816a480009f3d43b32248ce63da"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-nutria-project-context",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "skills/nutria-project-context/SKILL.md",
+      "catalog_path": "skills/g06-nutria-project-context/SKILL.md",
+      "source_sha256": "601d7a84cc2b7b9ea27f31a85454f15fad4c7ffd989ed1818f0e79f37757508c"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-pr-release-guardrails",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "skills/pr-release-guardrails/SKILL.md",
+      "catalog_path": "skills/g06-pr-release-guardrails/SKILL.md",
+      "source_sha256": "7005ec2db0f8e146f30658ef7ac05eb6493266db04241012880d6b63e86307f8"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-product-backlog",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/product-backlog/SKILL.md",
+      "catalog_path": "skills/g06-product-backlog/SKILL.md",
+      "source_sha256": "a5c29cef2b879329f5da8269b641cf8052e8d56e87e518f758872d6301565217"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-qa-playwright-evidence",
+      "role": "QA",
+      "owner": {
+        "nombre": "Tais Marambio",
+        "github": "TaisMarambio"
+      },
+      "source_path": "skills/qa-playwright-evidence/SKILL.md",
+      "catalog_path": "skills/g06-qa-playwright-evidence/SKILL.md",
+      "source_sha256": "ed7ec94ec9b307a1240ce23327f3027d4cb8fcc73f98b7108a370c45b1f80132"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-research",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/research/SKILL.md",
+      "catalog_path": "skills/g06-research/SKILL.md",
+      "source_sha256": "bf824e72dd93941c8d591e4af13bb7e3a09380cd6ed7dd8c1f61a295648fa023"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-review",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "skills/review/SKILL.md",
+      "catalog_path": "skills/g06-review/SKILL.md",
+      "source_sha256": "97ef664763fce4df5a12295b12b3fca34643859be2c077697b086ad7a7bf0bd2"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-share",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/share/SKILL.md",
+      "catalog_path": "skills/g06-share/SKILL.md",
+      "source_sha256": "5976cfbc9d865230db085af37f0c25a2d8beed3ff58e0e2edb9d0a4f7ca987b5"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-stitch-ui-workflow",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/stitch-ui-workflow/SKILL.md",
+      "catalog_path": "skills/g06-stitch-ui-workflow/SKILL.md",
+      "source_sha256": "38444d8ea5634fcde1ecc8b325a751f8548551ae5ecb376205318953bee5be21"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-time-reporting",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "skills/time-reporting/SKILL.md",
+      "catalog_path": "skills/g06-time-reporting/SKILL.md",
+      "source_sha256": "98262ea79786028dff8a2a453742534def3b2a31a4ee9ec2d2a3a2d8f30abae4"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-url-to-code",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/url-to-code/SKILL.md",
+      "catalog_path": "skills/g06-url-to-code/SKILL.md",
+      "source_sha256": "8708f622b4c86866370b8c1cef5f404b71679d09e6678953b2ca7125c3c1098d"
+    },
+    {
+      "tipo": "skill",
+      "name": "g06-user-context",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "skills/user-context/SKILL.md",
+      "catalog_path": "skills/g06-user-context/SKILL.md",
+      "source_sha256": "5690a7f99cf896970493f5d0bd7f35f62ab9cbe21744352acf84dc0ceea4194c"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-backend-designer",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/development/agents/backend-designer.toml",
+      "catalog_path": "agentes/g06-development-backend-designer/g06-development-backend-designer.md",
+      "native_path": "agentes/g06-development-backend-designer/backend-designer.toml",
+      "source_sha256": "21a4061a6d968bc135018be55a5bb75c762495a6f9bd47b999efdda15e7012ac"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-backend-explorer",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/development/agents/backend-explorer.toml",
+      "catalog_path": "agentes/g06-development-backend-explorer/g06-development-backend-explorer.md",
+      "native_path": "agentes/g06-development-backend-explorer/backend-explorer.toml",
+      "source_sha256": "52d935c5a014afa9efb11d48622deb72bd2918ead497a124c1f7eca12e5d4d13"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-backend-implementer",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/development/agents/backend-implementer.toml",
+      "catalog_path": "agentes/g06-development-backend-implementer/g06-development-backend-implementer.md",
+      "native_path": "agentes/g06-development-backend-implementer/backend-implementer.toml",
+      "source_sha256": "b85386c8017183329e4ec37445b326966b24c7fb897ee6238ce231c035f10f51"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-backend-review-readability",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/development/agents/backend-review-readability.toml",
+      "catalog_path": "agentes/g06-development-backend-review-readability/g06-development-backend-review-readability.md",
+      "native_path": "agentes/g06-development-backend-review-readability/backend-review-readability.toml",
+      "source_sha256": "8680fffc61bbb3b0dea2a27a8258fa52ad4d6661204f521928327091b7e6749c"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-backend-review-reliability",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/development/agents/backend-review-reliability.toml",
+      "catalog_path": "agentes/g06-development-backend-review-reliability/g06-development-backend-review-reliability.md",
+      "native_path": "agentes/g06-development-backend-review-reliability/backend-review-reliability.toml",
+      "source_sha256": "d24ea8cd969944801ba35aaf65101c438d0eac6295160052897865bff48ac13a"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-backend-review-resilience",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/development/agents/backend-review-resilience.toml",
+      "catalog_path": "agentes/g06-development-backend-review-resilience/g06-development-backend-review-resilience.md",
+      "native_path": "agentes/g06-development-backend-review-resilience/backend-review-resilience.toml",
+      "source_sha256": "865a773618209ffb8261997acf861c744a9bf2224361d0c828195389d1e2e505"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-backend-review-risk",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/development/agents/backend-review-risk.toml",
+      "catalog_path": "agentes/g06-development-backend-review-risk/g06-development-backend-review-risk.md",
+      "native_path": "agentes/g06-development-backend-review-risk/backend-review-risk.toml",
+      "source_sha256": "e3086ab83fbf21b4c5ecd075015a798c3b59a5f33eb5c54058116fd3873f5916"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-backend-tester",
+      "role": "QA",
+      "owner": {
+        "nombre": "Tais Marambio",
+        "github": "TaisMarambio"
+      },
+      "source_path": "bundles/development/agents/backend-tester.toml",
+      "catalog_path": "agentes/g06-development-backend-tester/g06-development-backend-tester.md",
+      "native_path": "agentes/g06-development-backend-tester/backend-tester.toml",
+      "source_sha256": "aae3f98690ed1ca937365eb0a06992db2cb58055e936d9d2d0fbaba26af5678e"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-frontend-checker-lite",
+      "role": "QA",
+      "owner": {
+        "nombre": "Tais Marambio",
+        "github": "TaisMarambio"
+      },
+      "source_path": "bundles/development/agents/frontend-checker-lite.toml",
+      "catalog_path": "agentes/g06-development-frontend-checker-lite/g06-development-frontend-checker-lite.md",
+      "native_path": "agentes/g06-development-frontend-checker-lite/frontend-checker-lite.toml",
+      "source_sha256": "d1bf2d3c1eb315ddc5bd887be4da238f75ed482ea20bd1445f4bda218482fdb5"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-frontend-designer",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/development/agents/frontend-designer.toml",
+      "catalog_path": "agentes/g06-development-frontend-designer/g06-development-frontend-designer.md",
+      "native_path": "agentes/g06-development-frontend-designer/frontend-designer.toml",
+      "source_sha256": "8debae113e0b8125881e60037fe85ed372f965249df37a0715b5293afe9fc36e"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-frontend-explorer",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/development/agents/frontend-explorer.toml",
+      "catalog_path": "agentes/g06-development-frontend-explorer/g06-development-frontend-explorer.md",
+      "native_path": "agentes/g06-development-frontend-explorer/frontend-explorer.toml",
+      "source_sha256": "de05de52c1d364e5d1cc6fdecc280be718e67d001521c3be66668f4f47ed8653"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-frontend-implementer",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/development/agents/frontend-implementer.toml",
+      "catalog_path": "agentes/g06-development-frontend-implementer/g06-development-frontend-implementer.md",
+      "native_path": "agentes/g06-development-frontend-implementer/frontend-implementer.toml",
+      "source_sha256": "ff848e633809abf0e4182819529e26d42eb379de473951f5897c4a01a77835ae"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-frontend-review-readability",
+      "role": "QA",
+      "owner": {
+        "nombre": "Tais Marambio",
+        "github": "TaisMarambio"
+      },
+      "source_path": "bundles/development/agents/frontend-review-readability.toml",
+      "catalog_path": "agentes/g06-development-frontend-review-readability/g06-development-frontend-review-readability.md",
+      "native_path": "agentes/g06-development-frontend-review-readability/frontend-review-readability.toml",
+      "source_sha256": "920b9af7dfa781e2e06f0d4f4a2900d28ca3a361463497df5b3c821adf07a5cb"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-frontend-review-reliability",
+      "role": "QA",
+      "owner": {
+        "nombre": "Tais Marambio",
+        "github": "TaisMarambio"
+      },
+      "source_path": "bundles/development/agents/frontend-review-reliability.toml",
+      "catalog_path": "agentes/g06-development-frontend-review-reliability/g06-development-frontend-review-reliability.md",
+      "native_path": "agentes/g06-development-frontend-review-reliability/frontend-review-reliability.toml",
+      "source_sha256": "68d0c20d6d5fd64a1571b019fa906662629ff8770e4e0eced260d80e9f4e6b45"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-frontend-review-resilience",
+      "role": "QA",
+      "owner": {
+        "nombre": "Tais Marambio",
+        "github": "TaisMarambio"
+      },
+      "source_path": "bundles/development/agents/frontend-review-resilience.toml",
+      "catalog_path": "agentes/g06-development-frontend-review-resilience/g06-development-frontend-review-resilience.md",
+      "native_path": "agentes/g06-development-frontend-review-resilience/frontend-review-resilience.toml",
+      "source_sha256": "be28e82157e74188fe6c68138a5fb977b6038add4e2e75608f1f31a9392498d9"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-frontend-review-risk",
+      "role": "QA",
+      "owner": {
+        "nombre": "Tais Marambio",
+        "github": "TaisMarambio"
+      },
+      "source_path": "bundles/development/agents/frontend-review-risk.toml",
+      "catalog_path": "agentes/g06-development-frontend-review-risk/g06-development-frontend-review-risk.md",
+      "native_path": "agentes/g06-development-frontend-review-risk/frontend-review-risk.toml",
+      "source_sha256": "01d0b5723142405232eb2d0f21532825b16a6324bc7baca186f0ef0cc4a6ce9d"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-frontend-tester",
+      "role": "QA",
+      "owner": {
+        "nombre": "Tais Marambio",
+        "github": "TaisMarambio"
+      },
+      "source_path": "bundles/development/agents/frontend-tester.toml",
+      "catalog_path": "agentes/g06-development-frontend-tester/g06-development-frontend-tester.md",
+      "native_path": "agentes/g06-development-frontend-tester/frontend-tester.toml",
+      "source_sha256": "20b0f79832c6bd537cad181d9ffe0acb2bb3c13ef31a2b7c2b76724ddfa4d94e"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-development-linear-time-registration",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "bundles/development/agents/linear-time-registration.toml",
+      "catalog_path": "agentes/g06-development-linear-time-registration/g06-development-linear-time-registration.md",
+      "native_path": "agentes/g06-development-linear-time-registration/linear-time-registration.toml",
+      "source_sha256": "3371d5b97a7d8ac4d351fe581656e7433d1b6188f2cfaf3ed87e737c4ffdae83"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-architecture-governor",
+      "role": "TL",
+      "owner": {
+        "nombre": "Camila Catalini",
+        "github": "CCatalini"
+      },
+      "source_path": "bundles/management/agents/architecture-governor.toml",
+      "catalog_path": "agentes/g06-management-architecture-governor/g06-management-architecture-governor.md",
+      "native_path": "agentes/g06-management-architecture-governor/architecture-governor.toml",
+      "source_sha256": "8e38820d256753ac8553f35c0761d5b924258df8d0b4e436cf252004b945346d"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-backlog-steward",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "bundles/management/agents/backlog-steward.toml",
+      "catalog_path": "agentes/g06-management-backlog-steward/g06-management-backlog-steward.md",
+      "native_path": "agentes/g06-management-backlog-steward/backlog-steward.toml",
+      "source_sha256": "d51b58a5731dd9ed0df33a30490d13b18f5a4c72b9771b46221294509384ee34"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-evidence-reporter",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "bundles/management/agents/evidence-reporter.toml",
+      "catalog_path": "agentes/g06-management-evidence-reporter/g06-management-evidence-reporter.md",
+      "native_path": "agentes/g06-management-evidence-reporter/evidence-reporter.toml",
+      "source_sha256": "8b57ae9e5c91550d9536b3581e8142563dbcfc2379450d9bd51129142c333055"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-frontend-checker",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "bundles/management/agents/frontend-checker.toml",
+      "catalog_path": "agentes/g06-management-frontend-checker/g06-management-frontend-checker.md",
+      "native_path": "agentes/g06-management-frontend-checker/frontend-checker.toml",
+      "source_sha256": "315172a197f142a1977cf978a239523b7709d8887a78972c31f1b95bb9dbb0e4"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-linear-tracker",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "bundles/management/agents/linear-tracker.toml",
+      "catalog_path": "agentes/g06-management-linear-tracker/g06-management-linear-tracker.md",
+      "native_path": "agentes/g06-management-linear-tracker/linear-tracker.toml",
+      "source_sha256": "ccc5e3a8a9c6e2dc504c7c880e44600e21e9142def09aacd19381f996d5bca84"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-portfolio-planner",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "bundles/management/agents/portfolio-planner.toml",
+      "catalog_path": "agentes/g06-management-portfolio-planner/g06-management-portfolio-planner.md",
+      "native_path": "agentes/g06-management-portfolio-planner/portfolio-planner.toml",
+      "source_sha256": "bc80052c5322029afb31f63cc3ea27ae8a70a4e47e709b1f80ad79b99531822a"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-product-discovery",
+      "role": "PO",
+      "owner": {
+        "nombre": "Tomás Alcázar",
+        "github": "tomasalcazar"
+      },
+      "source_path": "bundles/management/agents/product-discovery.toml",
+      "catalog_path": "agentes/g06-management-product-discovery/g06-management-product-discovery.md",
+      "native_path": "agentes/g06-management-product-discovery/product-discovery.toml",
+      "source_sha256": "5fe214f1d38fef862720400db98fab12b8bd5072d6a20ba4c42d8513420f2146"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-quality-strategist",
+      "role": "QA",
+      "owner": {
+        "nombre": "Tais Marambio",
+        "github": "TaisMarambio"
+      },
+      "source_path": "bundles/management/agents/quality-strategist.toml",
+      "catalog_path": "agentes/g06-management-quality-strategist/g06-management-quality-strategist.md",
+      "native_path": "agentes/g06-management-quality-strategist/quality-strategist.toml",
+      "source_sha256": "6678ddf7486067f72ca1fe424e760bd310eeddb6951b5e870e47ee36b3e2db1c"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-review-readability",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "bundles/management/agents/review-readability.toml",
+      "catalog_path": "agentes/g06-management-review-readability/g06-management-review-readability.md",
+      "native_path": "agentes/g06-management-review-readability/review-readability.toml",
+      "source_sha256": "f21d468c126db4cb8f0029675e90da68ec4f0fd585b0cdfa5d54e18a09944476"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-review-reliability",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "bundles/management/agents/review-reliability.toml",
+      "catalog_path": "agentes/g06-management-review-reliability/g06-management-review-reliability.md",
+      "native_path": "agentes/g06-management-review-reliability/review-reliability.toml",
+      "source_sha256": "e0e7990ffb60f0c4c2159d48cebd18eaefd2fff10b0042366e7e794fe7878444"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-review-resilience",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "bundles/management/agents/review-resilience.toml",
+      "catalog_path": "agentes/g06-management-review-resilience/g06-management-review-resilience.md",
+      "native_path": "agentes/g06-management-review-resilience/review-resilience.toml",
+      "source_sha256": "64661660097f248be624488333cf3ed53ad46339d0a996d3ed38b7b1452bbb83"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-review-risk",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "bundles/management/agents/review-risk.toml",
+      "catalog_path": "agentes/g06-management-review-risk/g06-management-review-risk.md",
+      "native_path": "agentes/g06-management-review-risk/review-risk.toml",
+      "source_sha256": "48d2ee462c068039a39d214d4a5693fcf5b9fabd5cf3f8a20a4119cd39514ce5"
+    },
+    {
+      "tipo": "agente",
+      "name": "g06-management-risk-dependency-manager",
+      "role": "PM",
+      "owner": {
+        "nombre": "Felipe Fernandez Cronenbold",
+        "github": "sonpipe0"
+      },
+      "source_path": "bundles/management/agents/risk-dependency-manager.toml",
+      "catalog_path": "agentes/g06-management-risk-dependency-manager/g06-management-risk-dependency-manager.md",
+      "native_path": "agentes/g06-management-risk-dependency-manager/risk-dependency-manager.toml",
+      "source_sha256": "0ddd38db815f7ecc13dd2d04b6dd388e7b528d1b744145fff5322fd1b1f2c3b1"
+    }
+  ],
+  "support_files": [
+    {
+      "source_path": ".ai/adherence.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/adherence.md",
+      "sha256": "f51c28af153ddf229e45477df4753bcfc36c4eb4a580f8ccc56fe94ca5e8c69a"
+    },
+    {
+      "source_path": ".ai/ai-generation-safety.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/ai-generation-safety.md",
+      "sha256": "9e8d5cd6ad850987eeba56d9cbe31d8f5ae3f18da33cc5a9f57adfe0a15b8411"
+    },
+    {
+      "source_path": ".ai/architecture.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/architecture.md",
+      "sha256": "daaea264ef6407d57f09d201a41637788fb278403ce8ad3ca83e5969001734c8"
+    },
+    {
+      "source_path": ".ai/authentication-and-profile.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/authentication-and-profile.md",
+      "sha256": "396572fe286e051cb19cca4eb9fc398d5939c554a4d19a7bc2004781cbee4829"
+    },
+    {
+      "source_path": ".ai/codegraph.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/codegraph.md",
+      "sha256": "736d498ee63bf701adf20b68cc0922cb4bad4cb2aa2e032e22fcb0898f26acbb"
+    },
+    {
+      "source_path": ".ai/database-and-migrations.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/database-and-migrations.md",
+      "sha256": "5d911e19ff06b0699eada1e3bd3dc4a53766a9c8367aaf4bd13edfc26bc2d2ea"
+    },
+    {
+      "source_path": ".ai/delivery-and-linear.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/delivery-and-linear.md",
+      "sha256": "a78ac9140bb0b64b989140e1eb3c385616fd3e4dbb2bf4cafb98df6504e6100f"
+    },
+    {
+      "source_path": ".ai/frontend-and-stitch.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/frontend-and-stitch.md",
+      "sha256": "fe242e03211e706d283a8406c15bcc2d5b2726ee7efb6798c5fbd0c004956a7a"
+    },
+    {
+      "source_path": ".ai/index.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/index.md",
+      "sha256": "a39b4860ca97d6bb4f7f724a8a0a4f62dd057158f4cface9c731a798e9edd4ff"
+    },
+    {
+      "source_path": ".ai/meal-plans.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/meal-plans.md",
+      "sha256": "c35d97dfc496de2e694a197ca27de9d0a0354c8350d2ac3ccd80c8f32f71c4fd"
+    },
+    {
+      "source_path": ".ai/memory-and-engram.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/memory-and-engram.md",
+      "sha256": "26c9fe916a9c6749dffd357ed1c2714b588f91184f8147cb3381b88d56f7afef"
+    },
+    {
+      "source_path": ".ai/quality-and-testing.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/quality-and-testing.md",
+      "sha256": "b91746568099cb599f1e823c5be7d7833d1997060c2f2434691e2b26770c0ca1"
+    },
+    {
+      "source_path": ".ai/recipes.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/recipes.md",
+      "sha256": "f9edea80165357bd59c9aff599d37b72d48a6e531b0599bc0e8eab1ebd4941a9"
+    },
+    {
+      "source_path": ".ai/release-and-evidence.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/release-and-evidence.md",
+      "sha256": "9b698719be1968f783e532b6049dc72f48bdc602fc6cef34e1003e8d58d4dd47"
+    },
+    {
+      "source_path": ".ai/shopping-list.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/.ai/shopping-list.md",
+      "sha256": "4bcad398eabde4fe64333c103523138470f13c270be91796c245b3b2a4d68046"
+    },
+    {
+      "source_path": "AGENTS.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/AGENTS.md",
+      "sha256": "4a721beb940fb3717dc877a16f8d097e62d65a8bf5a3a0bed6719adf7007cd26"
+    },
+    {
+      "source_path": "LICENSE",
+      "catalog_path": "skills/g06-nutria-project-context/harness/LICENSE",
+      "sha256": "fa3c58c4eb6b3f3a83f317c5dc41a96e68c03ae5adac2f3beb3d48fb54c2ca91"
+    },
+    {
+      "source_path": "bundles/agent-libraries.json",
+      "catalog_path": "skills/g06-nutria-project-context/harness/bundles/agent-libraries.json",
+      "sha256": "8fecfc7e4e4746e3db52028dfaa03804291dabf0d2cbd1c32872c288c5e6557c"
+    },
+    {
+      "source_path": "bundles/development/AGENTS.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/bundles/development/AGENTS.md",
+      "sha256": "f92ebb1e0a0e981703032378b041d7815e399cb77ac8f85c80b7dd0a47f7eb77"
+    },
+    {
+      "source_path": "bundles/management/AGENTS.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/bundles/management/AGENTS.md",
+      "sha256": "7ba5b6b864736dcdfe2dccf171709c289f430eb51aeee60edb54766cbfc47017"
+    },
+    {
+      "source_path": "bundles/management/connectors.json",
+      "catalog_path": "skills/g06-nutria-project-context/harness/bundles/management/connectors.json",
+      "sha256": "d2568850cf2bc1f72b7862df8073537a04f6803a88cd7bb2becb202566a547fc"
+    },
+    {
+      "source_path": "bundles/management/google-sheets-workflow.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/bundles/management/google-sheets-workflow.md",
+      "sha256": "19e498cc997736b3149ffcbfda53ea8104bae631d228202eb03501ca090400a7"
+    },
+    {
+      "source_path": "catalog.json",
+      "catalog_path": "skills/g06-nutria-project-context/harness/catalog.json",
+      "sha256": "488a3e0122649dc7a009407c34e26ffea573a63aa1177f2b732ab43c1451a009"
+    },
+    {
+      "source_path": "docs/agent-catalog.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/docs/agent-catalog.md",
+      "sha256": "4e71d73bd3122ef4a85de350acb8979ea68d7c1a186c5d3cf2fd7a6b135df281"
+    },
+    {
+      "source_path": "docs/codegraph-guidance.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/docs/codegraph-guidance.md",
+      "sha256": "25edd345adb2be1e51a26d7f94d2925950aa57f1a5108fcd53cd7d5f13270536"
+    },
+    {
+      "source_path": "docs/engram-protocol.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/docs/engram-protocol.md",
+      "sha256": "bf6bcafa54f2d39df4f8612e20dd0ac8ffd9be2a3247faba673d1c912c3b4dd9"
+    },
+    {
+      "source_path": "docs/gentle-ai-engram.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/docs/gentle-ai-engram.md",
+      "sha256": "e1503d4644a3e3eb18db1ae2d912de437e3f02f00b8467d3e15b6a299c3ea4a9"
+    },
+    {
+      "source_path": "docs/mcp-safety.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/docs/mcp-safety.md",
+      "sha256": "b924c05062fb9fad20a07c54cb279cc5c414ddd2dc9ff57fc148030cf928f340"
+    },
+    {
+      "source_path": "docs/rollout.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/docs/rollout.md",
+      "sha256": "72f0caf4e596e05e093509f9122d73154a73282674c144108eba1fd325a6537e"
+    },
+    {
+      "source_path": "management/links.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/management/links.md",
+      "sha256": "d294c53d3149f1e10a54218e597e2c518c9cbb037a5751d3f0693e7b62186241"
+    },
+    {
+      "source_path": "mcp/servers.json",
+      "catalog_path": "skills/g06-nutria-project-context/harness/mcp/servers.json",
+      "sha256": "9b1ef4c02e34e4b36dd2466c68012b8eae9ad373276a99ebaf6507bc52ceb4fd"
+    },
+    {
+      "source_path": "product-design/assets/composerIcon.svg",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/assets/composerIcon.svg",
+      "sha256": "e4c32b6524634b9bbcf80035f15933486a8d338decbf6cdc50c87e74529ee215"
+    },
+    {
+      "source_path": "product-design/assets/logo.png",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/assets/logo.png",
+      "sha256": "a1f718f71e727e6573b5810fee5ea33c887d1161203037746dfcdf856df2db3d"
+    },
+    {
+      "source_path": "product-design/scripts/bootstrap-prototype.mjs",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/scripts/bootstrap-prototype.mjs",
+      "sha256": "768e8f271c68e1b065ccc3ba614b5cca024a2ab0e7bf626e5de647d37e1b1442"
+    },
+    {
+      "source_path": "product-design/templates/prototype/.npmrc",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/templates/prototype/.npmrc",
+      "sha256": "37ae29f49cb719e0a2fbdef151dcfac3062390219ef54e2a5586e89303bd8648"
+    },
+    {
+      "source_path": "product-design/templates/prototype/AGENTS.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/templates/prototype/AGENTS.md",
+      "sha256": "43db3116b34adb4b753b5e94bfdc27206a2bed7157afb2a0c851d7f5b9adb16b"
+    },
+    {
+      "source_path": "product-design/templates/prototype/index.html",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/templates/prototype/index.html",
+      "sha256": "ff49999b0dd822d8c658465e6217e8f4e8afb6d3aed73a118788401ad8783d7b"
+    },
+    {
+      "source_path": "product-design/templates/prototype/package.json",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/templates/prototype/package.json",
+      "sha256": "75273cfbe38bc8b148a68155ac5005b1f3f4f78693b875711610dbc731a0e5a9"
+    },
+    {
+      "source_path": "product-design/templates/prototype/src/App.jsx",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/templates/prototype/src/App.jsx",
+      "sha256": "0e982da346547f695f18c77b471f99e4199282739d19931175341305617d383b"
+    },
+    {
+      "source_path": "product-design/templates/prototype/src/main.jsx",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/templates/prototype/src/main.jsx",
+      "sha256": "832f752c6b6a454a26dbc4f2654f5bd633f2b103516c8c0abac648308c133a7e"
+    },
+    {
+      "source_path": "product-design/templates/prototype/src/styles.css",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/templates/prototype/src/styles.css",
+      "sha256": "a40fc885072f72841eb425fd476e9b90d459d515f6ff9f3dde2d7c375baf9dfc"
+    },
+    {
+      "source_path": "product-design/templates/prototype/vite.config.mjs",
+      "catalog_path": "skills/g06-nutria-project-context/harness/product-design/templates/prototype/vite.config.mjs",
+      "sha256": "07313fdfc411175161e71e26b7b64c10ace124e47c251f4daa002a734f7b921f"
+    },
+    {
+      "source_path": "references/communication-protocol.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/references/communication-protocol.md",
+      "sha256": "7068e95f2f93e8a01c0dc73ea64625640834d55cc317066ebfc6a4b38fb8d318"
+    },
+    {
+      "source_path": "references/critical-overrides.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/references/critical-overrides.md",
+      "sha256": "52cbd24a61fdccafb6eb801f6464d02d5c2396d46f361f4a8c6f9dc19ec1ec44"
+    },
+    {
+      "source_path": "references/existing-codebase-edits.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/references/existing-codebase-edits.md",
+      "sha256": "ad40141411a0cf80c827faacf9c126eb61cbb4cb0274060d6d124b67134eaa8b"
+    },
+    {
+      "source_path": "references/local-prototype-preflight.md",
+      "catalog_path": "skills/g06-nutria-project-context/harness/references/local-prototype-preflight.md",
+      "sha256": "13c405891c1d460fac38181749b7ef92d1b0851e7309ef327bc4ab62dedd4962"
+    },
+    {
+      "source_path": "templates/antigravity.mcp.json",
+      "catalog_path": "skills/g06-nutria-project-context/harness/templates/antigravity.mcp.json",
+      "sha256": "2c298ac6557acfadb9ac0e467b862de6d16562ea4dd4f8eae31634dae72989ff"
+    },
+    {
+      "source_path": "templates/claude.mcp.json",
+      "catalog_path": "skills/g06-nutria-project-context/harness/templates/claude.mcp.json",
+      "sha256": "facebc04fbe1ec5aac1e880c8e7f37d915237c9b35ace9087219807a3d0b736a"
+    },
+    {
+      "source_path": "templates/codex.mcp.toml",
+      "catalog_path": "skills/g06-nutria-project-context/harness/templates/codex.mcp.toml",
+      "sha256": "b828e2e750d22f22954dd1f5edfd8f9a861c52d7e6aa015f1a91f259386ca718"
+    }
+  ]
+}

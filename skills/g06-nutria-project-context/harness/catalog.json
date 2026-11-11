@@ -1,0 +1,597 @@
+{
+  "version": "1.0.4",
+  "agents": [
+    {
+      "id": "architecture-governor",
+      "sourceBundle": "bundles/management",
+      "workflow": "management role-gated workflow",
+      "humanOwner": "TL",
+      "skills": [
+        "architecture-adr",
+        "neon-prisma-safety",
+        "pr-release-guardrails",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "neon",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Drafts ADRs, boundaries, migrations and technical-risk reports; TL approves architecture and release decisions."
+    },
+    {
+      "id": "backlog-steward",
+      "sourceBundle": "bundles/management",
+      "workflow": "management role-gated workflow",
+      "humanOwner": "PO",
+      "skills": [
+        "product-backlog",
+        "nutria-project-context",
+        "stitch-ui-workflow"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram"
+      ],
+      "approval": "Drafts prioritized stories and acceptance criteria; PO approves priority and scope."
+    },
+    {
+      "id": "evidence-reporter",
+      "sourceBundle": "bundles/management",
+      "workflow": "management role-gated workflow",
+      "humanOwner": "PM / TL / QA",
+      "skills": [
+        "documentation-evidence",
+        "engram-memory-protocol"
+      ],
+      "mcps": [
+        "linear",
+        "engram"
+      ],
+      "approval": "Maintains auditable delivery evidence; PM, TL and QA verify claims before publication."
+    },
+    {
+      "id": "linear-tracker",
+      "sourceBundle": "bundles/management",
+      "workflow": "management delivery workflow",
+      "humanOwner": "PM",
+      "skills": [
+        "linear-delivery-ops",
+        "time-reporting",
+        "documentation-evidence"
+      ],
+      "mcps": [
+        "linear",
+        "google-drive",
+        "engram"
+      ],
+      "approval": "Maintains Linear visibility and reconciliation; PM approves delivery-field changes and workflow mutations."
+    },
+    {
+      "id": "portfolio-planner",
+      "sourceBundle": "bundles/management",
+      "workflow": "management delivery workflow",
+      "humanOwner": "PM",
+      "skills": [
+        "linear-delivery-ops",
+        "time-reporting",
+        "documentation-evidence"
+      ],
+      "mcps": [
+        "linear",
+        "google-drive",
+        "engram"
+      ],
+      "approval": "Maintains roadmap, milestones and forecast; PM approves scope, dates and capacity decisions."
+    },
+    {
+      "id": "product-discovery",
+      "sourceBundle": "bundles/management",
+      "workflow": "management role-gated workflow",
+      "humanOwner": "PO",
+      "skills": [
+        "product-backlog",
+        "nutria-project-context",
+        "stitch-ui-workflow"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram"
+      ],
+      "approval": "Turns research into problems, outcomes and hypotheses; PO approves product direction and scope."
+    },
+    {
+      "id": "quality-strategist",
+      "sourceBundle": "bundles/management",
+      "workflow": "management role-gated workflow",
+      "humanOwner": "QA",
+      "skills": [
+        "qa-playwright-evidence",
+        "product-backlog"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram"
+      ],
+      "approval": "Builds quality strategy and release evidence; QA owns the recommendation and does not self-close work."
+    },
+    {
+      "id": "risk-dependency-manager",
+      "sourceBundle": "bundles/management",
+      "workflow": "management role-gated workflow",
+      "humanOwner": "TL",
+      "skills": [
+        "architecture-adr",
+        "neon-prisma-safety",
+        "pr-release-guardrails",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "neon",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Maintains risk, assumption, issue and dependency registers; TL approves technical-risk decisions and escalations."
+    },
+    {
+      "id": "frontend-checker",
+      "sourceBundle": "bundles/management",
+      "workflow": "management full frontend fidelity workflow",
+      "humanOwner": "PO / TL",
+      "skills": [
+        "google-modern-web-guidance",
+        "stitch-ui-workflow",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram",
+        "codegraph",
+        "agentation"
+      ],
+      "runtimeTools": [
+        "Agentation"
+      ],
+      "approval": "Checks responsive, accessible and Stitch-aligned frontend behavior using the Stitch MCP and Agentation annotations; PO validates visual/product fidelity and TL validates implementation correctness."
+    },
+    {
+      "id": "backend-designer",
+      "sourceBundle": "bundles/development",
+      "workflow": "development bounded-change workflow",
+      "humanOwner": "Rotating developer",
+      "skills": [
+        "architecture-adr",
+        "neon-prisma-safety",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "neon",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "designer stage of the backend bounded-change workflow; human owners approve scope, architecture, quality evidence and release as applicable."
+    },
+    {
+      "id": "backend-explorer",
+      "sourceBundle": "bundles/development",
+      "workflow": "development bounded-change workflow",
+      "humanOwner": "Rotating developer",
+      "skills": [
+        "architecture-adr",
+        "neon-prisma-safety",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "neon",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "explorer stage of the backend bounded-change workflow; human owners approve scope, architecture, quality evidence and release as applicable."
+    },
+    {
+      "id": "backend-tester",
+      "sourceBundle": "bundles/development",
+      "workflow": "development bounded-change workflow",
+      "humanOwner": "Rotating developer",
+      "skills": [
+        "architecture-adr",
+        "neon-prisma-safety",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "neon",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "tester stage of the backend bounded-change workflow; human owners approve scope, architecture, quality evidence and release as applicable."
+    },
+    {
+      "id": "backend-implementer",
+      "sourceBundle": "bundles/development",
+      "workflow": "development bounded-change workflow",
+      "humanOwner": "Rotating developer",
+      "skills": [
+        "architecture-adr",
+        "neon-prisma-safety",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "neon",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "implementer stage of the backend bounded-change workflow; human owners approve scope, architecture, quality evidence and release as applicable."
+    },
+    {
+      "id": "backend-review-readability",
+      "sourceBundle": "bundles/development",
+      "workflow": "parallel development review stage",
+      "humanOwner": "PO / TL",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed backend changes for readability; TL and QA approve merge and release."
+    },
+    {
+      "id": "backend-review-reliability",
+      "sourceBundle": "bundles/development",
+      "workflow": "parallel development review stage",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed backend changes for reliability; TL and QA approve merge and release."
+    },
+    {
+      "id": "backend-review-resilience",
+      "sourceBundle": "bundles/development",
+      "workflow": "parallel development review stage",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed backend changes for resilience; TL and QA approve merge and release."
+    },
+    {
+      "id": "backend-review-risk",
+      "sourceBundle": "bundles/development",
+      "workflow": "parallel development review stage",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed backend changes for risk; TL and QA approve merge and release."
+    },
+    {
+      "id": "frontend-designer",
+      "sourceBundle": "bundles/development",
+      "workflow": "development bounded-change workflow",
+      "humanOwner": "Rotating developer",
+      "skills": [
+        "google-modern-web-guidance",
+        "stitch-ui-workflow",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "designer stage of the frontend bounded-change workflow; human owners approve scope, architecture, quality evidence and release as applicable."
+    },
+    {
+      "id": "frontend-explorer",
+      "sourceBundle": "bundles/development",
+      "workflow": "development bounded-change workflow",
+      "humanOwner": "Rotating developer",
+      "skills": [
+        "google-modern-web-guidance",
+        "stitch-ui-workflow",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "explorer stage of the frontend bounded-change workflow; human owners approve scope, architecture, quality evidence and release as applicable."
+    },
+    {
+      "id": "frontend-tester",
+      "sourceBundle": "bundles/development",
+      "workflow": "development bounded-change workflow",
+      "humanOwner": "Rotating developer",
+      "skills": [
+        "google-modern-web-guidance",
+        "stitch-ui-workflow",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "tester stage of the frontend bounded-change workflow; human owners approve scope, architecture, quality evidence and release as applicable."
+    },
+    {
+      "id": "frontend-implementer",
+      "sourceBundle": "bundles/development",
+      "workflow": "development bounded-change workflow",
+      "humanOwner": "Rotating developer",
+      "skills": [
+        "google-modern-web-guidance",
+        "stitch-ui-workflow",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "implementer stage of the frontend bounded-change workflow; human owners approve scope, architecture, quality evidence and release as applicable."
+    },
+    {
+      "id": "frontend-review-readability",
+      "sourceBundle": "bundles/development",
+      "workflow": "parallel development review stage",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed frontend changes for readability; TL and QA approve merge and release."
+    },
+    {
+      "id": "frontend-review-reliability",
+      "sourceBundle": "bundles/development",
+      "workflow": "parallel development review stage",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed frontend changes for reliability; TL and QA approve merge and release."
+    },
+    {
+      "id": "frontend-review-resilience",
+      "sourceBundle": "bundles/development",
+      "workflow": "parallel development review stage",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed frontend changes for resilience; TL and QA approve merge and release."
+    },
+    {
+      "id": "frontend-review-risk",
+      "sourceBundle": "bundles/development",
+      "workflow": "parallel development review stage",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "codegraph-guidance"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed frontend changes for risk; TL and QA approve merge and release."
+    },
+    {
+      "id": "linear-time-registration",
+      "sourceBundle": "bundles/development",
+      "workflow": "final development workflow stage",
+      "humanOwner": "PM",
+      "skills": [
+        "linear-delivery-ops",
+        "time-reporting"
+      ],
+      "mcps": [
+        "linear",
+        "engram"
+      ],
+      "approval": "Records planned versus actual time and completed work; it never changes issue status, and PM owns delivery decisions."
+    },
+    {
+      "id": "frontend-checker-lite",
+      "sourceBundle": "bundles/development",
+      "workflow": "development frontend checker-lite stage",
+      "humanOwner": "Rotating developer",
+      "skills": [
+        "google-modern-web-guidance",
+        "stitch-ui-workflow",
+        "qa-playwright-evidence",
+        "codegraph-guidance",
+        "gentle-ai-engram"
+      ],
+      "mcps": [
+        "linear",
+        "stitch",
+        "engram",
+        "codegraph",
+        "agentation"
+      ],
+      "runtimeTools": [
+        "Agentation"
+      ],
+      "approval": "Runs a narrow, fast developer workflow check using the approved Stitch target and Agentation annotations; it reports evidence only and does not approve visual/product fidelity, merge or release."
+    },
+    {
+      "id": "review-risk",
+      "sourceBundle": "bundles/management",
+      "workflow": "management any-scope TL PR review gate",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "documentation-evidence",
+        "codegraph-guidance",
+        "engram-memory-protocol"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed PR changes for risk across any scope; reports evidence only. TL and QA retain approval, merge and release authority."
+    },
+    {
+      "id": "review-resilience",
+      "sourceBundle": "bundles/management",
+      "workflow": "management any-scope TL PR review gate",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "documentation-evidence",
+        "codegraph-guidance",
+        "engram-memory-protocol"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed PR changes for resilience across any scope; reports evidence only. TL and QA retain approval, merge and release authority."
+    },
+    {
+      "id": "review-readability",
+      "sourceBundle": "bundles/management",
+      "workflow": "management any-scope TL PR review gate",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "documentation-evidence",
+        "codegraph-guidance",
+        "engram-memory-protocol"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed PR changes for readability across any scope; reports evidence only. TL and QA retain approval, merge and release authority."
+    },
+    {
+      "id": "review-reliability",
+      "sourceBundle": "bundles/management",
+      "workflow": "management any-scope TL PR review gate",
+      "humanOwner": "TL / QA",
+      "skills": [
+        "pr-release-guardrails",
+        "qa-playwright-evidence",
+        "documentation-evidence",
+        "codegraph-guidance",
+        "engram-memory-protocol"
+      ],
+      "mcps": [
+        "linear",
+        "engram",
+        "codegraph"
+      ],
+      "approval": "Reviews completed PR changes for reliability across any scope; reports evidence only. TL and QA retain approval, merge and release authority."
+    }
+  ],
+  "mcps": {
+    "linear": "read-only-first; no priority, status, assignee or scope changes without human approval",
+    "neon": "development-branch-only; no production connection, secrets or PII",
+    "stitch": "human-approved; generated artifacts are proposals until PO approval",
+    "engram": "proactive-curated-save; no secrets, tokens, PII or raw production data",
+    "codegraph": "explore-first; no administrative lifecycle commands during normal work"
+  },
+  "skills": [
+    {
+      "id": "review",
+      "path": "skills/review/SKILL.md",
+      "scope": "project",
+      "mapping": "Management /review uses four generic management lenses for any PR scope; development /review selects backend/frontend variants from changed scope. Both preserve risk, resilience, readability and reliability lenses, deduplicate actionable findings, block unavailable lenses, and never approve, merge or deploy."
+    }
+  ],
+  "profileCounts": {
+    "total": 31,
+    "management": 13,
+    "development": 18
+  }
+}
