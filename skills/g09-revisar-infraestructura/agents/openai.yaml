@@ -1,0 +1,4 @@
+interface:
+  display_name: "Revisor de infraestructura"
+  short_description: "Revisa Terraform y coherencia de los ambientes"
+  default_prompt: "Usá $g09-revisar-infraestructura para revisar Terraform y la configuración de los ambientes de Zervi."

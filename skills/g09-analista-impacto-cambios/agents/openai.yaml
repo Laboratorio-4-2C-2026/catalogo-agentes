@@ -1,0 +1,4 @@
+interface:
+  display_name: "Analista de impacto de cambios"
+  short_description: "Mapea dependencias, contratos y riesgos de cada cambio"
+  default_prompt: "Usá $g09-analista-impacto-cambios para mapear qué afecta este ticket, sus riesgos y el orden recomendado de implementación."
