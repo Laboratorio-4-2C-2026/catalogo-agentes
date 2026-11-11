@@ -1,4 +1,0 @@
-interface:
-  display_name: "Design reviewer"
-  short_description: "Revisa diseño técnico con las skills del repositorio"
-  default_prompt: "Usá $g09-design-reviewer para analizar este design doc antes de implementar, aplicando las skills pertinentes de la carpeta de skills del repo."

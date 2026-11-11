@@ -1,4 +1,0 @@
-interface:
-  display_name: "Detector de scope creep"
-  short_description: "Clasifica pedidos y acumula impacto sobre el sprint"
-  default_prompt: "Usá $g09-detector-scope-creep para evaluar este pedido frente al alcance del sprint y actualizar su impacto acumulado."

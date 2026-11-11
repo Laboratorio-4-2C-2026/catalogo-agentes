@@ -1,4 +1,0 @@
-interface:
-  display_name: "Verificador de despliegue"
-  short_description: "Comprueba versión publicada, salud e integración"
-  default_prompt: "Usá $g09-verificar-despliegue para comprobar si el despliegue indicado de Zervi quedó correcto."

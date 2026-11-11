@@ -33,8 +33,8 @@ Convertí el requerimiento en una especificación ejecutable, no en una historia
 
 ## Elegir el tipo de ticket
 
-- Si el trabajo es solo frontend, leé [references/frontend.md](references/frontend.md).
-- Si el trabajo es solo backend, leé [references/backend.md](references/backend.md).
+- Si el trabajo es solo frontend, leé [references/frontend.md](#referencia-de-frontend).
+- Si el trabajo es solo backend, leé [references/backend.md](#referencia-de-backend).
 - Si abarca ambos, redactá dos tickets independientes —frontend y backend— y leé ambas referencias. No mezcles responsabilidades en un único ticket salvo que el usuario lo pida expresamente.
 - Si el usuario entrega un ticket como ejemplo, extraé su nivel de precisión y convenciones; no copies requisitos funcionales que no correspondan al nuevo trabajo.
 
@@ -66,3 +66,68 @@ Antes de entregar, comprobá que:
 **Pedido:** Separá este requerimiento de edición de perfil en tickets frontend y backend, conservando los endpoints y permisos del contrato adjunto.
 
 **Resultado:** Dos especificaciones con contratos, estados, pruebas, fuera de alcance y criterios de aceptación; las decisiones faltantes quedan explícitas.
+
+
+## Referencia de frontend
+
+### Ticket de frontend
+
+Usá solo las secciones que aporten información real al requerimiento, manteniendo este orden general.
+
+#### Estructura recomendada
+
+1. **Título y objetivo:** qué experiencia se incorpora y para quién.
+2. **Alcance:** pantallas, flujos y piezas compartidas incluidas.
+3. **Rutas:** tabla con ruta, componente y guard/acceso.
+4. **Pantallas o flujos:** una sección por pantalla con layout, contenido, comportamiento responsive, condiciones de renderizado, navegación e interacción.
+5. **Datos y estado:** queries, query keys, mutations, parámetros, caché, estado local y secuencia de efectos.
+6. **Estados de UI:** carga, error, vacío, reintento y éxito, conservando los textos exactos.
+7. **Formularios:** librerías, schema, coerciones, defaults, reset, campos, restricciones y mensajes exactos.
+8. **Media y recursos:** previews, persistencia, limpieza/revocación y límites cuando haya archivos o imágenes.
+9. **Componentes compartidos:** qué reutilizar y la responsabilidad específica de cada componente nuevo inevitable.
+10. **Cliente API y tipos:** firmas, payloads, responses e interfaces necesarias para implementar el ticket.
+11. **Pruebas:** permisos, renderizado condicional, validaciones, interacciones, fallos y efectos de caché relevantes.
+12. **Fuera de alcance.**
+13. **Criterios de aceptación.**
+
+#### Precisiones importantes
+
+- Indicá la fuente de cada identificador: params, sesión, props o respuesta de API.
+- En guards, definí por separado el caso sin sesión y el caso sin rol/permisos, incluyendo cada redirección.
+- Para formularios editables, especificá inicialización, resincronización al cambiar datos, submit pendiente, prevención de doble envío y feedback.
+- Para mutaciones de varios pasos, indicá si son secuenciales o paralelas, qué se actualiza tras cada confirmación y qué queda disponible para reintentar si falla parcialmente.
+- Para responsive, describí solo diferencias funcionales o de layout relevantes; usá clases exactas únicamente si forman parte del contrato solicitado.
+- No diseñes un backend alternativo. Documentá el contrato que consume el frontend y cualquier dependencia que deba existir.
+
+
+## Referencia de backend
+
+### Ticket de backend
+
+Usá solo las secciones que aporten información real al requerimiento, manteniendo este orden general.
+
+#### Estructura recomendada
+
+1. **Título y objetivo:** capacidad de negocio y recurso administrado.
+2. **Alcance:** casos de uso y capas afectadas.
+3. **Modelo de datos:** tablas, columnas, tipos, nulabilidad, defaults, índices, constraints, claves foráneas, cascadas y migraciones.
+4. **Entidades y relaciones:** anotaciones relevantes, ownership, colecciones, orden y auditoría.
+5. **Endpoints:** tabla con método, path, autenticación/autorización, request, response y status exitoso.
+6. **DTOs y validación:** firmas o esquemas, campos requeridos/opcionales, Bean Validation y semántica de `null` o ausencia.
+7. **Lógica de negocio:** una sección por método con búsqueda, errores, cambios de estado, orden de operaciones, persistencia y respuesta.
+8. **Transacciones:** escritura frente a `readOnly`, dirty checking, cascadas y atomicidad cuando sean relevantes.
+9. **Errores esperados:** excepción, status y mensaje exacto si fue definido.
+10. **Repositorio:** interfaz, queries o métodos nuevos necesarios.
+11. **Casos de prueba:** happy paths, conflictos, no encontrado, permisos, validación, ordenamiento y semánticas de actualización parcial.
+12. **Fuera de alcance.**
+13. **Criterios de aceptación.**
+
+#### Precisiones importantes
+
+- Para rutas equivalentes a `/me`, el identificador debe provenir del principal autenticado; no aceptes un identificador del body o query salvo requisito explícito.
+- Distinguí con exactitud creación, reemplazo y actualización parcial. Documentá por campo qué ocurre con valor, `null` y ausencia.
+- Indicá quién mantiene campos derivados y si el feature solo los expone.
+- Si una migración o contrato existente está incompleto, señalá el cambio necesario y su relación con las entidades; no ocultes la inconsistencia.
+- Especificá orden estable de colecciones cuando el consumidor dependa de él.
+- Reutilizá las excepciones y el manejo global existentes si el proyecto ya los define.
+- No agregues endpoints auxiliares, almacenamiento real, búsquedas u operaciones administrativas salvo que estén dentro del alcance solicitado.

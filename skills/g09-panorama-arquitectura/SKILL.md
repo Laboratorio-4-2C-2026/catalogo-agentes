@@ -46,8 +46,8 @@ Leé las instrucciones aplicables y empezá por manifiestos de dependencias, est
 
 Pistas de lectura, no hechos inmutables:
 
-- Zervi: `backend/` Kotlin/Spring, `frontend/` React/Vite, `docs/`, migraciones Flyway y `zervi/infrastructure-updated/` si el alcance incluye despliegue. Confirmá versiones y estructura en el checkout elegido. Leé el [runbook](references/runbook-despliegue.md) antes de describir su infraestructura.
-- Conexia: `backend/` NestJS, `backend/prisma/`, `frontend/`, `e2e/`, `.github/workflows/` y [documentación de notificaciones](references/notificaciones.md). Confirmá su autenticación e integraciones desde módulos y configuración.
+- Zervi: `backend/` Kotlin/Spring, `frontend/` React/Vite, `docs/`, migraciones Flyway y `zervi/infrastructure-updated/` si el alcance incluye despliegue. Confirmá versiones y estructura en el checkout elegido. Leé el runbook (`docs/RUNBOOK_DEPLOY_MAIN.md` del repositorio de aplicación) antes de describir su infraestructura.
+- Conexia: `backend/` NestJS, `backend/prisma/`, `frontend/`, `e2e/`, `.github/workflows/` y documentación de notificaciones (`backend/docs/notifications.md` del repositorio Conexia). Confirmá su autenticación e integraciones desde módulos y configuración.
 
 No accedas a `.env`, state ni archivos de credenciales para explicar la arquitectura; los nombres de variables y ejemplos públicos suelen bastar.
 

@@ -41,7 +41,7 @@ Determiná con evidencia si el ambiente sirve la versión esperada y sus compone
 
 Recibí ambiente y SHA esperado o manifiesto del release. Aceptá IDs de deployments como entrada auxiliar y resolvelos a una revisión verificable. Si solo se pide revisar el ambiente actual, podés comprobar salud y descubrir versiones, pero no certifiques que corresponde a una publicación solicitada sin identificar el objetivo.
 
-Leé completo el [runbook](references/runbook-despliegue.md) y consultá el código de la revisión objetivo para elegir rutas y migraciones. Revalidá URLs, cuentas, IDs y configuración; no uses el estado histórico del runbook ni [el deploy v1.1.0](references/despliegue-historico.md) como resultado actual. Usá herramientas conectadas o APIs de lectura disponibles.
+Leé completo el runbook (`docs/RUNBOOK_DEPLOY_MAIN.md` del repositorio de aplicación) y consultá el código de la revisión objetivo para elegir rutas y migraciones. Revalidá URLs, cuentas, IDs y configuración; no uses el estado histórico del runbook ni el deploy v1.1.0 (`DEPLOY_V1_1_0.md` del workspace del proyecto) como resultado actual. Usá herramientas conectadas o APIs de lectura disponibles.
 
 Fijá el SHA esperado al inicio. Si main avanza durante la consulta, no reemplaces ese SHA silenciosamente. Separá el cumplimiento de la política HEAD-de-main al momento de publicar de la identidad de una publicación histórica; un HEAD más reciente no demuestra por sí mismo que el deploy anterior falló. No cambies branches locales ni exijas limpiar el checkout para observar un deployment ya publicado.
 

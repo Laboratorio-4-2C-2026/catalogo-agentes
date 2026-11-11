@@ -60,7 +60,7 @@ Leé instrucciones aplicables y las skills del repo que correspondan al contrato
 - **Datos:** restricciones, defaults, backfill, volumen conocido, compatibilidad con datos existentes y migraciones. Usá Flyway en Zervi y Prisma en Conexia cuando esos mecanismos estén presentes en la revisión. No supongas número de migración ni recomiendes editar una aplicada.
 - **Permisos y estados:** dueño/tercero, rol, transiciones válidas, sesión y acceso por recurso. Trazá tanto backend como visibilidad de las acciones en frontend.
 - **Concurrencia y efectos:** reintentos, idempotencia, transacciones, eventos, notificaciones y caché cuando los cambios los alcancen. Describí el escenario preciso de inconsistencia.
-- **Build y despliegue:** variables públicas frente a secretos, configuración compilada en frontend frente a runtime, artefactos y orden de publicación. Para infraestructura/despliegue de Zervi, leé primero el [runbook](references/runbook-despliegue.md) y contrastá sus referencias históricas con el código actual.
+- **Build y despliegue:** variables públicas frente a secretos, configuración compilada en frontend frente a runtime, artefactos y orden de publicación. Para infraestructura/despliegue de Zervi, leé primero el runbook (`docs/RUNBOOK_DEPLOY_MAIN.md` del repositorio de aplicación) y contrastá sus referencias históricas con el código actual.
 
 No hagas una auditoría general de cada dimensión: cubrí las que tengan vínculo demostrable con el cambio. Una búsqueda sin resultados es una limitación, no una prueba absoluta de que no existen consumidores dinámicos o externos.
 

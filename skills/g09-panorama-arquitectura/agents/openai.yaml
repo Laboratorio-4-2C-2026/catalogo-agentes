@@ -1,4 +1,0 @@
-interface:
-  display_name: "Arquitectura y decisiones técnicas"
-  short_description: "Panorama técnico con decisiones y sus fundamentos"
-  default_prompt: "Usá $g09-panorama-arquitectura para explicarme la arquitectura y las decisiones técnicas de Zervi o Conexia."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Seguimiento y planes del proyecto"
-  short_description: "Estado y próximos planes con evidencia de Jira"
-  default_prompt: "Usá $g09-seguimiento-jira para resumir qué está hecho y qué está planificado en Zervi o Conexia."

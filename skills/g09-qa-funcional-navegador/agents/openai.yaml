@@ -1,4 +1,0 @@
-interface:
-  display_name: "QA funcional y navegador"
-  short_description: "Valida criterios, regresiones y flujos reales en Chrome"
-  default_prompt: "Usá $g09-qa-funcional-navegador para validar esta PR contra sus tickets y guardar un informe con evidencia."

@@ -1,4 +1,0 @@
-interface:
-  display_name: "Tickets técnicos"
-  short_description: "Redacta tickets técnicos completos y verificables"
-  default_prompt: "Usá $g09-redactar-tickets-tecnicos para convertir este requerimiento en un ticket listo para implementar."
