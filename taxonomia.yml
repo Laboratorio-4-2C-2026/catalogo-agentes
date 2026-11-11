@@ -97,6 +97,9 @@ valores:
     cloudflare: ''
     neon: ''
     render: ''
+    agentation: ''
+    codegraph: ''
+    stitch: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
