@@ -100,6 +100,9 @@ valores:
     agentation: ''
     codegraph: ''
     stitch: ''
+    canva: ''
+    gemini: ''
+    vertex-ai: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
