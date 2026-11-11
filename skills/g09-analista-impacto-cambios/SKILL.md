@@ -32,7 +32,8 @@ metadata:
   responsables:
   - XoaquinSanchezVarsallona
   madurez: experimental
-  relacionados: []
+  relacionados:
+  - g09-pre-pr-gate
 ---
 # Analista de impacto de cambios
 

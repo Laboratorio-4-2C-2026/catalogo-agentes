@@ -6,6 +6,7 @@ metadata:
   area:
   - devops
   - qa
+  - backend
   fase:
   - despliegue
   - revision

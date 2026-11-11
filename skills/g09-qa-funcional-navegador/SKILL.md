@@ -1,6 +1,6 @@
 ---
 name: g09-qa-funcional-navegador
-description: Verifica funcionalidades y regresiones de una PR de Zervi o Conexia contra sus tickets, con pruebas pertinentes y navegación real en Google Chrome. Entrega una matriz de criterios y evidencia; no se limita a revisar el código ni al smoke test de un despliegue.
+description: Verifica funcionalidades y regresiones de una PR de Zervi o Conexia contra sus tickets y entrega una matriz de criterios y evidencia. Usar para validar una PR contra sus criterios de aceptación mediante pruebas pertinentes y navegación real en Google Chrome.
 metadata:
   tipo: skill
   area:
