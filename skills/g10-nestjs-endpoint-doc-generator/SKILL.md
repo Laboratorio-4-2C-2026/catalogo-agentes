@@ -30,7 +30,7 @@ metadata:
 ---
 # NestJS Endpoint Doc Generator
 
-Generar documentación de los endpoints de un módulo del backend de Conexia (ej. `trips`, `travel-intents`, `travel-matches`, `subjects`, `profile`) leyendo el controller y los DTOs reales, no suponiendo cómo "debería" funcionar.
+Generar documentación de los endpoints de un módulo del backend de Conexia (ej. `trips`, `travel-intents`, `travel-matches`, `round-trips`, `subjects`, `profile`, `chat`, `notifications`, `universities`) leyendo el controller y los DTOs reales, no suponiendo cómo "debería" funcionar.
 
 ## Qué leer
 

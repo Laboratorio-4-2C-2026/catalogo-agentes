@@ -37,7 +37,7 @@ Revisar los cambios entre la versión anterior y la nueva de `backend/prisma/sch
 
 1. Comparar el schema anterior contra el nuevo (usar `git diff` sobre `schema.prisma`) y el SQL de la migración más reciente.
 2. Marcar como riesgo alto:
-   - `DROP TABLE` o `DROP COLUMN` sobre modelos que ya tienen datos en algún entorno (User, StudentProfile, Subject, Schedule, Trip, TripPassenger, TravelIntent, TravelMatch).
+   - `DROP TABLE` o `DROP COLUMN` sobre modelos que ya tienen datos en algún entorno (User, StudentProfile, Subject, Schedule, Trip, TripPassenger, TravelIntent, TravelMatch, University, Campus, Notification). Esta lista cambia seguido: si `schema.prisma` tiene un modelo nuevo que no está acá, tratarlo igual si ya tiene datos en algún entorno.
    - Columnas nuevas `NOT NULL` sin `@default(...)` en el schema (rompe el insert de filas existentes).
    - Cambios de tipo de columna (ej. `String` a `Int`) que puedan truncar o fallar en la conversión.
    - Cambios en relaciones (`onDelete`, claves foráneas) que puedan borrar en cascada datos que antes no se borraban.

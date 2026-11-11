@@ -1,6 +1,6 @@
 ---
 name: g10-playwright-matching-test-generator
-description: "Usar para generar un spec de Playwright nuevo en e2e/tests que cubra un flujo de trips, schedule o matching que todavía no tiene prueba end-to-end. No usar para unit tests de backend."
+description: "Usar para generar un spec de Playwright nuevo en e2e/tests que cubra un flujo de trips, schedule, matching o round-trips que todavía no tiene prueba end-to-end. No usar para unit tests de backend."
 tools: Read, Grep, Glob, Write, Bash
 model: sonnet
 metadata:
@@ -41,7 +41,7 @@ Sos un generador de specs de Playwright para el frontend de Conexia (`e2e/`, con
 
 ## Qué generar
 
-- Un flujo completo y realista del dominio pedido (por ejemplo: publicar un trip, buscar matches, ver el detalle de un match y sumarse como pasajero; o cargar una materia y un horario y ver que aparece en el schedule).
+- Un flujo completo y realista del dominio pedido (por ejemplo: publicar un trip, buscar matches, ver el detalle de un match y sumarse como pasajero; cargar una materia y un horario y ver que aparece en el schedule; o armar un paquete de ida y vuelta en round-trips y ver el match de cada tramo).
 - Casos felices primero, y al menos un caso de error esperado (ej. intentar unirse a un trip ya lleno, agendar un horario que se superpone con otro).
 - Asserts concretos sobre lo que se ve en pantalla, no sobre implementación interna.
 

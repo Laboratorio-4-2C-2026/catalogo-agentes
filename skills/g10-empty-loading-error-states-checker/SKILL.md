@@ -29,7 +29,7 @@ metadata:
 ---
 # Empty / Loading / Error States Checker
 
-Revisar cada página de `frontend/src/pages` (home, trips, tripDetails, matches, matchDetail, schedule, profile, addSubject, questionnaire) y confirmar que maneja de forma explícita los tres estados que toda vista que pide datos puede tener: cargando, vacía y con error.
+Revisar cada página de `frontend/src/pages` (home, trips, tripDetails, matches, matchDetail, intentDetails, schedule, profile, addSubject, importSubjects, questionnaire, chat, chats, notifications) y confirmar que maneja de forma explícita los tres estados que toda vista que pide datos puede tener: cargando, vacía y con error. La lista de páginas cambia seguido: si hay una carpeta en `frontend/src/pages` que no está en esta lista, revisarla igual.
 
 ## Qué revisar
 
