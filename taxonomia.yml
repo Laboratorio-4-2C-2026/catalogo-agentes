@@ -65,6 +65,7 @@ valores:
     github-actions: ''
     k6: ''
     turborepo: ''
+    cypress: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban

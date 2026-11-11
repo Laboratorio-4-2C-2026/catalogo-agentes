@@ -35,11 +35,11 @@ Preferí siempre estos valores. Si ninguno encaja, podés escribir uno nuevo: se
 <!-- LISTAS:INICIO -->
 | Campo | Valores (cantidad de piezas que lo usan) |
 |---|---|
-| `area` | `frontend` (59), `backend` (83), `mobile` (20), `datos` (18), `ia` (10), `qa` (129), `devops` (35), `seguridad` (18), `gestion` (179), `diseno` (22), `documentacion` (51) |
-| `fase` | `planificacion` (102), `analisis` (61), `diseno` (26), `desarrollo` (74), `testing` (72), `revision` (173), `despliegue` (17), `mantenimiento` (39), `integracion` (5) |
-| `tecnologias` | `agnostico` (195), `express` (22), `flutter` (18), `prisma` (26), `dart` (17), `docker` (16), `figma` (2), `javascript` (3), `postgresql` (26), `riverpod` (1), `supertest` (4), `typescript` (90), `vitest` (7), `zod` (1), `n8n` (2), `supabase` (17), `firebase` (14), `firestore` (3), `git` (22), `jest` (7), `nodejs` (11), `react` (48), `python` (25), `nextjs` (11), `playwright` (15), `nestjs` (26), `tanstack-query` (1), `auth0` (3), `flyway` (3), `junit` (2), `kotlin` (8), `postman` (1), `spring-boot` (9), `testcontainers` (1), `tailwindcss` (6), `vite` (3), `github-actions` (3), `k6` (2), `turborepo` (1) |
-| `metodologia` | `scrum` (274), `kanban` (10), `agnostico` (26) |
-| `herramientas` | `claude-code` (320), `cursor` (53), `codex` (95), `otra` (39) |
-| `requiere` | `jira` (48), `github` (129), `figma` (1), `google-sheets` (11), `slack` (0), `dart-mcp` (2), `chrome` (12), `discord` (14), `google-drive` (13), `engram` (33), `linear` (68), `playwright` (7), `talksmith` (2), `openrouter` (10), `multica` (38), `supabase` (1), `platformance` (1) |
-| `madurez` | `experimental` (133), `probado` (17), `usado-en-proyecto` (238), `prototipo` (3) |
+| `area` | `frontend` (63), `backend` (85), `mobile` (20), `datos` (19), `ia` (10), `qa` (134), `devops` (39), `seguridad` (18), `gestion` (195), `diseno` (27), `documentacion` (56) |
+| `fase` | `planificacion` (107), `analisis` (63), `diseno` (30), `desarrollo` (75), `testing` (74), `revision` (188), `despliegue` (19), `mantenimiento` (43), `integracion` (5) |
+| `tecnologias` | `agnostico` (217), `express` (22), `flutter` (18), `prisma` (26), `dart` (17), `docker` (18), `figma` (3), `javascript` (3), `postgresql` (27), `riverpod` (1), `supertest` (4), `typescript` (90), `vitest` (7), `zod` (1), `n8n` (2), `supabase` (17), `firebase` (14), `firestore` (3), `git` (23), `jest` (7), `nodejs` (11), `react` (51), `python` (25), `nextjs` (15), `playwright` (16), `nestjs` (26), `tanstack-query` (1), `auth0` (3), `flyway` (3), `junit` (2), `kotlin` (8), `postman` (1), `spring-boot` (10), `testcontainers` (1), `tailwindcss` (6), `vite` (3), `github-actions` (5), `k6` (2), `turborepo` (1), `cypress` (1) |
+| `metodologia` | `scrum` (304), `kanban` (10), `agnostico` (26) |
+| `herramientas` | `claude-code` (340), `cursor` (53), `codex` (115), `otra` (49) |
+| `requiere` | `jira` (48), `github` (140), `figma` (3), `google-sheets` (11), `slack` (0), `dart-mcp` (2), `chrome` (12), `discord` (14), `google-drive` (13), `engram` (33), `linear` (74), `playwright` (7), `talksmith` (2), `openrouter` (10), `multica` (38), `supabase` (1), `platformance` (1) |
+| `madurez` | `experimental` (142), `probado` (17), `usado-en-proyecto` (259), `prototipo` (3) |
 <!-- LISTAS:FIN -->
