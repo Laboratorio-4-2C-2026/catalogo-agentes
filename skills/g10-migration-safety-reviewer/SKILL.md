@@ -28,6 +28,8 @@ metadata:
   - g10-dto-validation-checker
   - g01-prisma-migration-guard
   - g11-revisar-migracion
+  - g06-neon-prisma-safety
+  - g03-prisma
 ---
 # Migration Safety Reviewer
 

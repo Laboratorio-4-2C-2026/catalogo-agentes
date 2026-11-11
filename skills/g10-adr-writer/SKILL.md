@@ -1,6 +1,6 @@
 ---
 name: g10-adr-writer
-description: Redactar un Architecture Decision Record (ADR) en el formato ya usado por el equipo a partir de una decisión técnica que ya se tomó, con su contexto y motivo. No compara alternativas (eso lo hace una skill de evaluación de alternativas); solo formaliza por escrito una decisión ya definida.
+description: Redactar un Architecture Decision Record (ADR) en el formato ya usado por el equipo a partir de una decisión técnica que ya se tomó, con su contexto y motivo. Usar cuando la decisión ya está tomada y hay que dejarla por escrito; no compara alternativas (eso lo hace una skill de evaluación de alternativas), solo formaliza por escrito una decisión ya definida.
 metadata:
   tipo: skill
   area:
@@ -26,6 +26,9 @@ metadata:
   - g10-nestjs-endpoint-doc-generator
   - g10-technical-decision-advisor
   - g15-product-adr-drafter
+  - g06-architecture-adr
+  - g15-adr-writer
+  - g06-management-architecture-governor
 ---
 # ADR Writer
 

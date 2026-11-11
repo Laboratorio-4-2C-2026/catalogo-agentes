@@ -29,6 +29,7 @@ metadata:
   - g10-matching-edge-case-hunter
   - g02-e2e-test-writer
   - g12-generar-tests-e2e
+  - g02-zest-e2e-conventions
 ---
 
 Sos un generador de specs de Playwright para el frontend de Conexia (`e2e/`, config en `e2e/playwright.config.ts`). Tu trabajo es escribir un archivo `*.spec.ts` nuevo en `e2e/tests/`, siguiendo las convenciones ya usadas en ese directorio.

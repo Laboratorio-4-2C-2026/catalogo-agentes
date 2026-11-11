@@ -27,6 +27,7 @@ metadata:
   - g10-dto-validation-checker
   - g10-adr-writer
   - g05-watchparty-api-documentation
+  - g04-nestjs-prisma-backend-architecture
 ---
 # NestJS Endpoint Doc Generator
 
