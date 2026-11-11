@@ -1,0 +1,27 @@
+# Timbre del bot: va en el repo de PRODUCTO (.github/workflows/pedir-review.yml), no en el del bot.
+# Lo agregan los devs del producto; dirección lo entrega como texto, sin commitear en ese repo.
+# Cambiá 'vaivendev' (cuenta del bot) y el repo destino por los tuyos.
+name: Pedir Review al Bot
+on:
+  pull_request:
+    types: [review_requested]
+
+jobs:
+  avisar-bot:
+    if: github.event.requested_reviewer.login == 'vaivendev'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Tocar timbre en vaivendev
+        run: |
+          gh api repos/vaiven-austral/vaivendev/actions/workflows/revisar-pr.yml/dispatches \
+            -f ref=main \
+            -f "inputs[pr]=$PR" \
+            -f "inputs[sha]=$SHA" \
+            -f "inputs[base]=$BASE"
+        env:
+          # El nombre de la rama lo controla quien abre el PR: entra por variable de entorno, no interpolado.
+          PR: ${{ github.event.pull_request.number }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+          BASE: ${{ github.event.pull_request.base.ref }}
+          # PAT fine-grained de la cuenta del bot con Actions: write SOLO sobre el repo del bot.
+          GH_TOKEN: ${{ secrets.DISPATCH_VAIVEN_REVIEW }}

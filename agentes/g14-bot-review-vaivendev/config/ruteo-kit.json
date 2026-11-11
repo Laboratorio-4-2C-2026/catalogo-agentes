@@ -1,0 +1,12 @@
+{
+  "_comentario": "Qué documentos de ai-config/docs/ recibe Gemini según las rutas que toca el diff. Globs con fnmatch ('*' cruza '/'). 'siempre' entra primero; el resto en el orden de las reglas. Si no coincide ninguna regla, entra 'sin_coincidencia'. Si se pasa el tope, se descartan desde el final.",
+  "tope_caracteres": 40000,
+  "siempre": ["definition-of-done.md"],
+  "reglas": [
+    {"globs": ["supabase/migrations/*", "supabase/*.sql"], "docs": ["datos/esquema.md", "datos/permisos.md", "codigo/datos-y-motor.md"]},
+    {"globs": ["n8n/*"], "docs": ["motor/contrato.md", "motor/llamada.md", "codigo/datos-y-motor.md"]},
+    {"globs": ["src/*"], "docs": ["codigo/frontend.md", "ui/tokens.md"]},
+    {"globs": [".env*", "vite.config*", "package.json", "pnpm-lock.yaml", "supabase/config.toml"], "docs": ["configuracion-del-entorno.md"]}
+  ],
+  "sin_coincidencia": ["INDEX.md"]
+}

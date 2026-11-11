@@ -1,0 +1,171 @@
+{
+  "_comentario": "Config del sincronizador de espejos (ver sync-agentes.py). Cada par declara una fuente canónica y sus espejos generados. 'frontmatter': 'source' copia el de la fuente; un objeto lo genera ($description = description de la fuente; $description_yaml la entrecomilla para YAML). 'body': false emite solo el prepend (stubs de command). 'replacements' son adaptaciones por proveedor con texto EXACTO: si la fuente cambia, el script falla y hay que actualizar el reemplazo a conciencia.",
+  "_nota_vaiven": "VaiVen todavía NO tiene subagentes propios de dominio. Cuando se definan, se agregan como pares .claude/agents/<n>.md → .cursor/rules/agents/<n>.mdc + .agents/rules/<n>.md + .opencode/agents/<n>.md, igual que en ECHO. Las skills NO se espejan a OpenCode: las lee nativas de .claude/skills/.",
+  "pairs": [
+    {
+      "source": "CLAUDE.md",
+      "outputs": [
+        {
+          "path": ".cursor/rules/general.mdc",
+          "frontmatter": {
+            "description": "Reglas generales de VaiVen (Regla #1, rutina de sesión, ruteo de conocimiento) — espejo generado de CLAUDE.md",
+            "globs": "\"*\"",
+            "alwaysApply": true
+          },
+          "replacements": [
+            {
+              "from": "# CLAUDE.md — vaiven-agentes",
+              "to": "# VaiVen — Reglas Generales del Proyecto (espejo de CLAUDE.md)"
+            }
+          ]
+        },
+        {
+          "path": ".agents/AGENTS.md",
+          "replacements": [
+            {
+              "from": "# CLAUDE.md — vaiven-agentes",
+              "to": "# AGENTS.md — VaiVen"
+            }
+          ]
+        },
+        {
+          "_nota": "OpenCode busca reglas locales subiendo por directorios y toma el primer AGENTS.md o CLAUDE.md; el de la raíz gana.",
+          "path": "AGENTS.md",
+          "replacements": [
+            {
+              "from": "# CLAUDE.md — vaiven-agentes",
+              "to": "# AGENTS.md — VaiVen"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "source": ".claude/skills/onboarding/SKILL.md",
+      "outputs": [
+        {
+          "path": ".cursor/rules/skills/onboarding.mdc",
+          "frontmatter": {
+            "description": "$description",
+            "globs": "\"*\""
+          }
+        },
+        {
+          "path": ".agents/skills/onboarding/SKILL.md",
+          "frontmatter": "source"
+        },
+        {
+          "_nota": "Command de OpenCode: stub. El protocolo vive en la skill, que OpenCode lee de .claude/skills/.",
+          "path": ".opencode/commands/onboarding.md",
+          "frontmatter": {
+            "description": "\"Poner al día a alguien sobre VaiVen respondiendo con el conocimiento del repo\"",
+            "agent": "plan"
+          },
+          "body": false,
+          "prepend": "Cargá la skill `onboarding` con la tool `skill` y seguí su protocolo.\n\nPregunta del usuario: $ARGUMENTS\n"
+        }
+      ]
+    },
+    {
+      "source": ".claude/skills/status-reporter/SKILL.md",
+      "outputs": [
+        {
+          "path": ".cursor/rules/skills/status-reporter.mdc",
+          "frontmatter": {
+            "description": "$description",
+            "globs": "\"*\""
+          }
+        },
+        {
+          "path": ".agents/skills/status-reporter/SKILL.md",
+          "frontmatter": "source"
+        },
+        {
+          "_nota": "Command de OpenCode: stub. El protocolo vive en la skill, que OpenCode lee de .claude/skills/.",
+          "path": ".opencode/commands/status-reporter.md",
+          "frontmatter": {
+            "description": "\"Generar informe semanal de avance con datos de Jira, GitHub y agentes\"",
+            "agent": "plan"
+          },
+          "body": false,
+          "prepend": "Cargá la skill `status-reporter` con la tool `skill` y seguí su protocolo.\n\nPregunta del usuario: $ARGUMENTS\n"
+        }
+      ]
+    },
+    {
+      "source": ".claude/skills/auditor-de-agentes/SKILL.md",
+      "outputs": [
+        {
+          "path": ".cursor/rules/skills/auditor-de-agentes.mdc",
+          "frontmatter": {
+            "description": "$description",
+            "globs": "\"*\""
+          }
+        },
+        {
+          "path": ".agents/skills/auditor-de-agentes/SKILL.md",
+          "frontmatter": "source"
+        },
+        {
+          "path": ".opencode/commands/auditor-de-agentes.md",
+          "frontmatter": {
+            "description": "\"Auditar agentes del equipo, 4 piezas, evidencias y Regla #1\"",
+            "agent": "plan"
+          },
+          "body": false,
+          "prepend": "Cargá la skill `auditor-de-agentes` con la tool `skill` y seguí su protocolo.\n\nPregunta del usuario: $ARGUMENTS\n"
+        }
+      ]
+    },
+    {
+      "source": ".claude/skills/tutor-del-proyecto/SKILL.md",
+      "outputs": [
+        {
+          "path": ".cursor/rules/skills/tutor-del-proyecto.mdc",
+          "frontmatter": {
+            "description": "$description",
+            "globs": "\"*\""
+          }
+        },
+        {
+          "path": ".agents/skills/tutor-del-proyecto/SKILL.md",
+          "frontmatter": "source"
+        },
+        {
+          "path": ".opencode/commands/tutor-del-proyecto.md",
+          "frontmatter": {
+            "description": "\"Responder consultas técnicas y de arquitectura citando ADRs y convenciones de VaiVen\"",
+            "agent": "plan"
+          },
+          "body": false,
+          "prepend": "Cargá la skill `tutor-del-proyecto` con la tool `skill` y seguí su protocolo.\n\nPregunta del usuario: $ARGUMENTS\n"
+        }
+      ]
+    },
+    {
+      "source": ".claude/skills/curador-de-contexto-devs/SKILL.md",
+      "outputs": [
+        {
+          "path": ".cursor/rules/skills/curador-de-contexto-devs.mdc",
+          "frontmatter": {
+            "description": "$description",
+            "globs": "\"*\""
+          }
+        },
+        {
+          "path": ".agents/skills/curador-de-contexto-devs/SKILL.md",
+          "frontmatter": "source"
+        },
+        {
+          "path": ".opencode/commands/curador-de-contexto-devs.md",
+          "frontmatter": {
+            "description": "\"Auditar y mantener la paridad entre ADRs de dirección y el kit de desarrolladores ai-config\"",
+            "agent": "plan"
+          },
+          "body": false,
+          "prepend": "Cargá la skill `curador-de-contexto-devs` con la tool `skill` y seguí su protocolo.\n\nPregunta del usuario: $ARGUMENTS\n"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+name: Tablero semanal de la cátedra
+
+# Jueves 8:30 (Argentina) = 11:30 UTC. Se adelanta media hora porque el cron
+# de GitHub llega tarde: así el issue está antes de las 9, que es el plazo de carga.
+on:
+  schedule:
+    - cron: '30 11 * * 4'
+  workflow_dispatch:
+    inputs:
+      hoy:
+        description: 'Fecha de corte YYYY-MM-DD (vacío = hoy)'
+        required: false
+        type: string
+      abrir_issue:
+        description: 'Abrir el issue (desmarcar para probar sin avisar a nadie)'
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  tablero:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Comprobar que el token de lectura ve vaiven-app y vaiven-direccion
+        env:
+          GH_TOKEN: ${{ secrets.VAIVEN_APP_TOKEN }}
+        run: |
+          gh api repos/vaiven-austral/vaiven-app --jq .full_name
+          gh api repos/vaiven-austral/vaiven-direccion --jq .full_name
+
+      - name: Juntar los datos y armar el texto del issue
+        env:
+          GH_TOKEN: ${{ secrets.VAIVEN_APP_TOKEN }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+        run: |
+          python3 scripts/tablero-semanal.py \
+            ${{ inputs.hoy && format('--hoy {0}', inputs.hoy) || '' }} \
+            --mencionar mardejesus,AnaB2,MackyAlimena,Elias85974 > issue.md
+          cat issue.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Propuesta de colores con IA (si falla, el issue sale igual)
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          python3 scripts/tablero-ia.py issue.md | tee propuesta.md || true
+          cat propuesta.md >> issue.md
+          cat propuesta.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Abrir el issue (sólo si hay semanas sin cargar)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ inputs.abrir_issue }}" = "false" ]; then
+            echo "Corrida de prueba: no se abre issue (ver el resumen de la corrida)."
+            exit 0
+          fi
+          if grep -q "No hay semanas vacías" issue.md; then
+            echo "Planilla al día: no se abre issue."
+            exit 0
+          fi
+          semanas=$(grep -o 'Semanas sin cargar:\*\* [^.]*' issue.md | sed 's/.*\*\* //')
+          gh issue create -R "$GITHUB_REPOSITORY" \
+            --title "Tablero de la cátedra — cargar ${semanas}" \
+            --body-file issue.md

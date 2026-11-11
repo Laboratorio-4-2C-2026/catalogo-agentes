@@ -1,0 +1,62 @@
+name: Revisar PR con Gemini
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr:
+        description: 'Número de Pull Request a revisar'
+        required: true
+        type: number
+      sha:
+        description: 'SHA del head commit'
+        required: false
+        type: string
+      base:
+        description: 'Rama base del PR'
+        required: false
+        type: string
+        default: 'main'
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout vaivendev
+        uses: actions/checkout@v4
+
+      - name: Checkout del kit de contexto (ai-config/docs)
+        uses: actions/checkout@v4
+        with:
+          repository: vaiven-austral/ai-config
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          path: ai-config
+          sparse-checkout: docs
+        # Si falla, la review sigue sin kit y lo avisa en el cuerpo.
+        continue-on-error: true
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Ejecutar review con Gemini
+        run: |
+          python3 scripts/generar-review.py \
+            --pr "$PR" \
+            --sha "$SHA" \
+            --base "$BASE" \
+            --repo "vaiven-austral/vaiven-app"
+        env:
+          # Los inputs entran por variables de entorno, nunca interpolados en el script de shell.
+          PR: ${{ inputs.pr }}
+          SHA: ${{ inputs.sha }}
+          BASE: ${{ inputs.base }}
+          GH_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-flash-latest' }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          TARGET_REPO: "vaiven-austral/vaiven-app"
+          AI_CONFIG_DIR: ${{ github.workspace }}/ai-config
