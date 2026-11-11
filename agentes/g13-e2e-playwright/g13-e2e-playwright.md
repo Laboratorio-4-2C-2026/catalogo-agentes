@@ -34,6 +34,7 @@ metadata:
   - g10-playwright-matching-test-generator
   - g13-generador-de-unit-tests
   - g13-guiones-uat
+  - g11-test-agent
 ---
 
 # E2E Playwright
