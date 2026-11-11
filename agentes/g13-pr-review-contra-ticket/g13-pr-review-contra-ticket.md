@@ -1,6 +1,6 @@
 ---
 name: g13-pr-review-contra-ticket
-description: 'Agente de GitHub Actions que revisa cada PR de MicroChangas contra el ticket de Multica: verifica los criterios de aceptación uno por uno, más correctitud, seguridad y mantenibilidad, y comenta inline. Abre con un bloque ''Para el negocio'' legible por alguien que no programa. Corre en cada push a una PR que no esté en draft.'
+description: 'Agente de GitHub Actions que revisa cada PR de MicroChangas contra el ticket de Multica: verifica los criterios de aceptación uno por uno, más correctitud, seguridad y mantenibilidad, y comenta inline para el dev. La traducción para el negocio la publica g13-traductor-a-negocio en su propio comentario. Corre en cada push a una PR que no esté en draft.'
 metadata:
   tipo: agente
   area:
@@ -31,9 +31,9 @@ metadata:
   relacionados:
   - g15-pr-code-reviewer
   - g04-pr-review-ticket-scope
-  - g11-pr-business-translator
   - g13-validar-branch
   - g13-guiones-uat
+  - g13-traductor-a-negocio
 ---
 
 # PR Review contra el ticket
@@ -57,7 +57,7 @@ Origen: `.github/workflows/pr-review.yml` en https://github.com/MicroChangas/mic
 
 - Resuelve el código de ticket desde la rama, el título o el cuerpo de la PR (`MIC-87` o `MC-106`).
 - Trae el ticket de la API de Multica. Si falla, el review igual corre y avisa que no pudo verificar los criterios.
-- El modelo lee el diff completo contra la base, comenta inline y publica un resumen con un bloque *Para el negocio* (qué resuelve, riesgo, qué probar).
+- El modelo lee el diff completo contra la base, comenta inline y publica un resumen técnico para el dev: si la PR cumple el ticket y el estado de cada criterio. No repite la traducción para el negocio, que publica `g13-traductor-a-negocio`.
 - Las PRs en draft no se revisan, para no gastar tokens en código que todavía se mueve.
 
 ## Cómo se instala
@@ -92,4 +92,4 @@ llama, e `id-token: write` nunca viene por defecto.
 
 **Pedido:** Un dev abre la PR `MIC-87 Postulación a changas` hacia `dev` en microchangas-backend.
 
-**Resultado:** El agente comenta en la PR una tabla con cada criterio de aceptación del ticket MIC-87 (cumple / no cumple / no verificable), observaciones inline sobre el diff y un bloque 'Para el negocio' con el riesgo y qué probar.
+**Resultado:** El agente comenta en la PR una tabla con cada criterio de aceptación del ticket MIC-87 (cumple / no cumple / no verificable) y observaciones inline sobre el diff, escritas para el dev.

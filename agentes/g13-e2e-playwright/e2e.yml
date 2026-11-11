@@ -1,0 +1,631 @@
+name: Agente · E2E Playwright
+
+# Reusable workflow. Los tres roles que pedia el ticket, en una sola corrida:
+#
+#   planner   - saca del ticket los recorridos de usuario que hay que cubrir
+#   generator - los escribe como specs de Playwright y LOS CORRE de verdad
+#   healer    - cuando uno falla, dictamina si esta mal el test o esta mal la app
+#
+# ────────────────────────────────────────────────────────────────────────────
+# Como corre E2E sin tocar el repo de producto
+#
+# Playwright no esta instalado en ningun repo y no se puede agregar: eso seria
+# un commit al package.json, que es codigo de aplicacion. Asi que se instala en
+# el runner con --no-save --no-package-lock, que no toca ni package.json ni el
+# lockfile, y los specs se escriben en e2e-agente/, una carpeta que solo existe
+# durante el job.
+#
+# La app se levanta en el mismo runner desde el build de la PR. El backend NO
+# esta corriendo, asi que los specs stubbean las respuestas de la API con
+# page.route(). Eso ademas hace los tests deterministicos: no dependen de que
+# datos haya cargados.
+#
+# El healer es ADVISORY a proposito. Un agente que arregla solo el test que
+# fallo puede estar tapando una regresion real: si la app se rompio, arreglar el
+# test es exactamente lo que no queres. Dictamina y propone, no corrige.
+# ────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_call:
+    inputs:
+      project_kind:
+        type: string
+        required: true
+      ticket_prefix:
+        type: string
+        default: 'MC'
+      multica_workspace_id:
+        type: string
+        required: false
+        default: ''
+      base_url:
+        description: |
+          URL ya desplegada contra la cual correr. Si se deja vacia, la app se
+          construye y se sirve en el propio runner con build_cmd y serve_cmd.
+        type: string
+        default: ''
+      package_manager:
+        type: string
+        default: 'npm'
+      node_version:
+        type: string
+        default: '22'
+      build_cmd:
+        type: string
+        default: ''
+      serve_cmd:
+        description: |
+          Comando que sirve el build. Tiene que quedar escuchando Y atar a IPv4
+          explicitamente: `vite preview` sin --host escucha en `localhost`, que
+          en algunos entornos resuelve solo a ::1, y el sondeo a 127.0.0.1 nunca
+          conecta.
+        type: string
+        default: ''
+      serve_port:
+        type: number
+        default: 4173
+      model:
+        type: string
+        default: 'claude-sonnet-5'
+      max_turns:
+        # El mas alto de todos: planifica, escribe varios specs, los corre, lee
+        # los errores y vuelve a iterar. Quedarse corto marca el paso como
+        # fallido aunque haya publicado. timeout_minutes es el corte real.
+        type: number
+        default: 80
+      timeout_minutes:
+        type: number
+        default: 35
+    secrets:
+      anthropic_api_key:
+        required: false
+      claude_code_oauth_token:
+        required: false
+      resend_api_key:
+        required: false
+      multica_token:
+        required: false
+
+jobs:
+  e2e:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      # read: el agente escribe specs en el runner, nunca en el repo.
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read
+    steps:
+      # ─────────────────────────────────────────────────────────────────────
+      # Compuerta. Es el agente mas caro que tenemos: instala un navegador,
+      # construye la app, la levanta y despues itera corriendo tests. No puede
+      # correr en cada push.
+      # ─────────────────────────────────────────────────────────────────────
+      - name: Decidir si corre
+        id: gate
+        env:
+          ACCION: ${{ github.event.action }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          BASE_URL: ${{ inputs.base_url }}
+          SERVE_CMD: ${{ inputs.serve_cmd }}
+        run: |
+          set -uo pipefail
+
+          momento=false
+          case "${ACCION:-}" in
+            opened|ready_for_review|reopened) momento=true ;;
+          esac
+          case ",${LABELS:-}," in
+            *,e2e,*) momento=true ;;
+          esac
+          if [ "$momento" != "true" ]; then
+            echo "Se omite: los E2E se generan al abrir o marcar lista la PR (evento '${ACCION:-?}')."
+            echo "correr=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Sin app contra la cual correr no hay E2E posible.
+          if [ -z "${BASE_URL:-}" ] && [ -z "${SERVE_CMD:-}" ]; then
+            echo "Se omite: no hay base_url ni serve_cmd, asi que no hay app contra la cual correr."
+            echo "correr=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Corre: evento '${ACCION:-?}'."
+          echo "correr=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v6
+        if: steps.gate.outputs.correr == 'true'
+        with:
+          fetch-depth: 0
+
+      - name: Resolver codigo de ticket
+        id: ticket
+        if: steps.gate.outputs.correr == 'true'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PREFIX: ${{ inputs.ticket_prefix }}
+        run: |
+          blob="$(printf '%s\n%s\n%s\n' "$HEAD_REF" "$PR_TITLE" "$PR_BODY")"
+          code="$(printf '%s' "$blob" | grep -oE '\bMIC-[0-9]+' | head -n1 || true)"
+          kind=short_id
+          if [ -z "$code" ]; then
+            code="$(printf '%s' "$blob" | grep -oE "\b${PREFIX}-[0-9]+" | head -n1 || true)"
+            kind=en_titulo
+          fi
+          if [ -z "$code" ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Ticket detectado: $code (se busca por $kind)"
+            {
+              echo "found=true"
+              echo "code=$code"
+              echo "kind=$kind"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Traer el ticket de Multica
+        continue-on-error: true
+        if: steps.gate.outputs.correr == 'true' && steps.ticket.outputs.found == 'true' && inputs.multica_workspace_id != ''
+        env:
+          MULTICA_TOKEN: ${{ secrets.multica_token }}
+          MULTICA_WORKSPACE_ID: ${{ inputs.multica_workspace_id }}
+          TICKET_CODE: ${{ steps.ticket.outputs.code }}
+          TICKET_KIND: ${{ steps.ticket.outputs.kind }}
+        run: |
+          set -uo pipefail
+          if [ -z "${MULTICA_TOKEN:-}" ]; then
+            echo "::warning::Falta el secret MULTICA_TOKEN. Sin criterios de aceptacion el planner trabaja a ciegas."
+            exit 0
+          fi
+          API="https://api.multica.ai/api"
+          auth=(-H "Authorization: Bearer ${MULTICA_TOKEN}" -H "X-Workspace-ID: ${MULTICA_WORKSPACE_ID}")
+
+          bajar() {
+            curl -sS --max-time 20 "${auth[@]}" "${API}/issues/$1" -o ticket.json \
+              && jq -e '.title' ticket.json >/dev/null 2>&1
+          }
+
+          if [ "$TICKET_KIND" = "short_id" ] && bajar "$TICKET_CODE"; then
+            echo "Ticket recuperado: $(jq -r --arg c "$TICKET_CODE" '((.short_id // "") | if . == "" then $c else . end) + " — " + (.title // "?")' ticket.json)"
+            exit 0
+          fi
+          rm -f ticket.json
+
+          uuid=''; offset=0
+          for _ in $(seq 1 10); do
+            page="$(curl -sS --max-time 20 "${auth[@]}" "${API}/issues?limit=100&offset=${offset}")" || break
+            if [ "$TICKET_KIND" = "short_id" ]; then
+              match="$(printf '%s' "$page" | jq -r --arg c "$TICKET_CODE" \
+                '(if type == "object" then (.items // []) else . end) | map(select(.short_id == $c)) | .[0].id // empty')"
+            else
+              match="$(printf '%s' "$page" | jq -r --arg c "[${TICKET_CODE}]" \
+                '(if type == "object" then (.items // []) else . end) | map(select(.title | contains($c))) | .[0].id // empty')"
+            fi
+            if [ -n "$match" ]; then uuid="$match"; break; fi
+            [ "$(printf '%s' "$page" | jq -r '.has_more // false')" = "true" ] || break
+            offset="$(printf '%s' "$page" | jq -r --argjson o "$offset" '.next_offset // ($o + 100)')"
+          done
+
+          [ -n "$uuid" ] || { echo "::warning::No hay issue para ${TICKET_CODE}."; exit 0; }
+          bajar "$uuid" || { echo "::warning::El issue ${uuid} no se pudo leer."; rm -f ticket.json; }
+
+      - name: Armar el contexto del ticket
+        if: steps.gate.outputs.correr == 'true'
+        run: |
+          if [ -f ticket.json ]; then
+            {
+              echo "## Ticket de Multica"
+              jq -r '"**" + (.short_id // "?") + "** — " + (.title // "?")' ticket.json
+              echo
+              jq -r '.description // "(sin descripcion)"' ticket.json
+            } > ticket-context.md
+          else
+            printf '## Ticket de Multica\n\nNo se pudo recuperar: los recorridos salen del diff.\n' > ticket-context.md
+          fi
+
+      - uses: pnpm/action-setup@v4
+        if: steps.gate.outputs.correr == 'true' && inputs.package_manager == 'pnpm'
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.correr == 'true'
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: ${{ inputs.package_manager }}
+
+      - name: Instalar dependencias
+        if: steps.gate.outputs.correr == 'true'
+        run: |
+          if [ "${{ inputs.package_manager }}" = "pnpm" ]; then
+            pnpm install --frozen-lockfile
+          else
+            npm ci --no-audit --no-fund
+          fi
+
+      - name: Construir la app
+        if: steps.gate.outputs.correr == 'true' && inputs.base_url == '' && inputs.build_cmd != ''
+        run: ${{ inputs.build_cmd }}
+
+      - name: Levantar la app y esperar que responda
+        id: servidor
+        if: steps.gate.outputs.correr == 'true' && inputs.base_url == ''
+        env:
+          PUERTO: ${{ inputs.serve_port }}
+        run: |
+          set -uo pipefail
+          nohup ${{ inputs.serve_cmd }} > servidor.log 2>&1 &
+          echo "pid=$!" >> "$GITHUB_OUTPUT"
+
+          url="http://127.0.0.1:${PUERTO}"
+          # Hasta 60s: el build ya esta hecho, levantar el server estatico es
+          # rapido, pero el runner a veces arranca lento.
+          for i in $(seq 1 60); do
+            if curl -fsS --max-time 3 "$url" -o /dev/null 2>/dev/null; then
+              echo "La app responde en ${url} (tras ${i}s)."
+              echo "url=$url" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            sleep 1
+          done
+
+          echo "::error::La app no respondio en ${url} despues de 60s."
+          echo "--- servidor.log ---"
+          tail -40 servidor.log || true
+          exit 1
+
+      - name: Instalar Playwright en el runner
+        if: steps.gate.outputs.correr == 'true'
+        run: |
+          set -uo pipefail
+          # --no-save alcanza: deja package.json Y el lockfile intactos, probado
+          # contra el repo real. Es la diferencia entre instalar una herramienta
+          # para este job y meter una dependencia en el repo de otro.
+          #
+          # Sin --no-package-lock a proposito: combinarlo con un lockfile ya
+          # existente revienta npm con "Cannot read properties of null
+          # (reading 'edgesOut')".
+          npm i --no-save @playwright/test
+          npx playwright install --with-deps chromium
+          echo "Playwright listo. package.json intacto:"
+          git status --porcelain package.json package-lock.json pnpm-lock.yaml 2>/dev/null || true
+
+      - name: Preparar el banco de pruebas
+        if: steps.gate.outputs.correr == 'true'
+        env:
+          BASE_URL_IN: ${{ inputs.base_url }}
+          URL_LOCAL: ${{ steps.servidor.outputs.url }}
+        run: |
+          set -uo pipefail
+          destino="${BASE_URL_IN:-$URL_LOCAL}"
+          echo "E2E_BASE_URL=${destino}" >> "$GITHUB_ENV"
+          echo "Los specs van a correr contra: ${destino}"
+
+          # La config la escribe el workflow, no el agente: asi el agente solo
+          # tiene que ocuparse de los specs y no puede romper el arnes.
+          mkdir -p e2e-agente/specs
+          cat > e2e-agente/playwright.config.ts <<'CFG'
+          import { defineConfig } from '@playwright/test';
+
+          export default defineConfig({
+            testDir: './specs',
+            timeout: 30_000,
+            expect: { timeout: 7_000 },
+            retries: 0,
+            workers: 1,
+            reporter: [['list'], ['html', { outputFolder: '../e2e-reporte', open: 'never' }]],
+            use: {
+              baseURL: process.env.E2E_BASE_URL,
+              trace: 'retain-on-failure',
+              screenshot: 'only-on-failure',
+              video: 'off',
+            },
+          });
+          CFG
+          echo "Banco de pruebas en e2e-agente/. Config escrita."
+
+      # Huella del arbol ANTES del agente, para verificar despues que solo
+      # escribio specs.
+      - name: Huella del arbol
+        if: steps.gate.outputs.correr == 'true'
+        run: |
+          git status --porcelain > antes.txt || true
+          echo "Archivos sucios antes del agente: $(wc -l < antes.txt | tr -d ' ')"
+
+      - id: claude
+        if: steps.gate.outputs.correr == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}
+          claude_code_oauth_token: ${{ secrets.claude_code_oauth_token }}
+          show_full_output: ${{ vars.CLAUDE_DEBUG == 'true' }}
+          prompt: |
+            Escribis tests end-to-end para MicroChangas, una app donde la gente publica
+            changas y otros se postulan. El repo es el ${{ inputs.project_kind }}.
+
+            **La app esta levantada y andando** en ${{ env.E2E_BASE_URL }}. Podes abrirla
+            con Playwright y ver lo que ve un usuario de verdad.
+
+            En `ticket-context.md` tenes el ticket de esta PR. El diff:
+              git diff origin/${{ github.base_ref }}...HEAD
+
+            Trabajas en tres tiempos. No te saltees el primero.
+
+            ── 1. PLANIFICAR ──────────────────────────────────────────────────────────
+
+            Antes de escribir una sola linea de test, decidi **que recorridos de usuario**
+            hay que cubrir. Salen de los criterios de aceptacion del ticket, mirados como
+            lo que una persona hace en pantalla, no como funciones que se llaman.
+
+            Un recorrido es "entra a la lista de changas, escribe en el buscador, ve solo
+            las que coinciden". No es "el componente recibe la prop correcta".
+
+            Elegi pocos y buenos: entre dos y cinco. Priorizá el camino que mas se usa y
+            los bordes donde la app suele romperse — lista vacia, error de la API, datos
+            que faltan, el estado de carga. Escribi el plan en tu respuesta antes de pasar
+            al paso 2.
+
+            ── 2. GENERAR ─────────────────────────────────────────────────────────────
+
+            Escribi los specs en `e2e-agente/specs/`, un archivo por recorrido, y
+            **corrélos**:
+
+              npx playwright test --config e2e-agente/playwright.config.ts
+
+            Para un archivo solo, agregale la ruta al final. `baseURL` ya esta configurado,
+            asi que en los tests navegas con rutas relativas: `await page.goto('/changas')`.
+
+            **El backend NO esta corriendo.** Toda llamada a la API tenes que stubbearla
+            con `page.route()`, devolviendo el JSON que corresponda al caso que estas
+            probando. Eso no es una limitacion: es lo que hace que el test sea
+            deterministico y que puedas probar el caso de lista vacia o el de error 500,
+            que con una base real casi no podes reproducir.
+
+            Mira primero el codigo del diff para saber **a que endpoints llama** la pantalla
+            y con que forma de respuesta, y usa selectores que no se rompan al primer
+            cambio de estilo: `getByRole`, `getByLabel`, `getByText`. Nada de clases de
+            Tailwind ni de rutas de CSS.
+
+            Itera hasta que pasen, o hasta llegar al paso 3.
+
+            ── 3. DIAGNOSTICAR LO QUE FALLA ───────────────────────────────────────────
+
+            Cuando un test falla, hay exactamente dos explicaciones y tenes que decidir
+            cual es:
+
+            **(a) El test esta mal.** Pusiste mal un selector, esperabas un texto que
+            nunca existio, no esperaste a que algo cargue. Arreglalo y corre de nuevo.
+
+            **(b) La app esta mal.** El test describe correctamente lo que el ticket
+            pedia, y la app no lo hace. **Dejá el test como esta, fallando**, y reportalo
+            como un hallazgo.
+
+            Esto es lo mas importante de todo tu trabajo: **nunca ablandes un test para
+            que pase**. No cambies el valor esperado por el que devuelve la app, no saques
+            la asercion que molesta, no lo marques como skip. Un test que afirma el
+            comportamiento con bug convierte el error en la especificacion, y el bug queda
+            bendecido para siempre.
+
+            Si no podes decidir entre (a) y (b), decilo con esas palabras en el comentario
+            y explica que haria falta para saberlo.
+
+            ── Reglas generales ───────────────────────────────────────────────────────
+
+            - **No toques ni un archivo fuera de `e2e-agente/`.** Ni codigo de produccion,
+              ni package.json, ni configuracion. Si lo hicieras se detecta despues
+              comparando el arbol, y todo tu trabajo se descarta.
+            - Estos tests **no se commitean**. Corren aca y se publican en un comentario
+              para que un dev los pegue si le sirven. No intentes hacer commit ni push.
+
+            ── Publicacion ────────────────────────────────────────────────────────────
+
+            Un unico comentario en la PR con:
+              gh pr comment ${{ github.event.pull_request.number }} --body "el texto aca"
+
+            En este orden:
+
+            1. Una linea: cuantos recorridos cubriste y cuantos pasaron.
+            2. **Si encontraste un bug de la app**, va primero y bien visible: que recorrido
+              lo destapa, que deberia pasar segun el ticket, que pasa en realidad. Es el
+              hallazgo mas valioso que podes traer, mas que los tests mismos.
+            3. El plan: la lista de recorridos, en una linea cada uno.
+            4. El contenido completo de cada spec en un bloque de codigo, con la ruta donde
+              iria si lo quieren guardar.
+            5. Una linea aclarando que Playwright no esta instalado en el repo: estos tests
+              corrieron con una instalacion temporal del runner, y para dejarlos fijos hay
+              que agregar la dependencia.
+
+            Escribi el texto literal dentro de --body, un solo comando, entre comillas
+            dobles. El sandbox rechaza todo lo que no sea un comando simple: nada de
+            `$(...)`, backticks, pipes, `>` ni `&&`.
+
+            Espanol rioplatense.
+          claude_args: |
+            --model ${{ inputs.model }}
+            --max-turns ${{ inputs.max_turns }}
+            --allowedTools "Read,Grep,Glob,Write,Edit,Bash(npx playwright:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(curl:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # ─────────────────────────────────────────────────────────────────────
+      # Control de integridad. El agente tiene Write y Edit porque los necesita
+      # para los specs, asi que "no toques nada fuera de e2e-agente" es solo una
+      # instruccion. Esto la verifica.
+      #
+      # Nada se commitea igual, pero si toco codigo de produccion entonces sus
+      # tests corrieron contra algo que no es esta PR, y no sirven.
+      # ─────────────────────────────────────────────────────────────────────
+      - name: Verificar que solo escribio specs
+        id: integridad
+        if: steps.gate.outputs.correr == 'true'
+        run: |
+          set -uo pipefail
+          git status --porcelain > despues.txt || true
+          comm -13 <(sort antes.txt) <(sort despues.txt) > nuevos.txt || true
+
+          # Todo lo que cae dentro del banco de pruebas es legitimo.
+          grep -vE 'e2e-agente/|e2e-reporte/|test-results/' nuevos.txt > sospechosos.txt || true
+          # Un archivo NUEVO suelto molesta poco; una MODIFICACION de uno que ya
+          # existia es lo que invalida la corrida.
+          grep -E '^\s*M' sospechosos.txt > modificados.txt || true
+
+          n_spec="$(find e2e-agente/specs -type f -name '*.spec.ts' 2>/dev/null | wc -l | tr -d ' ')"
+          n_mod="$(wc -l < modificados.txt | tr -d ' ')"
+          echo "Specs escritos: ${n_spec}. Archivos existentes modificados: ${n_mod}."
+
+          if [ "$n_mod" -gt 0 ]; then
+            echo "::error::El agente modifico archivos fuera del banco de pruebas. Sus resultados no son confiables."
+            cat modificados.txt
+            echo "limpio=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Solo escribio specs. Los resultados valen."
+            echo "limpio=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "n_spec=$n_spec" >> "$GITHUB_OUTPUT"
+
+      - name: Avisar en la PR si el agente se salio del carril
+        if: steps.integridad.outputs.limpio == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "$PR_NUM" --body "El agente de E2E modifico archivos fuera de su banco de pruebas, cosa que tiene prohibida. Nada de eso se commiteo (no tiene permiso de escritura sobre el repo), pero significa que sus tests corrieron contra un codigo distinto al de esta PR. **No peguen los specs que propuso.** Queda para revisar de este lado." || true
+
+      - name: Subir el reporte de Playwright
+        if: steps.gate.outputs.correr == 'true' && hashFiles('e2e-reporte/**') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-reporte-pr-${{ github.event.pull_request.number }}
+          path: |
+            e2e-reporte/
+            e2e-agente/specs/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Apagar el servidor
+        if: always() && steps.servidor.outputs.pid != ''
+        run: kill "${{ steps.servidor.outputs.pid }}" 2>/dev/null || true
+
+      - name: Resumen y notificacion
+        if: always()
+        env:
+          AGENTE: 'E2E Playwright'
+          ESTADO: ${{ steps.claude.outcome }}
+          CORRER: ${{ steps.gate.outputs.correr }}
+          N_SPEC: ${{ steps.integridad.outputs.n_spec }}
+          LIMPIO: ${{ steps.integridad.outputs.limpio }}
+          DESTINO: ${{ env.E2E_BASE_URL }}
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          TICKET_CODE: ${{ steps.ticket.outputs.code }}
+          NOTIFY_EMAIL: ${{ vars.NOTIFY_EMAIL }}
+          NOTIFY_FROM: ${{ vars.NOTIFY_FROM }}
+          RESEND_API_KEY: ${{ secrets.resend_api_key }}
+        run: |
+          set -uo pipefail
+
+          if [ "${CORRER:-}" != "true" ]; then
+            echo "Agente omitido: no es el momento de la PR, o no hay app contra la cual correr." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ -f ticket.json ]; then
+            multica="OK - $(jq -r --arg c "${TICKET_CODE:-?}" '((.short_id // "") | if . == "" then $c else . end) + " " + (.title // "?")' ticket.json | head -c 90)"
+          else
+            multica="sin ticket (recorridos deducidos del diff)"
+          fi
+
+          if [ "${ESTADO:-}" = "failure" ] && [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            echo "::group::Diagnostico de la falla"
+            jq -r '
+              [.. | objects | with_entries(select(.key | test("error|message|subtype|type|reason|status|code";"i")))]
+              | map(select(length > 0)) | unique | .[] | tostring
+            ' "$EXEC_FILE" 2>/dev/null | head -40 || echo "(no se pudo parsear)"
+            echo "::endgroup::"
+          fi
+
+          # ── El agente puede terminar en verde sin haber corrido ──────────
+          if [ "${ESTADO:-}" = "success" ] && { [ -z "${EXEC_FILE:-}" ] || [ ! -f "${EXEC_FILE}" ]; }; then
+            ESTADO="NO CORRIO - ver abajo"
+            echo "::error::El agente termino en verde pero no dejo archivo de ejecucion: nunca llamo al modelo. Causa mas probable: .github/workflows/agents.yml de ${GITHUB_REPOSITORY} no es identico al de la rama default."
+          fi
+
+          conclusion=""
+          if [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            conclusion="$(jq -r '
+                (.result? // empty),
+                ([.. | objects | select(.type? == "result") | .result?] | map(select(. != null)) | last // empty),
+                ([.. | objects | select(.type? == "text")   | .text?]   | map(select(. != null)) | last // empty)
+              ' "$EXEC_FILE" 2>/dev/null | grep -v '^$' | tail -n1)"
+          fi
+          [ -n "$conclusion" ] || conclusion="(no se pudo extraer del archivo de ejecucion)"
+          corto="$(printf '%s' "$conclusion" | head -c 1500)"
+          [ "${#conclusion}" -gt 1500 ] && corto="${corto}..."
+
+          if [ "${LIMPIO:-}" = "false" ]; then
+            integridad="NO - toco archivos fuera del banco de pruebas, resultados descartados"
+          else
+            integridad="OK - solo escribio specs"
+          fi
+
+          {
+            echo "## ${AGENTE}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Repo | ${GITHUB_REPOSITORY} |"
+            echo "| PR | #${PR_NUM:-?} |"
+            echo "| Resultado | ${ESTADO} |"
+            echo "| App probada en | ${DESTINO:-?} |"
+            echo "| Specs escritos | ${N_SPEC:-0} |"
+            echo "| Integridad | ${integridad} |"
+            echo "| Multica | ${multica} |"
+            echo
+            echo "### Conclusion"
+            echo
+            printf '%s\n' "$corto"
+            echo
+            echo "Corrida completa: ${RUN_URL}"
+          } > resumen.md
+          cat resumen.md >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -z "${NOTIFY_EMAIL:-}" ]; then
+            echo "::notice::Sin vars.NOTIFY_EMAIL: no se manda mail."
+            exit 0
+          fi
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "::warning::Hay NOTIFY_EMAIL pero falta el secret RESEND_API_KEY."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg from "${NOTIFY_FROM:-MicroChangas Agentes <onboarding@resend.dev>}" \
+            --arg to "$NOTIFY_EMAIL" \
+            --arg subject "[${GITHUB_REPOSITORY##*/}] PR #${PR_NUM:-?} - ${AGENTE}: ${ESTADO}" \
+            --rawfile text resumen.md \
+            '{from: $from, to: [$to], subject: $subject, text: $text}')"
+          resp="$(curl -sS --max-time 20 -w '\n%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$payload")"
+          code="$(printf '%s' "$resp" | tail -n1)"
+          if [ "$code" = "200" ]; then
+            echo "Mail enviado a ${NOTIFY_EMAIL}."
+          else
+            echo "::warning::Resend devolvio HTTP ${code}: $(printf '%s' "$resp" | sed '$d' | head -c 300)"
+          fi
+
+      - name: Guardar salida de ejecucion si fallo
+        if: failure() && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-exec-e2e-pr-${{ github.event.pull_request.number }}
+          path: ${{ steps.claude.outputs.execution_file }}
+          if-no-files-found: ignore
+          retention-days: 7

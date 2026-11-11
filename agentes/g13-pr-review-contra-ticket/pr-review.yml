@@ -232,20 +232,10 @@ jobs:
 
             Como escribir el comentario resumen. Lo lee una persona, no un linter.
 
-            Arranca **siempre** con un bloque corto titulado "Para el negocio", de tres
-            lineas, escrito para alguien que no programa: un PM, un profesor, alguien del
-            steering. Cada linea responde una pregunta:
-
-              - **Que resuelve**: que historia implementa esta PR, dicha en terminos de lo
-                que ahora puede hacer un usuario de MicroChangas. Nada de nombres de
-                funciones, archivos ni componentes.
-              - **Riesgo**: bajo, medio o alto, y por que en una frase. Alto si toca login,
-                permisos, datos personales o plata; medio si cambia algo que ya funcionaba;
-                bajo si solo agrega algo nuevo y aislado.
-              - **Que probar**: la accion concreta que alguien deberia hacer en la app para
-                comprobar que esto anda, en una oracion.
-
-            Despues de ese bloque viene el review tecnico para el dev:
+            Escribis para el dev que hizo la PR, en terminos tecnicos. La traduccion al
+            lenguaje del negocio la publica el agente Traductor a negocio en su propio
+            comentario, asi que no la repitas aca: dos comentarios diciendo lo mismo hacen
+            que no se lea ninguno.
 
             - Arranca diciendo en una frase si la PR cumple lo que pedia el ticket.
             - Despues, si hay criterios de aceptacion, una lista corta marcando cada uno como
