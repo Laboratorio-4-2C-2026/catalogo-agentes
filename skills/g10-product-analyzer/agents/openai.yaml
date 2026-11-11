@@ -1,0 +1,3 @@
+interface:
+  display_name: "Product Analyzer"
+  short_description: "Analiza producto y gaps con evidencia verificable"

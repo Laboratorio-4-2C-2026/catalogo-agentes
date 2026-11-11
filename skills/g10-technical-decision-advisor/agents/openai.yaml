@@ -1,0 +1,3 @@
+interface:
+  display_name: "Technical Decision Advisor"
+  short_description: "Compara alternativas y documenta decisiones técnicas"

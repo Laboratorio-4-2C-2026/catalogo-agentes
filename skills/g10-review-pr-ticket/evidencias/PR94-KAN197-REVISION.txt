@@ -1,0 +1,166 @@
+PR #94 / KAN-197 - revision terminada el 2026-11-09 (America/Buenos_Aires)
+
+VEREDICTO
+Aprobar con observaciones no bloqueantes. El recorrido principal cumple el ticket,
+incluida la integracion con backend local real y FCM real. Una observacion de
+recuperacion ante un fallo de registro de token se reprodujo con un SDK simulado;
+las notificaciones in-app siguen funcionando y una recarga permite volver a intentar.
+
+IDENTIDAD Y ALCANCE
+https://github.com/conexia-lab-4/conexia/pull/94
+https://conexia-lab.atlassian.net/browse/KAN-197
+Head completo: fb3a5645ae74d3e083c00453facbaaac38e9b550
+Base dev: fb4edc7ee6e1ff2035c407630715a6bf97905947
+Ancestro comun: fb4edc7ee6e1ff2035c407630715a6bf97905947
+Diff: git diff fb4edc7ee6e1ff2035c407630715a6bf97905947...HEAD
+36 archivos frontend, 1563 inserciones, 11 eliminaciones.
+Worktree aislado .review/pr94, detached HEAD.
+No cambios de backend contra e15e410, revisado previamente en la PR #93.
+Lockfile backend identico: dependencias de esa revision reutilizadas por junction.
+No se volvio a revisar en profundidad esa dependencia ni se atribuye a la PR94
+la suite de 457 tests ejecutada en la revision de PR93.
+Ticket completo y sus comentarios consultados: no habia comentarios adicionales.
+
+HALLAZGO [P2 - NO BLOQUEANTE]
+Exponer un reintento cuando falla la sincronizacion inicial del token.
+frontend/src/context/PushProvider.tsx:51 (tambien catch en 57-58)
+Relacion: components/notificationbell/index.tsx:20 y pages/home/index.tsx:75.
+
+Reproduccion controlada:
+1. Usuario con permiso del navegador granted y sin un token util registrado.
+2. Hacer fallar getToken o registerPushToken al iniciar la sesion.
+3. PushProvider ya puso status=granted antes del intento; el catch solo loguea.
+4. isActive queda false. Home y campanita solo ofrecen activar si status=default.
+5. No aparece error ni accion de reintento en la app; abrir la campanita navega
+   al listado. Se necesita recargar o iniciar otra sesion para volver a sincronizar.
+
+Esperado: informar el fallo y permitir reintentar, o reintentar automaticamente.
+Observado: error solamente en consola. Se reprodujo en navegador con el frontend
+real, Auth/Firestore emulados y backend real, sustituyendo solo el permiso y SDK
+Messaging por resultados controlados. No es un fallo observado del proveedor real.
+Consecuencia: si no habia token util, los avisos fuera de la app pueden faltar
+durante esa sesion. El polling in-app sigue funcionando. No se bloquea el flujo
+principal verificado y se clasifica como mejora de recuperacion no bloqueante.
+Evidencia: token-failure-console.json, token-failure-ui.txt,
+desktop-token-sync-failed-no-retry.jpg.
+Sugerencia: representar por separado permiso y registro efectivo, exponer un
+estado de error/reintento y consumir isActive en Home/campanita. No se implemento.
+
+MATRIZ KAN-197
+1. Ofrecer activacion en Home, registrar token, rechazo con avisos in-app:
+   PASS. Home/dialogo real en navegador; usuario habilito permiso real en Chrome
+   y el token se registro en el backend local. Rechazo y no soporte se probaron
+   con el componente productivo y resultados de permiso simulados.
+2. Campanita/lista/contador personales, carga/vacio/error y lectura:
+   PASS. Backend real y PostgreSQL aislado. Seis avisos ficticios, filtros,
+   lectura tras navegacion completa y readAt comprobado en base.
+   Error HTTP 503 y recuperacion por Reintentar; carga retrasada y estados vacios.
+3. Poll visible cada ~30s y al abrir/volver; pausar oculto:
+   PASS visible en navegador, sin permiso push. Intervalos reales ~29.99-30.61s.
+   Ocultar/reabrir y limpieza de timers comprobados con provider-contract.cjs,
+   cuyo DOM/temporizadores son controlados. La API de visibilidad del IAB no
+   cambia document.visibilityState y no se usa como prueba de ocultamiento real.
+4. Foreground solo in-app; background sistema con permiso:
+   PASS de integracion. FCM real acepto los envios. El monitor de prueba del
+   frontend observo un mensaje foreground y cero avisos del sistema. El usuario
+   confirmo el aviso real de sistema en segundo plano y lo toco.
+   No hay screenshot del toast nativo; hay captura de la pantalla resultante.
+5. Navegacion a viaje/chat y estado controlado de recurso inexistente:
+   PASS. TRIP, CHAT y MATCH navegados desde listado, destinos inexistentes
+   controlados. Click del push real abrio /trips/review-pr94-missing-live-trip;
+   ultimo aviso cafa9b5f-95fc-45a6-a3db-0dbcafc9ebb4 quedo leido en PostgreSQL.
+6. UI y responsive:
+   PASS visual en escritorio (831x884 inicial y 1280x800) y movil 390x844.
+   Movil es emulacion de viewport, no dispositivo fisico. Capturas reales JPG.
+7. Verificar backend real + FCM, no solo datos de ejemplo:
+   PASS. Primera ronda con Nest/PostgreSQL reales y Auth/Firestore emulados;
+   segunda con Firebase Auth/FCM reales, login y permiso manuales del usuario.
+   Datos y token persistidos exclusivamente en la base local aislada.
+
+VALIDACIONES Y COMANDOS
+Windows, Node 24.11.1, npm 11.6.2; CI usa Linux/Node 20.
+Frontend:
+  npm ci --no-audit --no-fund -> exit 0, 512 paquetes, lockfile intacto.
+  npm run build -> exit 0, advertencia por chunk grande.
+  node_modules/.bin/eslint.cmd . -> exit 0, sin --fix.
+  npm run format:check -> exit 1, CRLF en 196 archivos del checkout Windows.
+Backend aislado:
+  prisma generate -> exit 0.
+  prisma migrate deploy -> exit 0, base pr94_review:5494.
+  npm run build -> exit 0.
+Diagnostico sin reescritura:
+  node format-diagnostic.cjs -> exit 0; normalizacion LF en memoria:
+  196 archivos frontend y 128 backend, cero diferencias de formato.
+  git diff --check BASE...HEAD -> exit 0.
+Pruebas complementarias:
+  node sw-contract.cjs -> exit 0, 8/8 checks.
+  node provider-contract.cjs -> exit 0, 8/8 checks.
+  node summarize-polling.cjs -> evidencia de consultas reales cada ~30s.
+  node verify-live.cjs -> readAt del push real confirmado, sin imprimir tokens.
+  La suite E2E general existente no se ejecuto: se probaron los recorridos del
+  alcance en el navegador y los contratos nuevos con arneses temporales.
+
+CI REMOTO DEL HEAD REVISADO
+backend-ci: success
+https://github.com/conexia-lab-4/conexia/actions/runs/42700449622/job/129443432960
+frontend-ci: success
+https://github.com/conexia-lab-4/conexia/actions/runs/42700449671/job/129443433028
+Vercel Preview Comments: success.
+Los resultados CI se distinguen de las validaciones locales anteriores.
+
+ENTORNO Y LIMITES
+Para la primera ronda: PostgreSQL 16 exclusivo, Auth y Firestore emulados con
+las reglas exactas del backend. Geocodificacion/FCM controlados y declarados.
+Para FCM real: configuracion Firebase existente y login manual, autorizados
+explicitamente por el usuario. La revision automatica rechazo inicialmente
+el arranque con Firebase real; se continuo solo despues de esa autorizacion.
+No se creo una cuenta real ni se escribieron datos compartidos de aplicacion.
+El endpoint auxiliar de envio creo tres avisos en la base local y envio el
+payload de datos a FCM; esto prueba recepcion frontend. El disparador de eventos
+backend ya estaba revisado en PR93 y no fue modificado por PR94.
+Se inyecto un monitor local de prueba para contar mensajes foreground y avisos
+del sistema; no se cambio ningun archivo productivo ni se publico la PR.
+Los fallos iniciales de configuracion/importacion de arneses se corrigieron y
+se repitieron los casos; no se atribuyeron al producto. Un wait de UI expiro
+durante el retraso artificial de ocho segundos y luego se verifico la carga.
+
+CAPTURAS PRINCIPALES (DATOS FICTICIOS SALVO FCM REAL AUTORIZADO)
+desktop-notifications-populated.jpg: listado agrupado, contador, iconos y fechas.
+mobile-notifications-populated.jpg: 390x844, tarjetas y filtros horizontales.
+mobile-notifications-error.jpg: error de listado y boton Reintentar.
+mobile-notifications-loading.jpg: carga pendiente.
+mobile-notifications-empty.jpg: listado vacio.
+mobile-unread-filter-empty.jpg: filtro sin resultados.
+mobile-chat-from-notification.jpg: apertura del chat con Firestore emulado.
+mobile-trip-unavailable.jpg y mobile-chat-unavailable.jpg: destinos eliminados.
+desktop-polling-new-notification.jpg: aviso incorporado sin recargar.
+desktop-dialog-*-simulated.jpg: rechazo, no soporte y fallo de activacion simulados.
+desktop-token-sync-failed-no-retry.jpg: Home sin recuperacion del token fallido.
+live-fcm-foreground-notification.jpg: aviso real FCM listado in-app.
+live-fcm-foreground-monitor.jpg: monitor foreground=1, avisos sistema=0.
+live-fcm-system-click-unavailable.jpg: resultado de tocar push real del sistema.
+live-session-closed.jpg: cierre de sesion al terminar.
+
+LIMPIEZA
+Se cerro la sesion real desde la UI: AuthProvider ejecuto forgetPushToken y
+signOut; se verifico /login y no hubo errores de baja de token en consola.
+Se cerraron las sesiones y pestanas de prueba conocidas, se restauro viewport,
+se detuvieron procesos propios y se elimino contenedor/volumen pr94_review.
+El permiso de notificaciones que el usuario concedio a localhost:5294 no se
+modifico automaticamente; la suscripcion FCM se dio de baja al cerrar sesion.
+No se guardaron copias de credenciales reales ni sesiones en archivos.
+La base que contenia el token y los datos de esa cuenta se elimino.
+Se conserva worktree, dependencias, builds, arneses, capturas y logs saneados.
+Checkout principal dev sin alterar: permanecen los cambios previos en
+backend/docker-compose.yml y frontend/package-lock.json, .review/ y artifacts/.
+Worktree revisado sin diferencias productivas. Sin commits, push, comentarios,
+reviews publicados ni correcciones implementadas.
+
+COMENTARIO LISTO PARA COPIAR (NO PUBLICADO)
+Revisada contra KAN-197 en fb3a564. Recomiendo aprobar con una observacion no
+bloqueante: si el permiso ya esta concedido y falla la sincronizacion inicial
+del token, el error queda solo en consola y no hay reintento desde Home/campanita.
+El flujo principal quedo verificado en navegador, escritorio/movil, backend y
+PostgreSQL locales reales y FCM real: recepcion foreground sin aviso duplicado,
+push del sistema confirmado por el usuario, navegacion y lectura persistida.
+Build/lint y CI verdes; 16 checks adicionales de provider/service worker pasan.

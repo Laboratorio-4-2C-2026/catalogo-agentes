@@ -1,0 +1,41 @@
+{
+  "status": "loaded-and-api-verified",
+  "runId": "conexia-c31c6f155db5ebc2",
+  "ownedCounts": {
+    "User": 600,
+    "StudentProfile": 600,
+    "Subject": 5000,
+    "Schedule": 5000,
+    "Trip": 5000,
+    "TripPassenger": 5000,
+    "TravelIntent": 5000,
+    "TravelMatch": 9649
+  },
+  "authentication": {
+    "accountsCreated": 600,
+    "emailVerification": "administrative",
+    "passwordLoginVerified": true
+  },
+  "media": {
+    "avatarsUploaded": 600,
+    "publicFetchVerified": true
+  },
+  "scenariosVerifiedByApi": [
+    "password-login",
+    "profile",
+    "prepared-match"
+  ],
+  "scenariosVerifiedByDatabase": [
+    "full-trip"
+  ],
+  "browserAudit": "pending: invoke audit-demo-readiness after loading",
+  "completedAt": "2026-11-05T05:07:22.182Z",
+  "postLoadIntegrity": {
+    "status": "passed",
+    "report": "verification/post-load-integrity.json",
+    "checks": 12,
+    "firebaseAccountsChecked": 600,
+    "storageObjectsChecked": 600
+  },
+  "baselineCountsPreserved": true
+}

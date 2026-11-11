@@ -1,0 +1,61 @@
+{
+  "retrievedOn": "2026-11-10",
+  "source": "Jira, consulta de solo lectura",
+  "jql": "project in (CC, CC20) AND reporter = currentUser() ORDER BY updated DESC",
+  "issues": [
+    {
+      "key": "CC20-13",
+      "url": "https://conexia-lab.atlassian.net/browse/CC20-13",
+      "summary": "Gestión de horarios",
+      "reporter": "pedroramirezneira",
+      "status": "Por hacer",
+      "duedate": "2026-09-15",
+      "updated": "2026-09-11T12:17:48.157-0300"
+    },
+    {
+      "key": "CC20-16",
+      "url": "https://conexia-lab.atlassian.net/browse/CC20-16",
+      "summary": "Gestión de viajes",
+      "reporter": "pedroramirezneira",
+      "status": "Por hacer",
+      "duedate": "2026-10-07",
+      "updated": "2026-09-11T11:41:52.101-0300"
+    },
+    {
+      "key": "CC20-15",
+      "url": "https://conexia-lab.atlassian.net/browse/CC20-15",
+      "summary": "Conectar con usuarios",
+      "reporter": "pedroramirezneira",
+      "status": "Por hacer",
+      "duedate": "2026-09-30",
+      "updated": "2026-09-11T11:41:44.357-0300"
+    },
+    {
+      "key": "CC20-14",
+      "url": "https://conexia-lab.atlassian.net/browse/CC20-14",
+      "summary": "Algoritmo de matching",
+      "reporter": "pedroramirezneira",
+      "status": "Por hacer",
+      "duedate": "2026-10-07",
+      "updated": "2026-09-11T11:41:40.682-0300"
+    },
+    {
+      "key": "CC20-21",
+      "url": "https://conexia-lab.atlassian.net/browse/CC20-21",
+      "summary": "Integración, deployment y testing",
+      "reporter": "pedroramirezneira",
+      "status": "Por hacer",
+      "duedate": "2026-09-12",
+      "updated": "2026-09-03T19:45:53.950-0300"
+    },
+    {
+      "key": "CC20-17",
+      "url": "https://conexia-lab.atlassian.net/browse/CC20-17",
+      "summary": "Visualización de coincidencias",
+      "reporter": "pedroramirezneira",
+      "status": "Por hacer",
+      "duedate": "2026-10-14",
+      "updated": "2026-09-03T19:45:53.881-0300"
+    }
+  ]
+}

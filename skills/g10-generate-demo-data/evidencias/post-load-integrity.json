@@ -1,0 +1,35 @@
+{
+  "runId": "conexia-c31c6f155db5ebc2",
+  "readOnly": true,
+  "checks": {
+    "tripsOverCapacity": 0,
+    "driverAsPassenger": 0,
+    "invalidTripTimes": 0,
+    "invalidIntentTimes": 0,
+    "acceptedWithoutPassenger": 0,
+    "acceptedWithUnfulfilledIntent": 0,
+    "fulfilledWithoutAcceptance": 0,
+    "multipleAcceptances": 0,
+    "overlappingCommitments": 0,
+    "missingProfile": 0,
+    "missingSchedule": 0,
+    "incorrectEmailDomain": 0
+  },
+  "totalCounts": {
+    "User": 627,
+    "StudentProfile": 623,
+    "Subject": 5016,
+    "Schedule": 5014,
+    "Trip": 5013,
+    "TripPassenger": 5001,
+    "TravelIntent": 5007,
+    "TravelMatch": 9655,
+    "KpiEvent": 32628,
+    "DailyMetric": 404
+  },
+  "firebaseAccountsChecked": 600,
+  "storageObjectsChecked": 600,
+  "status": "passed",
+  "failures": [],
+  "completedAt": "2026-11-05T05:07:51.032Z"
+}

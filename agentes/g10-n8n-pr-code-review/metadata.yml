@@ -1,0 +1,27 @@
+name: g10-n8n-pr-code-review
+description: Agente de n8n que revisa el diff de una PR de GitHub al abrirse o reabrirse y publica una review breve sobre code smells en español rioplatense. Usar
+  como feedback automático complementario a la revisión humana.
+metadata:
+  tipo: agente
+  area:
+  - qa
+  fase:
+  - revision
+  tecnologias:
+  - n8n
+  metodologia:
+  - agnostico
+  herramientas:
+  - otra
+  requiere:
+  - github
+  - openrouter
+  grupo: "10"
+  autor:
+    nombre: Pedro Ramirez Neira
+    github: pedroramirezneira
+  responsables:
+  - pedroramirezneira
+  madurez: usado-en-proyecto
+  relacionados:
+  - g10-branch-pr-review

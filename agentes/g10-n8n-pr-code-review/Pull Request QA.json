@@ -1,0 +1,235 @@
+{
+  "name": "Pull Request QA",
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/conexia-lab-4",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "conexia",
+          "mode": "list",
+          "cachedResultName": "conexia",
+          "cachedResultUrl": "https://github.com/conexia-lab-4/conexia"
+        },
+        "events": [
+          "pull_request"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        96
+      ],
+      "id": "fa184d7a-2326-4f70-959c-73557c13dfaa",
+      "name": "Github Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Pull request data:\n\n{{ $json.data }}",
+        "options": {
+          "systemMessage": "You are a senior software engineer. You must review this github pull request.\n\nYour comments should be:\n* Clear and concise.\n* Use case oriented.\n* Useful, not forced.\n\nRules:\n* Review in Argentina Spanish.\n* Keep the review small in size.\n* Go straight to the point.\n\nCode smells:\n* Duplicate code\n* Long functions\n* Ambiguous naming\n* Deep nesting\n* Large class\n* Long parameter lists\n* Magic numbers\n* Dead code\n\nIf the pull request looks good, leave a comment saying so. If there are suggested actions, write them down as clear and concise as possible. Clearly state that the pull request is being reviewed by Pedro AI."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        672,
+        0
+      ],
+      "id": "477dd950-f3f5-497e-8944-05aa923e6a5b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openrouter/free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        752,
+        224
+      ],
+      "id": "bb926ba9-5473-48b9-820a-bbe957a2385c",
+      "name": "OpenRouter Chat Model"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "08398f33-f241-4e0d-a1fa-3170c305a903",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "opened",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "76f5282b-d274-4cfb-aaab-a6dc34834783",
+              "leftValue": "={{ $json.body.action }}",
+              "rightValue": "reopened",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        96
+      ],
+      "id": "fd0e7465-2802-4dbb-9998-332de63a0b77",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        448,
+        192
+      ],
+      "id": "cfe41eb2-e946-4f23-a918-449581b8585d",
+      "name": "No Operation, do nothing1"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "review",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/conexia-lab-4",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "conexia",
+          "mode": "list",
+          "cachedResultName": "conexia",
+          "cachedResultUrl": "https://github.com/conexia-lab-4/conexia"
+        },
+        "pullRequestNumber": "={{ $('Github Trigger').item.json.body.number }}",
+        "event": "comment",
+        "body": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        0
+      ],
+      "id": "3de334b9-22a3-4e4e-ab55-ce9126fb1e47",
+      "name": "Create a review"
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Github Trigger').item.json.body.pull_request.diff_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        0
+      ],
+      "id": "e4a49a9c-3769-4400-9b1f-8858b051fa6c",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Github Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "nodeGroups": [],
+  "tags": []
+}
