@@ -1,0 +1,404 @@
+name: Agente · Guiones UAT
+
+# Reusable workflow. Convierte los criterios de aceptacion del ticket en un guion
+# de UAT paso a paso y un acta de aceptacion para el steering.
+#
+# IMPORTANTE: este agente NO escribe en el repo de producto. Solo lee el diff y
+# comenta en la PR. No tiene `contents: write` ni lo va a tener.
+
+on:
+  workflow_call:
+    inputs:
+      project_kind:
+        description: 'frontend | backend.'
+        type: string
+        required: true
+      ticket_prefix:
+        type: string
+        default: 'MC'
+      multica_workspace_id:
+        type: string
+        required: false
+        default: ''
+      model:
+        type: string
+        default: 'claude-sonnet-5'
+      max_turns:
+        # El tope es una red de seguridad, no un presupuesto: los turnos se
+        # gastan solo si hacen falta. Pero quedarse corto marca el paso como
+        # fallido AUNQUE el agente haya terminado bien y publicado su comentario
+        # ("Claude reported a successful result after N turns, exceeding the
+        # configured maximum of M"). El de Figma venia en 25 y necesito 31.
+        # Quien corta de verdad si algo se desboca es timeout_minutes.
+        type: number
+        default: 40
+      timeout_minutes:
+        type: number
+        default: 15
+    secrets:
+      anthropic_api_key:
+        required: false
+      claude_code_oauth_token:
+        required: false
+      resend_api_key:
+        required: false
+      multica_token:
+        required: false
+
+jobs:
+  uat:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read
+    steps:
+      # ─────────────────────────────────────────────────────────────────────
+      # Compuerta. El guion de UAT se escribe UNA vez, cuando la PR esta lista,
+      # no en cada push. Sin esto, diez pushes pagan diez guiones identicos.
+      # El caller dispara en todos los eventos a proposito: la decision de
+      # cuando corre cada agente vive aca, para no volver a tocar el repo de
+      # producto cada vez que la queramos cambiar.
+      # ─────────────────────────────────────────────────────────────────────
+      - name: Decidir si corre
+        id: gate
+        env:
+          ACCION: ${{ github.event.action }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: |
+          set -uo pipefail
+          correr=false
+          case "${ACCION:-}" in
+            opened|ready_for_review|reopened) correr=true ;;
+          esac
+          # Un label `uat` permite re-generarlo a mano sin cerrar y reabrir la PR.
+          case ",${LABELS:-}," in
+            *,uat,*) correr=true ;;
+          esac
+          if [ "$correr" = "true" ]; then
+            echo "Corre: evento '${ACCION:-?}', labels '${LABELS:-}'."
+          else
+            echo "Se omite: el guion de UAT solo se genera al abrir o marcar lista la PR (evento '${ACCION:-?}')."
+          fi
+          echo "correr=$correr" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v6
+        if: steps.gate.outputs.correr == 'true'
+        with:
+          fetch-depth: 0
+
+      - name: Resolver codigo de ticket
+        id: ticket
+        if: steps.gate.outputs.correr == 'true'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PREFIX: ${{ inputs.ticket_prefix }}
+        run: |
+          blob="$(printf '%s\n%s\n%s\n' "$HEAD_REF" "$PR_TITLE" "$PR_BODY")"
+          code="$(printf '%s' "$blob" | grep -oE '\bMIC-[0-9]+' | head -n1 || true)"
+          kind=short_id
+          if [ -z "$code" ]; then
+            code="$(printf '%s' "$blob" | grep -oE "\b${PREFIX}-[0-9]+" | head -n1 || true)"
+            kind=en_titulo
+          fi
+          if [ -z "$code" ]; then
+            echo "No se encontro ni MIC-NN ni ${PREFIX}-NNN en rama, titulo ni cuerpo de la PR."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Ticket detectado: $code (se busca por $kind)"
+            {
+              echo "found=true"
+              echo "code=$code"
+              echo "kind=$kind"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Traer el ticket de Multica
+        id: multica
+        continue-on-error: true
+        if: steps.gate.outputs.correr == 'true' && steps.ticket.outputs.found == 'true' && inputs.multica_workspace_id != ''
+        env:
+          MULTICA_TOKEN: ${{ secrets.multica_token }}
+          MULTICA_WORKSPACE_ID: ${{ inputs.multica_workspace_id }}
+          TICKET_CODE: ${{ steps.ticket.outputs.code }}
+          TICKET_KIND: ${{ steps.ticket.outputs.kind }}
+        run: |
+          set -uo pipefail
+          if [ -z "${MULTICA_TOKEN:-}" ]; then
+            echo "::warning::Falta el secret MULTICA_TOKEN. Sin ticket no hay criterios de aceptacion que convertir."
+            exit 0
+          fi
+          API="https://api.multica.ai/api"
+          auth=(-H "Authorization: Bearer ${MULTICA_TOKEN}" -H "X-Workspace-ID: ${MULTICA_WORKSPACE_ID}")
+
+          bajar() {
+            curl -sS --max-time 20 "${auth[@]}" "${API}/issues/$1" -o ticket.json \
+              && jq -e '.title' ticket.json >/dev/null 2>&1
+          }
+
+          if [ "$TICKET_KIND" = "short_id" ] && bajar "$TICKET_CODE"; then
+            echo "Ticket recuperado: $(jq -r --arg c "$TICKET_CODE" '((.short_id // "") | if . == "" then $c else . end) + " — " + (.title // "?")' ticket.json)"
+            exit 0
+          fi
+          rm -f ticket.json
+
+          uuid=''; offset=0
+          for _ in $(seq 1 10); do
+            page="$(curl -sS --max-time 20 "${auth[@]}" "${API}/issues?limit=100&offset=${offset}")" || break
+            if [ "$TICKET_KIND" = "short_id" ]; then
+              match="$(printf '%s' "$page" | jq -r --arg c "$TICKET_CODE" \
+                '(if type == "object" then (.items // []) else . end) | map(select(.short_id == $c)) | .[0].id // empty')"
+            else
+              match="$(printf '%s' "$page" | jq -r --arg c "[${TICKET_CODE}]" \
+                '(if type == "object" then (.items // []) else . end) | map(select(.title | contains($c))) | .[0].id // empty')"
+            fi
+            if [ -n "$match" ]; then uuid="$match"; break; fi
+            [ "$(printf '%s' "$page" | jq -r '.has_more // false')" = "true" ] || break
+            offset="$(printf '%s' "$page" | jq -r --argjson o "$offset" '.next_offset // ($o + 100)')"
+          done
+
+          if [ -z "$uuid" ]; then
+            echo "::warning::No hay ningun issue en Multica que corresponda a ${TICKET_CODE}."
+            exit 0
+          fi
+          if bajar "$uuid"; then
+            echo "Ticket recuperado: $(jq -r --arg c "$TICKET_CODE" '((.short_id // "") | if . == "" then $c else . end) + " — " + (.title // "?")' ticket.json)"
+          else
+            echo "::warning::El issue ${uuid} no se pudo leer."
+            rm -f ticket.json
+          fi
+
+      - name: Armar el contexto del ticket
+        id: contexto
+        if: steps.gate.outputs.correr == 'true'
+        run: |
+          set -uo pipefail
+          if [ -f ticket.json ]; then
+            {
+              echo "## Ticket de Multica"
+              jq -r '"**" + (.short_id // "?") + "** — " + (.title // "?") + "\n\nEstado: " + (.status // "?")' ticket.json
+              echo
+              jq -r '.description // "(sin descripcion)"' ticket.json
+              echo
+              jq -r 'if (.comments // []) | length > 0
+                     then "## Comentarios del ticket\n" + ((.comments // []) | map("- " + (.body // .content // "")) | join("\n"))
+                     else "" end' ticket.json
+            } > ticket-context.md
+            echo "hay_ticket=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "hay_ticket=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Sin criterios de aceptacion no hay nada que convertir en guion. Mejor no
+      # gastar la llamada al modelo que producir un guion inventado.
+      - name: Avisar que no hay ticket
+        if: steps.gate.outputs.correr == 'true' && steps.contexto.outputs.hay_ticket != 'true'
+        run: |
+          echo "::warning::Sin ticket de Multica no se puede generar el guion de UAT. Revisar que la rama o el titulo incluyan el codigo MIC-NN."
+
+      - id: claude
+        if: steps.gate.outputs.correr == 'true' && steps.contexto.outputs.hay_ticket == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}
+          claude_code_oauth_token: ${{ secrets.claude_code_oauth_token }}
+          show_full_output: ${{ vars.CLAUDE_DEBUG == 'true' }}
+          prompt: |
+            Escribis guiones de UAT para MicroChangas. El repo es el ${{ inputs.project_kind }}.
+
+            Quien va a ejecutar este guion es una persona del negocio, no un dev: no conoce
+            el codigo, no sabe abrir la consola del navegador y no va a leer el diff. Tiene
+            que poder sentarse frente a la aplicacion y seguir los pasos sin preguntar nada.
+
+            En `ticket-context.md` tenes el ticket con sus criterios de aceptacion.
+            El diff implementado:
+              git diff origin/${{ github.base_ref }}...HEAD
+
+            Tu trabajo:
+
+            1. Recorre los criterios de aceptacion del ticket. Por **cada** criterio escribi
+               un caso de prueba con esta forma:
+                 - Un titulo corto que diga que se esta probando.
+                 - Precondiciones: con que usuario hay que entrar, que datos tienen que existir
+                   antes de empezar.
+                 - Pasos numerados, en imperativo y concretos: "entra a X", "escribi Y en el
+                   campo Z", "apreta el boton W". Nada de "verificar que el sistema funcione".
+                 - Resultado esperado: que tiene que ver la persona en pantalla, en palabras
+                   que pueda comparar contra lo que ve.
+            2. Mira el diff para que los pasos coincidan con lo que realmente se implemento:
+               los nombres de pantallas, botones y campos tienen que ser los de verdad, no los
+               que supondrias por el ticket. Si el diff y el ticket no coinciden, decilo.
+            3. Si un criterio no se puede probar a mano (algo interno, un job, una migracion),
+               no inventes pasos: marcalo como "no verificable en UAT" y explica por que.
+
+            Cerra con un **acta de aceptacion** para el steering: una tabla con una fila por
+            caso y columnas Caso / Resultado (OK - Falla - No probado) / Observaciones, mas un
+            lugar para fecha, quien lo probo y la firma. Esa tabla va vacia: la completa quien
+            ejecuta la prueba.
+
+            Publicacion. Deja todo en un unico comentario de la PR con:
+              gh pr comment ${{ github.event.pull_request.number }} --body "el texto aca"
+
+            Escribi el texto literal dentro de --body, un solo comando, entre comillas dobles.
+            El sandbox rechaza todo lo que no sea un comando simple: nada de `$(...)`,
+            backticks, pipes, `>` ni `&&`. Leé los archivos con Read, no con cat. Cada comando
+            rechazado te consume un turno y si los agotas te quedas sin publicar.
+
+            Espanol rioplatense. No modifiques ningun archivo del repositorio: tu unica salida
+            es el comentario.
+          claude_args: |
+            --model ${{ inputs.model }}
+            --max-turns ${{ inputs.max_turns }}
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # El acta "para el steering" tiene que poder sacarse de la PR sin copiar y
+      # pegar a mano. Se recupera el comentario que acaba de dejar el bot y se
+      # sube como artifact descargable.
+      - name: Guardar el acta como artifact
+        id: acta
+        if: steps.claude.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+        run: |
+          set -uo pipefail
+          gh pr view "$PR_NUM" --json comments \
+            --jq '[.comments[] | select(.author.login == "github-actions")] | last | .body // empty' \
+            > acta-uat.md || true
+          if [ -s acta-uat.md ]; then
+            echo "Acta recuperada: $(wc -c < acta-uat.md) bytes."
+          else
+            echo "::warning::No se pudo recuperar el comentario del bot para armar el acta."
+            rm -f acta-uat.md
+          fi
+
+      - name: Subir el acta
+        if: steps.acta.outcome == 'success' && hashFiles('acta-uat.md') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: acta-uat-${{ steps.ticket.outputs.code || github.event.pull_request.number }}
+          path: acta-uat.md
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Resumen y notificacion
+        if: always()
+        env:
+          AGENTE: 'Guiones UAT'
+          ESTADO: ${{ steps.claude.outcome }}
+          CORRER: ${{ steps.gate.outputs.correr }}
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          TICKET_CODE: ${{ steps.ticket.outputs.code }}
+          NOTIFY_EMAIL: ${{ vars.NOTIFY_EMAIL }}
+          NOTIFY_FROM: ${{ vars.NOTIFY_FROM }}
+          RESEND_API_KEY: ${{ secrets.resend_api_key }}
+        run: |
+          set -uo pipefail
+
+          # Omitido por la compuerta: no se manda mail. Avisar en cada push que el
+          # agente decidio no correr seria ruido, no informacion.
+          if [ "${CORRER:-}" != "true" ]; then
+            echo "Agente omitido por la compuerta: no se notifica." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ -f ticket.json ]; then
+            multica="OK - $(jq -r --arg c "${TICKET_CODE:-?}" '((.short_id // "") | if . == "" then $c else . end) + " " + (.title // "?")' ticket.json | head -c 90)"
+          else
+            multica="sin ticket (no se genero guion)"
+          fi
+
+          if [ "${ESTADO:-}" = "failure" ] && [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            echo "::group::Diagnostico de la falla"
+            jq -r '
+              [.. | objects | with_entries(select(.key | test("error|message|subtype|type|reason|status|code";"i")))]
+              | map(select(length > 0)) | unique | .[] | tostring
+            ' "$EXEC_FILE" 2>/dev/null | head -40 || echo "(no se pudo parsear)"
+            echo "::endgroup::"
+          fi
+
+          # ── El agente puede terminar en verde sin haber corrido ──────────
+          # La action se autosaltea cuando el archivo de workflow que disparo la
+          # corrida no es identico al que hay en la rama default del repo, y en
+          # ese caso sale con conclusion=success: job verde, cero review, y el
+          # motivo enterrado en el log. Sin archivo de ejecucion no hubo llamada
+          # al modelo, asi que eso no se reporta como exito.
+          if [ "${ESTADO:-}" = "success" ] && { [ -z "${EXEC_FILE:-}" ] || [ ! -f "${EXEC_FILE}" ]; }; then
+            ESTADO="NO CORRIO - ver abajo"
+            echo "::error::El agente termino en verde pero no dejo archivo de ejecucion: nunca llamo al modelo. Causa mas probable: .github/workflows/agents.yml de ${GITHUB_REPOSITORY} no es identico al de la rama default. Tiene que estar igual en la default y en la rama de trabajo."
+          fi
+
+          conclusion=""
+          if [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            conclusion="$(jq -r '
+                (.result? // empty),
+                ([.. | objects | select(.type? == "result") | .result?] | map(select(. != null)) | last // empty),
+                ([.. | objects | select(.type? == "text")   | .text?]   | map(select(. != null)) | last // empty)
+              ' "$EXEC_FILE" 2>/dev/null | grep -v '^$' | tail -n1)"
+          fi
+          [ -n "$conclusion" ] || conclusion="(no se pudo extraer del archivo de ejecucion)"
+          corto="$(printf '%s' "$conclusion" | head -c 1200)"
+          [ "${#conclusion}" -gt 1200 ] && corto="${corto}..."
+
+          {
+            echo "## ${AGENTE}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Repo | ${GITHUB_REPOSITORY} |"
+            echo "| PR | #${PR_NUM:-?} |"
+            echo "| Resultado | ${ESTADO:-omitido} |"
+            echo "| Multica | ${multica} |"
+            echo
+            echo "### Conclusion"
+            echo
+            printf '%s\n' "$corto"
+            echo
+            echo "Corrida completa: ${RUN_URL}"
+          } > resumen.md
+          cat resumen.md >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -z "${NOTIFY_EMAIL:-}" ]; then
+            echo "::notice::Sin vars.NOTIFY_EMAIL: no se manda mail."
+            exit 0
+          fi
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "::warning::Hay NOTIFY_EMAIL pero falta el secret RESEND_API_KEY."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg from "${NOTIFY_FROM:-MicroChangas Agentes <onboarding@resend.dev>}" \
+            --arg to "$NOTIFY_EMAIL" \
+            --arg subject "[${GITHUB_REPOSITORY##*/}] PR #${PR_NUM:-?} - ${AGENTE}: ${ESTADO:-omitido}" \
+            --rawfile text resumen.md \
+            '{from: $from, to: [$to], subject: $subject, text: $text}')"
+          resp="$(curl -sS --max-time 20 -w '\n%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$payload")"
+          code="$(printf '%s' "$resp" | tail -n1)"
+          if [ "$code" = "200" ]; then
+            echo "Mail enviado a ${NOTIFY_EMAIL}."
+          else
+            echo "::warning::Resend devolvio HTTP ${code}: $(printf '%s' "$resp" | sed '$d' | head -c 300)"
+          fi
+
+      - name: Guardar salida de ejecucion si fallo
+        if: failure() && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-exec-uat-pr-${{ github.event.pull_request.number }}
+          path: ${{ steps.claude.outputs.execution_file }}
+          if-no-files-found: ignore
+          retention-days: 7

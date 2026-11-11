@@ -1,0 +1,393 @@
+name: Agente · PR Review
+
+# Reusable workflow. No corre solo: lo invocan los repos de producto con `uses:`.
+# Ver docs/install-frontend.md y docs/install-backend.md para el snippet exacto.
+
+on:
+  workflow_call:
+    inputs:
+      project_kind:
+        description: 'frontend | backend. Ajusta el contexto que recibe el agente.'
+        type: string
+        required: true
+      ticket_prefix:
+        description: 'Prefijo del codigo de ticket en la rama. En Multica los titulos son "[MC-106] ...".'
+        type: string
+        default: 'MC'
+      multica_workspace_id:
+        description: 'UUID del workspace de Multica. No es secreto, pero se pasa como input para no hardcodearlo.'
+        type: string
+        required: false
+        default: ''
+      model:
+        type: string
+        default: 'claude-sonnet-5'
+      max_turns:
+        type: number
+        default: 50
+      timeout_minutes:
+        type: number
+        default: 20
+    secrets:
+      anthropic_api_key:
+        required: false
+      claude_code_oauth_token:
+        required: false
+      resend_api_key:
+        description: 'API key de Resend para mandar el resumen por mail. Opcional.'
+        required: false
+      multica_token:
+        description: 'Personal access token de Multica (mul_...). Sin esto el agente revisa el diff pero no compara contra el ticket.'
+        required: false
+
+jobs:
+  review:
+    # Las PRs en draft no se revisan: gastan tokens en codigo que todavia se esta moviendo.
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          # Necesitamos la base para poder diffear la rama completa, no solo el ultimo commit.
+          fetch-depth: 0
+
+      - name: Resolver codigo de ticket
+        id: ticket
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PREFIX: ${{ inputs.ticket_prefix }}
+        run: |
+          # El equipo nombra las ramas con el short_id de Multica (MIC-87). La
+          # convencion anterior usaba el codigo interno (feature/MC-106-...), que en
+          # Multica vive dentro del titulo, como "[MC-106] ...". Se soportan las dos,
+          # y el short_id gana porque permite pedir el issue directo.
+          blob="$(printf '%s\n%s\n%s\n' "$HEAD_REF" "$PR_TITLE" "$PR_BODY")"
+
+          code="$(printf '%s' "$blob" | grep -oE '\bMIC-[0-9]+' | head -n1 || true)"
+          kind=short_id
+          if [ -z "$code" ]; then
+            # El \b es lo que evita que MIC-87 se lea como si fuera MC-87.
+            code="$(printf '%s' "$blob" | grep -oE "\b${PREFIX}-[0-9]+" | head -n1 || true)"
+            kind=en_titulo
+          fi
+
+          if [ -z "$code" ]; then
+            echo "No se encontro ni MIC-NN ni ${PREFIX}-NNN en rama, titulo ni cuerpo de la PR."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Ticket detectado: $code (se busca por $kind)"
+            {
+              echo "found=true"
+              echo "code=$code"
+              echo "kind=$kind"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Traer el ticket de Multica
+        id: multica
+        # Best-effort: si Multica no responde o falta el token, el agente igual corre.
+        continue-on-error: true
+        if: steps.ticket.outputs.found == 'true' && inputs.multica_workspace_id != ''
+        env:
+          MULTICA_TOKEN: ${{ secrets.multica_token }}
+          MULTICA_WORKSPACE_ID: ${{ inputs.multica_workspace_id }}
+          TICKET_CODE: ${{ steps.ticket.outputs.code }}
+          TICKET_KIND: ${{ steps.ticket.outputs.kind }}
+        run: |
+          set -uo pipefail
+          if [ -z "${MULTICA_TOKEN:-}" ]; then
+            echo "::warning::Falta el secret MULTICA_TOKEN. El agente no va a poder comparar contra el ticket."
+            exit 0
+          fi
+          API="https://api.multica.ai/api"
+          auth=(-H "Authorization: Bearer ${MULTICA_TOKEN}" -H "X-Workspace-ID: ${MULTICA_WORKSPACE_ID}")
+
+          bajar() {
+            curl -sS --max-time 20 "${auth[@]}" "${API}/issues/$1" -o ticket.json \
+              && jq -e '.title' ticket.json >/dev/null 2>&1
+          }
+
+          # Camino corto: el codigo YA es el short_id, se pide el issue directo.
+          if [ "$TICKET_KIND" = "short_id" ] && bajar "$TICKET_CODE"; then
+            echo "Ticket recuperado: $(jq -r --arg c "$TICKET_CODE" '((.short_id // "") | if . == "" then $c else . end) + " — " + (.title // "?")' ticket.json)"
+            exit 0
+          fi
+          rm -f ticket.json
+
+          # Camino largo: listar y buscar. Por short_id si el endpoint directo no lo
+          # acepta, o por el codigo interno entre corchetes dentro del titulo.
+          uuid=''; offset=0
+          for _ in $(seq 1 10); do
+            page="$(curl -sS --max-time 20 "${auth[@]}" "${API}/issues?limit=100&offset=${offset}")" || break
+            if [ "$TICKET_KIND" = "short_id" ]; then
+              match="$(printf '%s' "$page" | jq -r --arg c "$TICKET_CODE" \
+                '(if type == "object" then (.items // []) else . end) | map(select(.short_id == $c)) | .[0].id // empty')"
+            else
+              match="$(printf '%s' "$page" | jq -r --arg c "[${TICKET_CODE}]" \
+                '(if type == "object" then (.items // []) else . end) | map(select(.title | contains($c))) | .[0].id // empty')"
+            fi
+            if [ -n "$match" ]; then uuid="$match"; break; fi
+            [ "$(printf '%s' "$page" | jq -r '.has_more // false')" = "true" ] || break
+            offset="$(printf '%s' "$page" | jq -r --argjson o "$offset" '.next_offset // ($o + 100)')"
+          done
+
+          if [ -z "$uuid" ]; then
+            echo "::warning::No hay ningun issue en Multica que corresponda a ${TICKET_CODE}."
+            exit 0
+          fi
+          if bajar "$uuid"; then
+            echo "Ticket recuperado: $(jq -r --arg c "$TICKET_CODE" '((.short_id // "") | if . == "" then $c else . end) + " — " + (.title // "?")' ticket.json)"
+          else
+            echo "::warning::El issue ${uuid} no se pudo leer."
+            rm -f ticket.json
+          fi
+
+      - name: Armar el contexto del ticket
+        run: |
+          if [ -f ticket.json ]; then
+            {
+              echo "## Ticket de Multica"
+              jq -r '"**" + (.short_id // "?") + "** — " + (.title // "?") + "\n\nEstado: " + (.status // "?")' ticket.json
+              echo
+              jq -r '.description // "(sin descripcion)"' ticket.json
+              echo
+              # Los comentarios suelen traer correcciones posteriores al ticket original.
+              jq -r 'if (.comments // []) | length > 0
+                     then "## Comentarios del ticket\n" + ((.comments // []) | map("- " + (.body // .content // "")) | join("\n"))
+                     else "" end' ticket.json
+            } > ticket-context.md
+          else
+            cat > ticket-context.md <<'EOF'
+          ## Ticket de Multica
+
+          No se pudo recuperar. Puede ser que la rama no siga la convencion de nombre, que
+          el ticket no exista en Multica, o que falte configurar MULTICA_TOKEN.
+          Reviso el diff igual, pero **no** puedo verificar criterios de aceptacion ni DoD:
+          eso hay que decirlo explicitamente en el comentario.
+          EOF
+          fi
+          echo "--- contexto que recibe el agente ---"
+          head -c 2000 ticket-context.md
+
+      - id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          # Se pasan los dos: la action usa el que este cargado e ignora el vacio.
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}
+          claude_code_oauth_token: ${{ secrets.claude_code_oauth_token }}
+          # Diagnostico: la action oculta la salida del SDK, asi que cuando el LLM
+          # falla no queda rastro del motivo. Se prende con `gh variable set
+          # CLAUDE_DEBUG --body true` y se apaga despues: expone TODOS los mensajes,
+          # incluidos resultados de herramientas.
+          show_full_output: ${{ vars.CLAUDE_DEBUG == 'true' }}
+          prompt: |
+            Sos el revisor de PRs de MicroChangas. El repo es el ${{ inputs.project_kind }}.
+            Los autores suelen ser devs junior: se claro y concreto, y explica el porque de
+            cada hallazgo en vez de solo marcarlo.
+
+            En `ticket-context.md` tenes el ticket de Multica al que responde esta PR
+            (si se pudo recuperar). Leelo primero: define que se pidio.
+
+            El diff a revisar:
+              git diff origin/${{ github.base_ref }}...HEAD
+
+            Revisa en este orden y no te saltees el paso 1:
+
+            1. **Cumplimiento del ticket.** Recorre los criterios de aceptacion del ticket uno
+               por uno y deci si el diff los cumple, no los cumple, o no se puede verificar
+               solo leyendo el codigo (por ejemplo algo que depende de como se ve renderizado).
+               Un criterio que no podes verificar se marca como "no verificable desde el diff",
+               nunca como cumplido. Si no hay ticket, deci explicitamente que revisaste sin el.
+            2. **Correctitud y seguridad.** Bugs reales, no hipoteticos: condiciones mal
+               escritas, casos borde sin manejar, datos sensibles expuestos, validacion faltante
+               en endpoints, control de acceso.
+            3. **Mantenibilidad.** Codigo duplicado, funciones que hacen demasiado, nombres que
+               enganan, y desvios de las convenciones que ya usa el repo alrededor.
+
+            Como publicar (esto es obligatorio, no opcional):
+
+            1. **Siempre** deja un comentario resumen en la PR con:
+                 gh pr comment ${{ github.event.pull_request.number }} --body "el texto aca"
+               Aunque no encuentres nada. Un review que no aparece en la PR no existe: el dev
+               no entra a mirar los logs de Actions.
+
+               Escribi el texto **literal** dentro de --body. Un solo comando, el texto
+               entre comillas dobles, y listo.
+
+            Sobre los comandos de shell en general: el sandbox rechaza todo lo que no sea un
+            comando simple. Nada de `$(...)`, backticks, pipes, `>` ni `&&`. Tampoco escribas
+            archivos: leelos con Read y contalos con Grep. Cada comando rechazado te consume
+            un turno, y si los agotas te quedas sin publicar el review.
+            2. Ademas, para cada hallazgo puntual que se ancla a una linea concreta, deja un
+               comentario inline con mcp__github_inline_comment__create_inline_comment.
+
+            Como escribir el comentario resumen. Lo lee una persona, no un linter.
+
+            Arranca **siempre** con un bloque corto titulado "Para el negocio", de tres
+            lineas, escrito para alguien que no programa: un PM, un profesor, alguien del
+            steering. Cada linea responde una pregunta:
+
+              - **Que resuelve**: que historia implementa esta PR, dicha en terminos de lo
+                que ahora puede hacer un usuario de MicroChangas. Nada de nombres de
+                funciones, archivos ni componentes.
+              - **Riesgo**: bajo, medio o alto, y por que en una frase. Alto si toca login,
+                permisos, datos personales o plata; medio si cambia algo que ya funcionaba;
+                bajo si solo agrega algo nuevo y aislado.
+              - **Que probar**: la accion concreta que alguien deberia hacer en la app para
+                comprobar que esto anda, en una oracion.
+
+            Despues de ese bloque viene el review tecnico para el dev:
+
+            - Arranca diciendo en una frase si la PR cumple lo que pedia el ticket.
+            - Despues, si hay criterios de aceptacion, una lista corta marcando cada uno como
+              cumplido, no cumplido, o no verificable desde el diff.
+            - Despues los hallazgos, explicando **por que** importa cada uno y que pasaria si
+              queda asi, no solo que esta mal. Si el arreglo es corto, escribi el codigo.
+            - Si algo esta bien resuelto, decilo. Un review que solo marca errores se lee como
+              una lista de reproches, y el autor suele ser alguien que recien empieza.
+            - Si no encontraste nada relevante, decilo en una linea y no inventes trabajo.
+
+            Escribi en espanol rioplatense, en prosa, como si se lo explicaras al dev sentado
+            al lado. Nada de plantillas rigidas ni de jerga de auditoria.
+
+            No apruebes ni mergees la PR. No comentes estilo que ya resuelven prettier o eslint.
+          claude_args: |
+            --model ${{ inputs.model }}
+            --max-turns ${{ inputs.max_turns }}
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(git show-ref:*),Bash(git rev-parse:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*)"
+        env:
+          # Sin esto `gh pr comment` no tiene con que autenticarse y el agente se
+          # queda sin forma de publicar el resumen.
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Resumen y notificacion
+        # always(): el resumen sirve sobre todo cuando algo salio mal.
+        if: always()
+        env:
+          AGENTE: 'PR Review'
+          ESTADO: ${{ steps.claude.outcome }}
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          TICKET_CODE: ${{ steps.ticket.outputs.code }}
+          NOTIFY_EMAIL: ${{ vars.NOTIFY_EMAIL }}
+          NOTIFY_FROM: ${{ vars.NOTIFY_FROM }}
+          RESEND_API_KEY: ${{ secrets.resend_api_key }}
+        run: |
+          set -uo pipefail
+
+          # ---- estado de las conexiones ----
+          if [ -f ticket.json ]; then
+            # La REST no siempre devuelve short_id en el issue individual, asi que
+            # se cae al codigo que detectamos de la rama.
+            multica="OK - $(jq -r --arg c "${TICKET_CODE:-?}" '((.short_id // "") | if . == "" then $c else . end) + " " + (.title // "?")' ticket.json | head -c 90)"
+          else
+            multica="sin ticket (el agente reviso a ciegas)"
+          fi
+          CONEXIONES="| Multica | ${multica} |"
+
+          # ---- diagnostico cuando la llamada al LLM falla ----
+          # La action oculta la salida del SDK "for security", asi que cuando algo
+          # falla no queda rastro del motivo. Esto vuelca solo los campos de error
+          # del archivo de ejecucion, no la conversacion entera.
+          if [ "${ESTADO:-}" = "failure" ] && [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            echo "::group::Diagnostico de la falla"
+            jq -r '
+              [.. | objects | with_entries(select(.key | test("error|message|subtype|type|reason|status|code";"i")))]
+              | map(select(length > 0)) | unique | .[] | tostring
+            ' "$EXEC_FILE" 2>/dev/null | head -40 || echo "(no se pudo parsear)"
+            echo "--- tamano del archivo: $(wc -c < "$EXEC_FILE") bytes ---"
+            echo "::endgroup::"
+          fi
+
+          # ---- conclusion del agente ----
+          # Sale de la transcripcion. El formato puede cambiar entre versiones de
+          # la action, asi que se prueban varias formas; si ninguna da, se dice
+          # que no esta disponible en vez de inventar algo.
+          # ── El agente puede terminar en verde sin haber corrido ──────────
+          # La action se autosaltea cuando el archivo de workflow que disparo la
+          # corrida no es identico al que hay en la rama default del repo, y en
+          # ese caso sale con conclusion=success: job verde, cero review, y el
+          # motivo enterrado en el log. Sin archivo de ejecucion no hubo llamada
+          # al modelo, asi que eso no se reporta como exito.
+          if [ "${ESTADO:-}" = "success" ] && { [ -z "${EXEC_FILE:-}" ] || [ ! -f "${EXEC_FILE}" ]; }; then
+            ESTADO="NO CORRIO - ver abajo"
+            echo "::error::El agente termino en verde pero no dejo archivo de ejecucion: nunca llamo al modelo. Causa mas probable: .github/workflows/agents.yml de ${GITHUB_REPOSITORY} no es identico al de la rama default. Tiene que estar igual en la default y en la rama de trabajo."
+          fi
+
+          conclusion=""
+          if [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            conclusion="$(jq -r '
+                (.result? // empty),
+                ([.. | objects | select(.type? == "result") | .result?] | map(select(. != null)) | last // empty),
+                ([.. | objects | select(.type? == "text")   | .text?]   | map(select(. != null)) | last // empty)
+              ' "$EXEC_FILE" 2>/dev/null | grep -v '^$' | tail -n1)"
+          fi
+          [ -n "$conclusion" ] || conclusion="(no se pudo extraer del archivo de ejecucion)"
+          corto="$(printf '%s' "$conclusion" | head -c 1200)"
+          [ "${#conclusion}" -gt 1200 ] && corto="${corto}..."
+
+          # ---- armar el resumen ----
+          {
+            echo "## ${AGENTE}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Repo | ${GITHUB_REPOSITORY} |"
+            echo "| PR | #${PR_NUM:-?} |"
+            echo "| Resultado | ${ESTADO} |"
+            printf '%s\n' "$CONEXIONES"
+            echo
+            echo "### Conclusion"
+            echo
+            printf '%s\n' "$corto"
+            echo
+            echo "Corrida completa: ${RUN_URL}"
+          } > resumen.md
+          cat resumen.md >> "$GITHUB_STEP_SUMMARY"
+
+          # ---- mandar el mail ----
+          # Best-effort a proposito: un problema de notificacion no deberia
+          # marcar en rojo una corrida de review.
+          if [ -z "${NOTIFY_EMAIL:-}" ]; then
+            echo "::notice::Sin vars.NOTIFY_EMAIL: no se manda mail."
+            exit 0
+          fi
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "::warning::Hay NOTIFY_EMAIL pero falta el secret RESEND_API_KEY."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg from "${NOTIFY_FROM:-MicroChangas Agentes <onboarding@resend.dev>}" \
+            --arg to "$NOTIFY_EMAIL" \
+            --arg subject "[${GITHUB_REPOSITORY##*/}] PR #${PR_NUM:-?} - ${AGENTE}: ${ESTADO}" \
+            --rawfile text resumen.md \
+            '{from: $from, to: [$to], subject: $subject, text: $text}')"
+          resp="$(curl -sS --max-time 20 -w '\n%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$payload")"
+          code="$(printf '%s' "$resp" | tail -n1)"
+          if [ "$code" = "200" ]; then
+            echo "Mail enviado a ${NOTIFY_EMAIL}."
+          else
+            echo "::warning::Resend devolvio HTTP ${code}: $(printf '%s' "$resp" | sed '$d' | head -c 300)"
+          fi
+
+      - name: Guardar salida de ejecucion si fallo
+        if: failure() && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-exec-review-pr-${{ github.event.pull_request.number }}
+          path: ${{ steps.claude.outputs.execution_file }}
+          if-no-files-found: ignore
+          retention-days: 7

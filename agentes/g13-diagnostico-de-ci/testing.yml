@@ -1,0 +1,321 @@
+name: Agente · Testing
+
+# Reusable workflow. Corre la suite del repo y, si algo se rompe, un agente diagnostica
+# la causa y la comenta en la PR. Si todo pasa, no gasta un solo token.
+
+on:
+  workflow_call:
+    inputs:
+      project_kind:
+        type: string
+        required: true
+      package_manager:
+        description: 'npm | pnpm'
+        type: string
+        default: 'npm'
+      node_version:
+        type: string
+        default: '22'
+      lint_cmd:
+        description: 'Vacio = no se corre.'
+        type: string
+        default: ''
+      build_cmd:
+        type: string
+        default: ''
+      test_cmd:
+        type: string
+        default: ''
+      analyze_on_success:
+        description: 'Si es true, el agente opina sobre cobertura aunque todo pase verde.'
+        type: boolean
+        default: false
+      model:
+        type: string
+        default: 'claude-sonnet-5'
+      max_turns:
+        type: number
+        default: 15
+      timeout_minutes:
+        type: number
+        default: 25
+    secrets:
+      anthropic_api_key:
+        required: false
+      claude_code_oauth_token:
+        required: false
+      resend_api_key:
+        description: 'API key de Resend para mandar el resumen por mail. Opcional.'
+        required: false
+
+jobs:
+  test:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+        if: inputs.package_manager == 'pnpm'
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: ${{ inputs.package_manager }}
+
+      - name: Instalar dependencias
+        run: |
+          if [ "${{ inputs.package_manager }}" = "pnpm" ]; then
+            pnpm install --frozen-lockfile
+          else
+            npm ci --no-audit --no-fund
+          fi
+
+      # Cada paso escribe su log y NO corta el job: queremos el cuadro completo de que
+      # fallo, no solo el primer error. El veredicto se arma al final.
+      - name: Lint
+        id: lint
+        if: inputs.lint_cmd != ''
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ${{ inputs.lint_cmd }} 2>&1 | tee logs-lint.txt
+
+      - name: Build
+        id: build
+        if: inputs.build_cmd != ''
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ${{ inputs.build_cmd }} 2>&1 | tee logs-build.txt
+
+      - name: Tests
+        id: tests
+        if: inputs.test_cmd != ''
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ${{ inputs.test_cmd }} 2>&1 | tee logs-tests.txt
+
+      - name: Evaluar resultado
+        id: verdict
+        run: |
+          # Ojo: `[ cond ] && var=x` con cond falsa devuelve 1 y, como Actions corre los
+          # run con `bash -e`, tumbaria el step. Por eso van `if` completos.
+          failed=""
+          if [ "${{ steps.lint.outcome }}"  = "failure" ]; then failed="${failed}lint ";  fi
+          if [ "${{ steps.build.outcome }}" = "failure" ]; then failed="${failed}build "; fi
+          if [ "${{ steps.tests.outcome }}" = "failure" ]; then failed="${failed}tests "; fi
+          if [ -n "$failed" ]; then
+            echo "Fallaron: $failed"
+            echo "failed=true" >> "$GITHUB_OUTPUT"
+            echo "stages=$failed" >> "$GITHUB_OUTPUT"
+          else
+            echo "Todo verde."
+            echo "failed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Los logs de jest/tsc son largos y la mayoria es ruido de stack traces repetidos.
+          # Recortamos a la cola, que es donde vive el resumen de fallos.
+          for f in logs-lint.txt logs-build.txt logs-tests.txt; do
+            [ -f "$f" ] || continue
+            tail -c 20000 "$f" > "${f%.txt}-recorte.txt"
+          done
+
+      - name: Guardar logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-ci-pr-${{ github.event.pull_request.number }}
+          path: logs-*.txt
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Diagnostico del agente
+        if: steps.verdict.outputs.failed == 'true' || inputs.analyze_on_success
+        id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}
+          claude_code_oauth_token: ${{ secrets.claude_code_oauth_token }}
+          # Diagnostico: la action oculta la salida del SDK, asi que cuando el LLM
+          # falla no queda rastro del motivo. Se prende con `gh variable set
+          # CLAUDE_DEBUG --body true` y se apaga despues: expone TODOS los mensajes,
+          # incluidos resultados de herramientas.
+          show_full_output: ${{ vars.CLAUDE_DEBUG == 'true' }}
+          prompt: |
+            La CI del repo ${{ inputs.project_kind }} de MicroChangas corrio sobre esta PR.
+
+            Resultado: ${{ steps.verdict.outputs.failed == 'true' && format('FALLARON: {0}', steps.verdict.outputs.stages) || 'todo verde' }}
+
+            Los logs recortados estan en `logs-lint-recorte.txt`, `logs-build-recorte.txt` y
+            `logs-tests-recorte.txt` (existe solo el de las etapas que corrieron).
+
+            Si algo fallo:
+            1. Leé el log de cada etapa que fallo y encontra el **primer** error real. En una
+               cascada de errores de TypeScript o de jest, los que siguen suelen ser
+               consecuencia del primero; arreglar el primero suele apagar el resto.
+            2. Corre `git diff origin/${{ github.base_ref }}...HEAD` y determina si el error lo
+               introdujo esta PR o si ya venia roto de la base. Esa distincion le cambia la
+               vida al autor, asi que decila explicitamente.
+            3. Deci la causa concreta, con archivo y linea, y como se arregla. Si el arreglo
+               es de una linea, escribi la linea.
+
+            Si todo paso verde, revisa si el diff agrega logica sin tests que la cubran, y
+            nombra los casos que faltan. Si la cobertura es razonable, decilo en una linea y
+            no inventes trabajo.
+
+            Escribi el texto literal dentro de --body: el sandbox rechaza `$(...)`, backticks,
+            pipes y redirecciones, y en ese caso el comentario no se publica.
+
+            Publica UN comentario en la PR #${{ github.event.pull_request.number }} del repo
+            ${{ github.repository }} con `gh pr comment`. Se breve: los logs completos ya
+            estan en los artifacts del run, no los repitas.
+
+            No edites archivos ni pushees. Solo diagnostica.
+
+            Escribi en espanol rioplatense.
+          claude_args: |
+            --model ${{ inputs.model }}
+            --max-turns ${{ inputs.max_turns }}
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(gh pr comment:*)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # El job tiene que quedar rojo si la CI fallo. El agente comenta, no absuelve.
+      - name: Reflejar el estado real
+        if: steps.verdict.outputs.failed == 'true'
+        run: |
+          echo "::error::Fallaron estas etapas: ${{ steps.verdict.outputs.stages }}"
+          exit 1
+
+      - name: Resumen y notificacion
+        # always(): el resumen sirve sobre todo cuando algo salio mal.
+        if: always()
+        env:
+          AGENTE: 'Testing'
+          ESTADO: ${{ steps.claude.outcome }}
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          VERDICT_STAGES: ${{ steps.verdict.outputs.stages }}
+          NOTIFY_EMAIL: ${{ vars.NOTIFY_EMAIL }}
+          NOTIFY_FROM: ${{ vars.NOTIFY_FROM }}
+          RESEND_API_KEY: ${{ secrets.resend_api_key }}
+        run: |
+          set -uo pipefail
+
+          # ---- estado de las conexiones ----
+          etapas="${VERDICT_STAGES:-}"
+          if [ -n "$etapas" ]; then
+            ci="FALLO en: ${etapas}"
+          else
+            ci="todo verde"
+          fi
+          CONEXIONES="| CI | ${ci} |"
+
+          # ---- diagnostico cuando la llamada al LLM falla ----
+          # La action oculta la salida del SDK "for security", asi que cuando algo
+          # falla no queda rastro del motivo. Esto vuelca solo los campos de error
+          # del archivo de ejecucion, no la conversacion entera.
+          if [ "${ESTADO:-}" = "failure" ] && [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            echo "::group::Diagnostico de la falla"
+            jq -r '
+              [.. | objects | with_entries(select(.key | test("error|message|subtype|type|reason|status|code";"i")))]
+              | map(select(length > 0)) | unique | .[] | tostring
+            ' "$EXEC_FILE" 2>/dev/null | head -40 || echo "(no se pudo parsear)"
+            echo "--- tamano del archivo: $(wc -c < "$EXEC_FILE") bytes ---"
+            echo "::endgroup::"
+          fi
+
+          # ---- conclusion del agente ----
+          # Sale de la transcripcion. El formato puede cambiar entre versiones de
+          # la action, asi que se prueban varias formas; si ninguna da, se dice
+          # que no esta disponible en vez de inventar algo.
+          # ── El agente puede terminar en verde sin haber corrido ──────────
+          # La action se autosaltea cuando el archivo de workflow que disparo la
+          # corrida no es identico al que hay en la rama default del repo, y en
+          # ese caso sale con conclusion=success: job verde, cero review, y el
+          # motivo enterrado en el log. Sin archivo de ejecucion no hubo llamada
+          # al modelo, asi que eso no se reporta como exito.
+          if [ "${ESTADO:-}" = "success" ] && { [ -z "${EXEC_FILE:-}" ] || [ ! -f "${EXEC_FILE}" ]; }; then
+            ESTADO="NO CORRIO - ver abajo"
+            echo "::error::El agente termino en verde pero no dejo archivo de ejecucion: nunca llamo al modelo. Causa mas probable: .github/workflows/agents.yml de ${GITHUB_REPOSITORY} no es identico al de la rama default. Tiene que estar igual en la default y en la rama de trabajo."
+          fi
+
+          conclusion=""
+          if [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            conclusion="$(jq -r '
+                (.result? // empty),
+                ([.. | objects | select(.type? == "result") | .result?] | map(select(. != null)) | last // empty),
+                ([.. | objects | select(.type? == "text")   | .text?]   | map(select(. != null)) | last // empty)
+              ' "$EXEC_FILE" 2>/dev/null | grep -v '^$' | tail -n1)"
+          fi
+          [ -n "$conclusion" ] || conclusion="(no se pudo extraer del archivo de ejecucion)"
+          corto="$(printf '%s' "$conclusion" | head -c 1200)"
+          [ "${#conclusion}" -gt 1200 ] && corto="${corto}..."
+
+          # ---- armar el resumen ----
+          {
+            echo "## ${AGENTE}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Repo | ${GITHUB_REPOSITORY} |"
+            echo "| PR | #${PR_NUM:-?} |"
+            echo "| Resultado | ${ESTADO} |"
+            printf '%s\n' "$CONEXIONES"
+            echo
+            echo "### Conclusion"
+            echo
+            printf '%s\n' "$corto"
+            echo
+            echo "Corrida completa: ${RUN_URL}"
+          } > resumen.md
+          cat resumen.md >> "$GITHUB_STEP_SUMMARY"
+
+          # ---- mandar el mail ----
+          # Best-effort a proposito: un problema de notificacion no deberia
+          # marcar en rojo una corrida de review.
+          if [ -z "${NOTIFY_EMAIL:-}" ]; then
+            echo "::notice::Sin vars.NOTIFY_EMAIL: no se manda mail."
+            exit 0
+          fi
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "::warning::Hay NOTIFY_EMAIL pero falta el secret RESEND_API_KEY."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg from "${NOTIFY_FROM:-MicroChangas Agentes <onboarding@resend.dev>}" \
+            --arg to "$NOTIFY_EMAIL" \
+            --arg subject "[${GITHUB_REPOSITORY##*/}] PR #${PR_NUM:-?} - ${AGENTE}: ${ESTADO}" \
+            --rawfile text resumen.md \
+            '{from: $from, to: [$to], subject: $subject, text: $text}')"
+          resp="$(curl -sS --max-time 20 -w '\n%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$payload")"
+          code="$(printf '%s' "$resp" | tail -n1)"
+          if [ "$code" = "200" ]; then
+            echo "Mail enviado a ${NOTIFY_EMAIL}."
+          else
+            echo "::warning::Resend devolvio HTTP ${code}: $(printf '%s' "$resp" | sed '$d' | head -c 300)"
+          fi
+
+      - name: Guardar salida de ejecucion si fallo
+        if: failure() && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-exec-testing-pr-${{ github.event.pull_request.number }}
+          path: ${{ steps.claude.outputs.execution_file }}
+          if-no-files-found: ignore
+          retention-days: 7

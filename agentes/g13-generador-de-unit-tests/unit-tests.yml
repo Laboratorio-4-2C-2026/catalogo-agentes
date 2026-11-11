@@ -1,0 +1,427 @@
+name: Agente · Generador de unit tests
+
+# Reusable workflow. Busca codigo nuevo del diff que quedo sin tests, escribe la
+# suite, LA CORRE DE VERDAD hasta que pase, y despues la publica en un comentario
+# para que un dev la pegue.
+#
+# ────────────────────────────────────────────────────────────────────────────
+# Por que puede "ejecutarlas hasta que pasen" sin commitear nada
+#
+# El agente escribe los tests en el checkout del runner, que es una copia
+# efimera que se destruye al terminar el job. Correrlos ahi es lo que separa
+# "aca tenes unos tests que invente" de "estos tests pasan contra tu codigo".
+#
+# Commitear es otra cosa, y no puede: el job pide `contents: read`, asi que no
+# tiene credencial de escritura contra el repo. Su unica salida es el comentario.
+# ────────────────────────────────────────────────────────────────────────────
+
+on:
+  workflow_call:
+    inputs:
+      project_kind:
+        description: 'frontend | backend.'
+        type: string
+        required: true
+      package_manager:
+        description: 'npm | pnpm'
+        type: string
+        default: 'npm'
+      node_version:
+        type: string
+        default: '22'
+      test_one_cmd:
+        description: |
+          Comando para correr UN archivo de test. Se le concatena la ruta.
+          Vacio = default segun package_manager (vitest para npm, jest para pnpm).
+        type: string
+        default: ''
+      excluir_regex:
+        description: 'ERE de archivos que no vale la pena testear unitariamente.'
+        type: string
+        default: ''
+      model:
+        type: string
+        default: 'claude-sonnet-5'
+      max_turns:
+        type: number
+        default: 60
+      timeout_minutes:
+        type: number
+        default: 30
+    secrets:
+      anthropic_api_key:
+        required: false
+      claude_code_oauth_token:
+        required: false
+      resend_api_key:
+        required: false
+
+jobs:
+  unit-tests:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      # read, no write. El agente no puede commitear aunque se lo pidieran.
+      contents: read
+      pull-requests: write
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # ─────────────────────────────────────────────────────────────────────
+      # Compuerta. Generar tests es de los agentes mas caros que tenemos (hasta
+      # 60 turnos, porque itera corriendo la suite). Corre solo cuando la PR
+      # esta lista, y solo si hay codigo nuevo sin cubrir.
+      # ─────────────────────────────────────────────────────────────────────
+      - name: Decidir si corre
+        id: gate
+        env:
+          ACCION: ${{ github.event.action }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          BASE: ${{ github.base_ref }}
+          EXCLUIR: ${{ inputs.excluir_regex }}
+        run: |
+          set -uo pipefail
+
+          momento=false
+          case "${ACCION:-}" in
+            opened|ready_for_review|reopened) momento=true ;;
+          esac
+          case ",${LABELS:-}," in
+            *,tests,*) momento=true ;;
+          esac
+          if [ "$momento" != "true" ]; then
+            echo "Se omite: los tests se generan al abrir o marcar lista la PR (evento '${ACCION:-?}')."
+            echo "correr=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          excluir="${EXCLUIR:-}"
+          if [ -z "$excluir" ]; then
+            # Lo que no se testea unitariamente: definiciones de tipos, barriles,
+            # modulos de Nest (solo cablean), DTOs y entidades (solo forma),
+            # configuracion y puntos de entrada.
+            excluir='\.d\.ts$|/index\.tsx?$|\.module\.ts$|\.dto\.ts$|\.entity\.ts$|\.interface\.ts$|\.config\.|/main\.tsx?$|\.stories\.'
+          fi
+
+          # Solo archivos agregados o modificados: los borrados no necesitan tests.
+          git diff --name-only --diff-filter=AM "origin/${BASE}...HEAD" > cambiados.txt || true
+          grep -E '\.(ts|tsx)$' cambiados.txt \
+            | grep -vE '(\.|/)(test|spec)\.' \
+            | grep -vE "$excluir" > fuentes.txt || true
+
+          : > sin-tests.txt
+          while IFS= read -r f; do
+            [ -n "$f" ] || continue
+            dir="$(dirname "$f")"
+            base="$(basename "$f")"
+            base="${base%.*}"
+            # Un test puede vivir al lado o en __tests__. Si ya hay uno, el agente
+            # no tiene que inventarlo de nuevo.
+            #
+            # Se prueba candidato por candidato y no con un solo `ls a b c`:
+            # ls devuelve error si CUALQUIERA de sus argumentos no existe, asi
+            # que esa forma solo daria verdadero si existieran las tres variantes
+            # a la vez. Un glob sin coincidencias queda literal y `-e` lo
+            # descarta, que es justo lo que queremos.
+            tiene_test=false
+            for cand in "${dir}/${base}".test.* "${dir}/${base}".spec.* \
+                        "${dir}/__tests__/${base}".*; do
+              if [ -e "$cand" ]; then tiene_test=true; break; fi
+            done
+            if [ "$tiene_test" = "true" ]; then continue; fi
+            printf '%s\n' "$f" >> sin-tests.txt
+          done < fuentes.txt
+
+          n="$(wc -l < sin-tests.txt | tr -d ' ')"
+          echo "Fuentes tocadas: $(wc -l < fuentes.txt | tr -d ' '). Sin tests: ${n}."
+          if [ "$n" -gt 0 ]; then
+            echo "--- sin cobertura ---"
+            cat sin-tests.txt
+            echo "correr=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Todo el codigo tocado ya tiene tests al lado. No hay nada que generar."
+            echo "correr=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "n_sin_tests=$n" >> "$GITHUB_OUTPUT"
+
+      - uses: pnpm/action-setup@v4
+        if: steps.gate.outputs.correr == 'true' && inputs.package_manager == 'pnpm'
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.correr == 'true'
+        with:
+          node-version: ${{ inputs.node_version }}
+          cache: ${{ inputs.package_manager }}
+
+      - name: Instalar dependencias
+        if: steps.gate.outputs.correr == 'true'
+        run: |
+          if [ "${{ inputs.package_manager }}" = "pnpm" ]; then
+            pnpm install --frozen-lockfile
+          else
+            npm ci --no-audit --no-fund
+          fi
+
+      # Huella del arbol ANTES del agente. Se compara despues para detectar si
+      # toco codigo de produccion en vez de limitarse a escribir tests.
+      - name: Huella del arbol
+        id: huella
+        if: steps.gate.outputs.correr == 'true'
+        run: |
+          git status --porcelain > antes.txt || true
+          echo "Archivos sucios antes del agente: $(wc -l < antes.txt | tr -d ' ')"
+
+      - name: Resolver comando de test unitario
+        id: cmd
+        if: steps.gate.outputs.correr == 'true'
+        env:
+          CMD_IN: ${{ inputs.test_one_cmd }}
+          PM: ${{ inputs.package_manager }}
+        run: |
+          cmd="${CMD_IN:-}"
+          if [ -z "$cmd" ]; then
+            if [ "$PM" = "pnpm" ]; then cmd="pnpm exec jest"; else cmd="npx vitest run"; fi
+          fi
+          echo "Comando para un archivo: $cmd <ruta>"
+          echo "cmd=$cmd" >> "$GITHUB_OUTPUT"
+
+      - id: claude
+        if: steps.gate.outputs.correr == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}
+          claude_code_oauth_token: ${{ secrets.claude_code_oauth_token }}
+          show_full_output: ${{ vars.CLAUDE_DEBUG == 'true' }}
+          prompt: |
+            Escribis unit tests para MicroChangas. El repo es el ${{ inputs.project_kind }}.
+
+            En `sin-tests.txt` esta la lista de archivos que esta PR agrega o modifica y
+            que hoy no tienen ningun test al lado. Son los que te tocan.
+
+            Las dependencias ya estan instaladas. Para correr un archivo de test:
+              ${{ steps.cmd.outputs.cmd }} ruta/al/archivo.test.ts
+
+            ── Lo mas importante de todo ──────────────────────────────────────────────
+
+            **No toques ni un archivo de codigo de produccion.** Ni para arreglar un bug,
+            ni para hacer algo testeable, ni para agregar un export. Solo creas archivos
+            de test nuevos. Si tocaras otra cosa, se detecta despues comparando el arbol y
+            tu trabajo se descarta entero.
+
+            **Si un test falla porque el codigo esta mal, el test tiene razon.** No lo
+            ablandes, no cambies el valor esperado para que coincida con lo que devuelve,
+            no lo marques como skip. Dejalo fallando, y en el comentario explica cual es
+            el bug que encontraste. Un test que afirma el comportamiento con bug es peor
+            que no tener test: convierte el error en la especificacion.
+
+            ───────────────────────────────────────────────────────────────────────────
+
+            Como trabajar:
+
+            1. Leé primero dos o tres tests que ya existan en el repo. Copiá esa forma:
+               los mismos helpers, la misma manera de mockear, la misma estructura. Un
+               test que no se parece al resto es un test que nadie va a mantener.
+            2. Para cada archivo de `sin-tests.txt`, escribi su test y **correlo**.
+               Iterá hasta que pase o hasta que concluyas que falla por un bug del codigo.
+            3. Cubri el camino feliz, pero sobre todo los **casos borde**: listas vacias,
+               null y undefined, strings vacios, numeros en cero o negativos, errores de
+               la API, promesas que rechazan, limites de los rangos. Ahi es donde un test
+               encuentra algo; repetir el camino feliz no agrega nada.
+            4. No apuntes a cubrir todo. Tres tests que prueban algo que podria romperse
+               valen mas que quince que verifican que un getter devuelve lo que le pusiste.
+
+            Publicacion. Un unico comentario en la PR con:
+              gh pr comment ${{ github.event.pull_request.number }} --body "el texto aca"
+
+            El comentario lleva, en este orden:
+
+            - Una linea diciendo cuantos archivos cubriste y si todo paso.
+            - **Si encontraste un bug**, eso va primero y bien visible: que test lo
+              destapa, que esperabas, que devuelve. Es el hallazgo mas valioso que podes
+              traer, mas que los tests mismos.
+            - El contenido completo de cada archivo de test en un bloque de codigo, con la
+              ruta exacta donde va, para que un dev lo pegue sin editar nada.
+            - Una linea aclarando que estos tests **no estan commiteados**: corrieron en el
+              runner y hay que pegarlos a mano.
+
+            Escribi el texto literal dentro de --body, un solo comando, entre comillas
+            dobles. El sandbox rechaza todo lo que no sea un comando simple: nada de
+            `$(...)`, backticks, pipes, `>` ni `&&`.
+
+            Espanol rioplatense.
+          claude_args: |
+            --model ${{ inputs.model }}
+            --max-turns ${{ inputs.max_turns }}
+            --allowedTools "Read,Grep,Glob,Write,Edit,Bash(npx vitest:*),Bash(npx jest:*),Bash(pnpm exec jest:*),Bash(pnpm exec vitest:*),Bash(npm test:*),Bash(pnpm test:*),Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      # ─────────────────────────────────────────────────────────────────────
+      # Control de integridad. El agente tiene Write y Edit porque los necesita
+      # para escribir tests, asi que la instruccion de no tocar produccion es
+      # solo una instruccion. Esto la verifica.
+      #
+      # Nada de esto se commitea igual, pero si toco codigo de produccion
+      # entonces sus tests pasaron contra un codigo que no es el de la PR, y la
+      # conclusion no sirve.
+      # ─────────────────────────────────────────────────────────────────────
+      - name: Verificar que solo escribio tests
+        id: integridad
+        if: steps.gate.outputs.correr == 'true'
+        run: |
+          set -uo pipefail
+          git status --porcelain > despues.txt || true
+
+          # Lo que aparecio durante la corrida del agente.
+          comm -13 <(sort antes.txt) <(sort despues.txt) > nuevos.txt || true
+
+          # Archivos de test nuevos: legitimo. Cualquier otra cosa: no.
+          grep -vE '(\.|/)(test|spec)\.|(^|/)__tests__/' nuevos.txt > sospechosos.txt || true
+          # Los archivos sin seguimiento que el agente creo para si mismo tampoco
+          # son codigo de produccion, pero una MODIFICACION (' M') de un archivo
+          # existente si lo es.
+          grep -E '^\s*M' sospechosos.txt > modificados.txt || true
+
+          n_test="$(grep -cE '(\.|/)(test|spec)\.|(^|/)__tests__/' nuevos.txt || true)"
+          n_mod="$(wc -l < modificados.txt | tr -d ' ')"
+          echo "Archivos de test creados: ${n_test}. Archivos existentes modificados: ${n_mod}."
+
+          if [ "$n_mod" -gt 0 ]; then
+            echo "::error::El agente modifico archivos que no son tests. Sus resultados no son confiables."
+            cat modificados.txt
+            echo "limpio=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Solo escribio tests. Los resultados valen."
+            echo "limpio=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "n_test=$n_test" >> "$GITHUB_OUTPUT"
+
+      - name: Avisar en la PR si el agente se salio del carril
+        if: steps.integridad.outputs.limpio == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "$PR_NUM" --body "El generador de unit tests modifico archivos de codigo de produccion en el runner, cosa que tiene prohibida. Nada de eso se commiteo (el agente no tiene permiso de escritura sobre el repo), pero significa que sus tests corrieron contra un codigo distinto al de esta PR. **No peguen los tests que propuso**: no estan validados contra lo que ustedes escribieron. Queda para revisar de este lado." || true
+
+      - name: Resumen y notificacion
+        if: always()
+        env:
+          AGENTE: 'Generador de unit tests'
+          ESTADO: ${{ steps.claude.outcome }}
+          CORRER: ${{ steps.gate.outputs.correr }}
+          N_SIN: ${{ steps.gate.outputs.n_sin_tests }}
+          N_TEST: ${{ steps.integridad.outputs.n_test }}
+          LIMPIO: ${{ steps.integridad.outputs.limpio }}
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          NOTIFY_EMAIL: ${{ vars.NOTIFY_EMAIL }}
+          NOTIFY_FROM: ${{ vars.NOTIFY_FROM }}
+          RESEND_API_KEY: ${{ secrets.resend_api_key }}
+        run: |
+          set -uo pipefail
+
+          if [ "${CORRER:-}" != "true" ]; then
+            echo "Agente omitido: no es el momento de la PR, o el codigo tocado ya tiene tests." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ "${ESTADO:-}" = "failure" ] && [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            echo "::group::Diagnostico de la falla"
+            jq -r '
+              [.. | objects | with_entries(select(.key | test("error|message|subtype|type|reason|status|code";"i")))]
+              | map(select(length > 0)) | unique | .[] | tostring
+            ' "$EXEC_FILE" 2>/dev/null | head -40 || echo "(no se pudo parsear)"
+            echo "::endgroup::"
+          fi
+
+          # ── El agente puede terminar en verde sin haber corrido ──────────
+          # La action se autosaltea cuando el archivo de workflow que disparo la
+          # corrida no es identico al que hay en la rama default del repo, y en
+          # ese caso sale con conclusion=success: job verde, cero review, y el
+          # motivo enterrado en el log. Sin archivo de ejecucion no hubo llamada
+          # al modelo, asi que eso no se reporta como exito.
+          if [ "${ESTADO:-}" = "success" ] && { [ -z "${EXEC_FILE:-}" ] || [ ! -f "${EXEC_FILE}" ]; }; then
+            ESTADO="NO CORRIO - ver abajo"
+            echo "::error::El agente termino en verde pero no dejo archivo de ejecucion: nunca llamo al modelo. Causa mas probable: .github/workflows/agents.yml de ${GITHUB_REPOSITORY} no es identico al de la rama default. Tiene que estar igual en la default y en la rama de trabajo."
+          fi
+
+          conclusion=""
+          if [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            conclusion="$(jq -r '
+                (.result? // empty),
+                ([.. | objects | select(.type? == "result") | .result?] | map(select(. != null)) | last // empty),
+                ([.. | objects | select(.type? == "text")   | .text?]   | map(select(. != null)) | last // empty)
+              ' "$EXEC_FILE" 2>/dev/null | grep -v '^$' | tail -n1)"
+          fi
+          [ -n "$conclusion" ] || conclusion="(no se pudo extraer del archivo de ejecucion)"
+          corto="$(printf '%s' "$conclusion" | head -c 1200)"
+          [ "${#conclusion}" -gt 1200 ] && corto="${corto}..."
+
+          if [ "${LIMPIO:-}" = "false" ]; then
+            integridad="NO - modifico codigo de produccion, resultados descartados"
+          else
+            integridad="OK - solo escribio tests"
+          fi
+
+          {
+            echo "## ${AGENTE}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Repo | ${GITHUB_REPOSITORY} |"
+            echo "| PR | #${PR_NUM:-?} |"
+            echo "| Resultado | ${ESTADO:-omitido} |"
+            echo "| Archivos sin cobertura | ${N_SIN:-0} |"
+            echo "| Tests escritos | ${N_TEST:-0} |"
+            echo "| Integridad | ${integridad} |"
+            echo
+            echo "### Conclusion"
+            echo
+            printf '%s\n' "$corto"
+            echo
+            echo "Corrida completa: ${RUN_URL}"
+          } > resumen.md
+          cat resumen.md >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -z "${NOTIFY_EMAIL:-}" ]; then
+            echo "::notice::Sin vars.NOTIFY_EMAIL: no se manda mail."
+            exit 0
+          fi
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "::warning::Hay NOTIFY_EMAIL pero falta el secret RESEND_API_KEY."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg from "${NOTIFY_FROM:-MicroChangas Agentes <onboarding@resend.dev>}" \
+            --arg to "$NOTIFY_EMAIL" \
+            --arg subject "[${GITHUB_REPOSITORY##*/}] PR #${PR_NUM:-?} - ${AGENTE}: ${ESTADO:-omitido}" \
+            --rawfile text resumen.md \
+            '{from: $from, to: [$to], subject: $subject, text: $text}')"
+          resp="$(curl -sS --max-time 20 -w '\n%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$payload")"
+          code="$(printf '%s' "$resp" | tail -n1)"
+          if [ "$code" = "200" ]; then
+            echo "Mail enviado a ${NOTIFY_EMAIL}."
+          else
+            echo "::warning::Resend devolvio HTTP ${code}: $(printf '%s' "$resp" | sed '$d' | head -c 300)"
+          fi
+
+      - name: Guardar salida de ejecucion si fallo
+        if: failure() && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-exec-unit-tests-pr-${{ github.event.pull_request.number }}
+          path: ${{ steps.claude.outputs.execution_file }}
+          if-no-files-found: ignore
+          retention-days: 7

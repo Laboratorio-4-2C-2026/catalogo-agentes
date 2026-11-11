@@ -1,0 +1,295 @@
+name: Agente · Performance
+
+# Reusable workflow. Busca en el diff los patrones que hacen lenta una app:
+# N+1, queries adentro de loops, payloads sin acotar, re-renders evitables.
+#
+# IMPORTANTE: este agente NO escribe en el repo de producto. Solo lee el diff y
+# comenta en la PR. No tiene `contents: write` ni lo va a tener.
+#
+# Alcance honesto: esto es analisis estatico del diff. El N+1 real se ve en
+# runtime con las queries contadas. Sirve para que no pase lo obvio, no para
+# certificar que la PR es performante.
+
+on:
+  workflow_call:
+    inputs:
+      project_kind:
+        description: 'frontend | backend.'
+        type: string
+        required: true
+      paths_regex:
+        description: |
+          ERE contra la lista de archivos cambiados. Si ninguno matchea, el agente
+          se omite sin gastar tokens. Vacio = usar el default segun project_kind.
+        type: string
+        required: false
+        default: ''
+      model:
+        type: string
+        default: 'claude-sonnet-5'
+      max_turns:
+        # El tope es una red de seguridad, no un presupuesto: los turnos se
+        # gastan solo si hacen falta. Pero quedarse corto marca el paso como
+        # fallido AUNQUE el agente haya terminado bien y publicado su comentario
+        # ("Claude reported a successful result after N turns, exceeding the
+        # configured maximum of M"). El de Figma venia en 25 y necesito 31.
+        # Quien corta de verdad si algo se desboca es timeout_minutes.
+        type: number
+        default: 40
+      timeout_minutes:
+        type: number
+        default: 15
+    secrets:
+      anthropic_api_key:
+        required: false
+      claude_code_oauth_token:
+        required: false
+      resend_api_key:
+        required: false
+
+jobs:
+  performance:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      # ─────────────────────────────────────────────────────────────────────
+      # Compuerta por rutas. Una PR que solo toca estilos o textos no tiene
+      # nada que analizar: correrla igual seria pagar una llamada al modelo
+      # para que conteste "no encontre nada".
+      # ─────────────────────────────────────────────────────────────────────
+      - name: Decidir si corre
+        id: gate
+        env:
+          BASE: ${{ github.base_ref }}
+          KIND: ${{ inputs.project_kind }}
+          REGEX_IN: ${{ inputs.paths_regex }}
+        run: |
+          set -uo pipefail
+          regex="${REGEX_IN:-}"
+          if [ -z "$regex" ]; then
+            case "$KIND" in
+              backend)
+                # Donde viven las queries en un NestJS + Prisma.
+                regex='(service|repository|controller|resolver|dao)\.ts$|^prisma/|\.sql$'
+                ;;
+              frontend)
+                # Donde vive el fetching y el renderizado de listas en React.
+                regex='/(api|hooks|services|queries|store|context)/|\.tsx$'
+                ;;
+              *)
+                regex='.'
+                ;;
+            esac
+          fi
+          echo "Regex en uso: $regex"
+
+          git diff --name-only "origin/${BASE}...HEAD" > cambiados.txt || true
+          total="$(wc -l < cambiados.txt | tr -d ' ')"
+
+          # Antes de la regex, sacar lo que nunca tiene un problema de performance
+          # en produccion: tests, historias de Storybook, estilos, docs y
+          # configuracion. Sin este filtro una PR que solo agrega tests dispara el
+          # agente, que es justo lo que la compuerta tiene que evitar.
+          grep -vE '(\.|/)(test|spec|stories)\.|(^|/)(__tests__|__mocks__|e2e)/|\.(md|css|scss|sass|less|json|svg|png|jpe?g|gif|ico|lock|ya?ml|txt)$' \
+            cambiados.txt > candidatos.txt || true
+
+          # grep sin -n: este archivo lo lee el agente y los numeros de linea solo
+          # ensucian la lista de rutas.
+          grep -E "$regex" candidatos.txt > relevantes.txt || true
+          n="$(wc -l < relevantes.txt | tr -d ' ')"
+
+          echo "Archivos cambiados: ${total}. Codigo (sin tests ni assets): $(wc -l < candidatos.txt | tr -d ' '). Relevantes para performance: ${n}."
+          if [ "$n" -gt 0 ]; then
+            echo "--- relevantes ---"
+            head -30 relevantes.txt
+            echo "correr=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Ningun archivo del diff cae en las rutas donde buscamos problemas de performance."
+            echo "correr=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "n_relevantes=$n" >> "$GITHUB_OUTPUT"
+
+      - id: claude
+        if: steps.gate.outputs.correr == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}
+          claude_code_oauth_token: ${{ secrets.claude_code_oauth_token }}
+          show_full_output: ${{ vars.CLAUDE_DEBUG == 'true' }}
+          prompt: |
+            Revisas performance en las PRs de MicroChangas. El repo es el
+            ${{ inputs.project_kind }}: ${{ inputs.project_kind == 'backend' && 'NestJS con Prisma sobre Postgres (Supabase)' || 'React con TypeScript' }}.
+
+            El diff a revisar:
+              git diff origin/${{ github.base_ref }}...HEAD
+
+            En `relevantes.txt` tenes los archivos del diff que caen en las rutas donde
+            suelen aparecer estos problemas. Empeza por ahi, pero si el diff te lleva a
+            otro archivo, seguilo con Read.
+
+            Que buscar, en orden de gravedad:
+
+            1. **N+1.** Una query adentro de un loop, de un `.map()`, de un `for`, o de un
+               `Promise.all` que mapea ids a queries individuales. En Prisma el sintoma
+               tipico es un `findUnique` o `findFirst` por cada elemento de una lista que
+               ya se podria haber traido con un `include` o un `in`. Es el problema que
+               mas rapido mata una pantalla cuando crecen los datos.
+            2. **Consultas sin acotar.** `findMany` sin `take` ni paginacion, consultas que
+               traen la tabla entera, `select *` implicito donde se usan dos campos.
+            3. **Payloads grandes.** Endpoints que devuelven objetos anidados completos
+               cuando el consumidor usa una parte, o relaciones incluidas de mas.
+            4. **Trabajo repetido en render** (solo frontend): efectos que se disparan en
+               cada render por dependencias mal declaradas, calculos caros sin memo dentro
+               de listas, llamadas a la API que se repiten por componente de la lista.
+            5. **Indices.** Si el diff agrega una consulta que filtra u ordena por una
+               columna que en `prisma/schema.prisma` no tiene indice, decilo.
+
+            Reglas sobre como reportar, que importan tanto como los hallazgos:
+
+            - Esto es analisis estatico. Si algo **parece** un N+1 pero no podes confirmarlo
+              sin ver las queries en runtime, decilo con esas palabras. Un falso positivo
+              presentado como certeza hace que el proximo review no se lea.
+            - Estima el impacto en concreto: "esto hace una query por changa, con 50 changas
+              en pantalla son 51 queries". Un numero convence; "podria ser lento" no.
+            - Si el arreglo es corto, escribi el codigo.
+            - No marques micro-optimizaciones que no cambian nada a la escala de esta app.
+
+            Publicacion:
+
+            - Si encontraste algo, deja **un** comentario en la PR con:
+                gh pr comment ${{ github.event.pull_request.number }} --body "el texto aca"
+              Arranca diciendo en una linea que tan serio es lo que encontraste, despues los
+              hallazgos ordenados por gravedad.
+            - Si **no** encontraste nada que valga la pena, no comentes. Decilo en tu
+              respuesta final y listo: un comentario por PR diciendo "todo bien" entrena al
+              equipo a ignorar los comentarios del bot.
+            - Para hallazgos que se anclan a una linea concreta, usa tambien
+              mcp__github_inline_comment__create_inline_comment.
+
+            Escribi el texto literal dentro de --body, un solo comando, entre comillas dobles.
+            El sandbox rechaza todo lo que no sea un comando simple: nada de `$(...)`,
+            backticks, pipes, `>` ni `&&`. Leé los archivos con Read, no con cat.
+
+            Espanol rioplatense, explicando el porque. No modifiques ningun archivo del
+            repositorio: tu unica salida son los comentarios.
+          claude_args: |
+            --model ${{ inputs.model }}
+            --max-turns ${{ inputs.max_turns }}
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Resumen y notificacion
+        if: always()
+        env:
+          AGENTE: 'Performance'
+          ESTADO: ${{ steps.claude.outcome }}
+          CORRER: ${{ steps.gate.outputs.correr }}
+          N_REL: ${{ steps.gate.outputs.n_relevantes }}
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          NOTIFY_EMAIL: ${{ vars.NOTIFY_EMAIL }}
+          NOTIFY_FROM: ${{ vars.NOTIFY_FROM }}
+          RESEND_API_KEY: ${{ secrets.resend_api_key }}
+        run: |
+          set -uo pipefail
+
+          if [ "${CORRER:-}" != "true" ]; then
+            echo "Agente omitido: ningun archivo del diff cae en las rutas de performance." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ "${ESTADO:-}" = "failure" ] && [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            echo "::group::Diagnostico de la falla"
+            jq -r '
+              [.. | objects | with_entries(select(.key | test("error|message|subtype|type|reason|status|code";"i")))]
+              | map(select(length > 0)) | unique | .[] | tostring
+            ' "$EXEC_FILE" 2>/dev/null | head -40 || echo "(no se pudo parsear)"
+            echo "::endgroup::"
+          fi
+
+          # ── El agente puede terminar en verde sin haber corrido ──────────
+          # La action se autosaltea cuando el archivo de workflow que disparo la
+          # corrida no es identico al que hay en la rama default del repo, y en
+          # ese caso sale con conclusion=success: job verde, cero review, y el
+          # motivo enterrado en el log. Sin archivo de ejecucion no hubo llamada
+          # al modelo, asi que eso no se reporta como exito.
+          if [ "${ESTADO:-}" = "success" ] && { [ -z "${EXEC_FILE:-}" ] || [ ! -f "${EXEC_FILE}" ]; }; then
+            ESTADO="NO CORRIO - ver abajo"
+            echo "::error::El agente termino en verde pero no dejo archivo de ejecucion: nunca llamo al modelo. Causa mas probable: .github/workflows/agents.yml de ${GITHUB_REPOSITORY} no es identico al de la rama default. Tiene que estar igual en la default y en la rama de trabajo."
+          fi
+
+          conclusion=""
+          if [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            conclusion="$(jq -r '
+                (.result? // empty),
+                ([.. | objects | select(.type? == "result") | .result?] | map(select(. != null)) | last // empty),
+                ([.. | objects | select(.type? == "text")   | .text?]   | map(select(. != null)) | last // empty)
+              ' "$EXEC_FILE" 2>/dev/null | grep -v '^$' | tail -n1)"
+          fi
+          [ -n "$conclusion" ] || conclusion="(no se pudo extraer del archivo de ejecucion)"
+          corto="$(printf '%s' "$conclusion" | head -c 1200)"
+          [ "${#conclusion}" -gt 1200 ] && corto="${corto}..."
+
+          {
+            echo "## ${AGENTE}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Repo | ${GITHUB_REPOSITORY} |"
+            echo "| PR | #${PR_NUM:-?} |"
+            echo "| Resultado | ${ESTADO:-omitido} |"
+            echo "| Archivos analizados | ${N_REL:-0} |"
+            echo
+            echo "### Conclusion"
+            echo
+            printf '%s\n' "$corto"
+            echo
+            echo "Corrida completa: ${RUN_URL}"
+          } > resumen.md
+          cat resumen.md >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -z "${NOTIFY_EMAIL:-}" ]; then
+            echo "::notice::Sin vars.NOTIFY_EMAIL: no se manda mail."
+            exit 0
+          fi
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "::warning::Hay NOTIFY_EMAIL pero falta el secret RESEND_API_KEY."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg from "${NOTIFY_FROM:-MicroChangas Agentes <onboarding@resend.dev>}" \
+            --arg to "$NOTIFY_EMAIL" \
+            --arg subject "[${GITHUB_REPOSITORY##*/}] PR #${PR_NUM:-?} - ${AGENTE}: ${ESTADO:-omitido}" \
+            --rawfile text resumen.md \
+            '{from: $from, to: [$to], subject: $subject, text: $text}')"
+          resp="$(curl -sS --max-time 20 -w '\n%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$payload")"
+          code="$(printf '%s' "$resp" | tail -n1)"
+          if [ "$code" = "200" ]; then
+            echo "Mail enviado a ${NOTIFY_EMAIL}."
+          else
+            echo "::warning::Resend devolvio HTTP ${code}: $(printf '%s' "$resp" | sed '$d' | head -c 300)"
+          fi
+
+      - name: Guardar salida de ejecucion si fallo
+        if: failure() && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-exec-perf-pr-${{ github.event.pull_request.number }}
+          path: ${{ steps.claude.outputs.execution_file }}
+          if-no-files-found: ignore
+          retention-days: 7

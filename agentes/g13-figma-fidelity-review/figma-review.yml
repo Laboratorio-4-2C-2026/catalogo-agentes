@@ -1,0 +1,532 @@
+name: Agente · Figma Fidelity
+
+# Reusable workflow. Solo tiene sentido en el frontend.
+# Compara lo que dice Figma contra lo que dice el codigo para el nodo del ticket.
+#
+# ALCANCE (leer docs/limitaciones-figma.md antes de confiar en el veredicto):
+# Esta v1 hace comparacion ESTATICA: JSON del nodo de Figma vs tokens de Tailwind vs
+# fuente del componente. No mide computed styles del DOM salvo que actives `preview_path`.
+
+on:
+  workflow_call:
+    inputs:
+      figma_file_key:
+        description: 'File key de Figma (el segmento despues de /design/ en la URL).'
+        type: string
+        required: true
+      ticket_prefix:
+        type: string
+        default: 'MC'
+      multica_workspace_id:
+        type: string
+        required: false
+        default: ''
+      tokens_file:
+        description: 'Archivo con los design tokens del repo.'
+        type: string
+        default: 'tailwind.config.js'
+      preview_path:
+        description: >-
+          Ruta de la app donde se renderiza el componente (ej: /register). Si la pasas,
+          se buildea la app y Playwright extrae computed styles reales. Vacio = solo estatico.
+        type: string
+        default: ''
+      node_version:
+        type: string
+        default: '22'
+      model:
+        type: string
+        default: 'claude-sonnet-5'
+      max_turns:
+        # 50, no 25. La action marca el paso como fallido cuando el agente se
+        # pasa del limite AUNQUE haya terminado bien ("Claude reported a
+        # successful result after 31 turns, exceeding the configured maximum of
+        # 25"): review publicado y check en rojo. Los nodos de Figma que linkean
+        # los tickets suelen ser grandes — uno real traia 973 nodos — y comparar
+        # eso contra el codigo lleva mas turnos de los que parecia.
+        type: number
+        default: 50
+      timeout_minutes:
+        type: number
+        default: 25
+    secrets:
+      anthropic_api_key:
+        required: false
+      claude_code_oauth_token:
+        required: false
+      resend_api_key:
+        description: 'API key de Resend para mandar el resumen por mail. Opcional.'
+        required: false
+      multica_token:
+        required: false
+      figma_token:
+        description: 'Personal access token de Figma. Sin esto el workflow no puede correr.'
+        required: true
+
+jobs:
+  figma:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolver codigo de ticket
+        id: ticket
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PREFIX: ${{ inputs.ticket_prefix }}
+        run: |
+          # El equipo nombra las ramas con el short_id de Multica (MIC-87). La
+          # convencion anterior usaba el codigo interno (feature/MC-106-...), que en
+          # Multica vive dentro del titulo, como "[MC-106] ...". Se soportan las dos,
+          # y el short_id gana porque permite pedir el issue directo.
+          blob="$(printf '%s\n%s\n%s\n' "$HEAD_REF" "$PR_TITLE" "$PR_BODY")"
+
+          code="$(printf '%s' "$blob" | grep -oE '\bMIC-[0-9]+' | head -n1 || true)"
+          kind=short_id
+          if [ -z "$code" ]; then
+            # El \b es lo que evita que MIC-87 se lea como si fuera MC-87.
+            code="$(printf '%s' "$blob" | grep -oE "\b${PREFIX}-[0-9]+" | head -n1 || true)"
+            kind=en_titulo
+          fi
+
+          if [ -z "$code" ]; then
+            echo "No se encontro ni MIC-NN ni ${PREFIX}-NNN en rama, titulo ni cuerpo de la PR."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Ticket detectado: $code (se busca por $kind)"
+            {
+              echo "found=true"
+              echo "code=$code"
+              echo "kind=$kind"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Traer el ticket de Multica
+        id: multica
+        # Best-effort: si Multica no responde o falta el token, el agente igual corre.
+        continue-on-error: true
+        if: steps.ticket.outputs.found == 'true' && inputs.multica_workspace_id != ''
+        env:
+          MULTICA_TOKEN: ${{ secrets.multica_token }}
+          MULTICA_WORKSPACE_ID: ${{ inputs.multica_workspace_id }}
+          TICKET_CODE: ${{ steps.ticket.outputs.code }}
+          TICKET_KIND: ${{ steps.ticket.outputs.kind }}
+        run: |
+          set -uo pipefail
+          if [ -z "${MULTICA_TOKEN:-}" ]; then
+            echo "::warning::Falta el secret MULTICA_TOKEN. El agente no va a poder comparar contra el ticket."
+            exit 0
+          fi
+          API="https://api.multica.ai/api"
+          auth=(-H "Authorization: Bearer ${MULTICA_TOKEN}" -H "X-Workspace-ID: ${MULTICA_WORKSPACE_ID}")
+
+          bajar() {
+            curl -sS --max-time 20 "${auth[@]}" "${API}/issues/$1" -o ticket.json \
+              && jq -e '.title' ticket.json >/dev/null 2>&1
+          }
+
+          # Camino corto: el codigo YA es el short_id, se pide el issue directo.
+          if [ "$TICKET_KIND" = "short_id" ] && bajar "$TICKET_CODE"; then
+            echo "Ticket recuperado: $(jq -r --arg c "$TICKET_CODE" '((.short_id // "") | if . == "" then $c else . end) + " — " + (.title // "?")' ticket.json)"
+            exit 0
+          fi
+          rm -f ticket.json
+
+          # Camino largo: listar y buscar. Por short_id si el endpoint directo no lo
+          # acepta, o por el codigo interno entre corchetes dentro del titulo.
+          uuid=''; offset=0
+          for _ in $(seq 1 10); do
+            page="$(curl -sS --max-time 20 "${auth[@]}" "${API}/issues?limit=100&offset=${offset}")" || break
+            if [ "$TICKET_KIND" = "short_id" ]; then
+              match="$(printf '%s' "$page" | jq -r --arg c "$TICKET_CODE" \
+                '(if type == "object" then (.items // []) else . end) | map(select(.short_id == $c)) | .[0].id // empty')"
+            else
+              match="$(printf '%s' "$page" | jq -r --arg c "[${TICKET_CODE}]" \
+                '(if type == "object" then (.items // []) else . end) | map(select(.title | contains($c))) | .[0].id // empty')"
+            fi
+            if [ -n "$match" ]; then uuid="$match"; break; fi
+            [ "$(printf '%s' "$page" | jq -r '.has_more // false')" = "true" ] || break
+            offset="$(printf '%s' "$page" | jq -r --argjson o "$offset" '.next_offset // ($o + 100)')"
+          done
+
+          if [ -z "$uuid" ]; then
+            echo "::warning::No hay ningun issue en Multica que corresponda a ${TICKET_CODE}."
+            exit 0
+          fi
+          if bajar "$uuid"; then
+            echo "Ticket recuperado: $(jq -r --arg c "$TICKET_CODE" '((.short_id // "") | if . == "" then $c else . end) + " — " + (.title // "?")' ticket.json)"
+          else
+            echo "::warning::El issue ${uuid} no se pudo leer."
+            rm -f ticket.json
+          fi
+
+      - name: Extraer node-id de Figma del ticket
+        id: node
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Los tickets referencian el nodo de dos formas: como URL de Figma con ?node-id=78-195
+          # (guion) o suelto en el texto como `78:195` (dos puntos). La API quiere dos puntos.
+          src=""
+          [ -f ticket.json ] && src="$(jq -r '.description // ""' ticket.json)"
+          src="${src}
+          ${PR_BODY}"
+
+          # Casi todos los tickets linkean el design system entero como referencia
+          # general, con node-id=0-1, que es la pagina raiz del archivo. Eso no es un
+          # componente: bajarlo trae miles de nodos y no hay nada puntual contra que
+          # comparar. Por eso se descartan los nodos de pagina (0:N).
+          id="$(printf '%s' "$src" | grep -oE 'node-id=[0-9]+[-:][0-9]+' | sed 's/node-id=//' | tr '-' ':' | grep -vxE '0:[0-9]+' | head -n1 || true)"
+          if [ -z "$id" ]; then
+            # Los backticks de esta regex son literales: los tickets escriben el nodo en
+            # markdown como `78:195`. shellcheck los lee como sustitucion de comandos.
+            # shellcheck disable=SC2016
+            id="$(printf '%s' "$src" | grep -oE '`[0-9]+:[0-9]+`' | tr -d '`' | grep -vxE '0:[0-9]+' | head -n1 || true)"
+          fi
+          if [ -z "$id" ]; then
+            echo "::notice::El ticket no referencia ningun nodo puntual de Figma (como mucho el design system completo). No hay nada que comparar."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Nodo de Figma: $id"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "id=$id" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Bajar el nodo desde la API de Figma
+        if: steps.node.outputs.found == 'true'
+        env:
+          FIGMA_TOKEN: ${{ secrets.figma_token }}
+          FILE_KEY: ${{ inputs.figma_file_key }}
+          NODE_ID: ${{ steps.node.outputs.id }}
+        run: |
+          set -uo pipefail
+          auth=(-H "X-Figma-Token: ${FIGMA_TOKEN}")
+          base="https://api.figma.com/v1"
+
+          # El JSON del nodo trae fills, strokes, cornerRadius, padding y tipografia ya
+          # resueltos a valores concretos. Eso es lo que se compara contra el codigo.
+          curl -sS --max-time 30 "${auth[@]}" \
+            "${base}/files/${FILE_KEY}/nodes?ids=${NODE_ID}&geometry=paths" -o figma-node-raw.json
+
+          if jq -e '.err // .error' figma-node-raw.json >/dev/null 2>&1; then
+            echo "::error::Figma devolvio error: $(jq -r '.err // .error' figma-node-raw.json)"
+            echo "Revisa que FIGMA_TOKEN tenga acceso al file ${FILE_KEY} y que el node-id exista."
+            exit 1
+          fi
+
+          # El JSON crudo de un nodo con hijos puede ser enorme. Nos quedamos con las
+          # propiedades visuales, que es lo unico que se puede contrastar contra CSS.
+          jq '[.. | objects | select(has("name") and has("type")) | {
+                name, type,
+                w: (.absoluteBoundingBox.width? // null),
+                h: (.absoluteBoundingBox.height? // null),
+                padding: {l: .paddingLeft?, r: .paddingRight?, t: .paddingTop?, b: .paddingBottom?},
+                gap: .itemSpacing?,
+                radius: .cornerRadius?,
+                layout: .layoutMode?,
+                fills: [(.fills? // [])[] | select(.visible != false) | {type, color, opacity}],
+                strokes: [(.strokes? // [])[] | select(.visible != false) | {type, color}],
+                strokeWeight: .strokeWeight?,
+                text: .characters?,
+                font: {family: .style?.fontFamily, weight: .style?.fontWeight, size: .style?.fontSize,
+                       lineHeight: .style?.lineHeightPx, spacing: .style?.letterSpacing}
+              }]' figma-node-raw.json > figma-node.json
+          n_nodos="$(jq 'length' figma-node.json)"
+          echo "Nodos extraidos: ${n_nodos}"
+          # Un componente tiene decenas de nodos; cientos significa que el ticket
+          # apunta a una pagina entera y la comparacion va a ser gruesa.
+          if [ "$n_nodos" -gt 300 ]; then
+            echo "::warning::El nodo ${NODE_ID} tiene ${n_nodos} nodos: parece una pagina completa y no un componente. La comparacion va a ser poco precisa."
+          fi
+
+          # Los rgba 0-1 de Figma no se comparan a ojo contra hex. Los convertimos.
+          jq -r '
+            def tohex: . as $n | ["0","1","2","3","4","5","6","7","8","9","a","b","c","d","e","f"] as $d
+              | $d[(($n / 16) | floor)] + $d[($n % 16)];
+            def hex: (. * 255 | round) | tohex;
+            def h($c): "#" + ($c.r|hex) + ($c.g|hex) + ($c.b|hex);
+            [.[] | select((.fills|length) > 0 or (.strokes|length) > 0) | {
+               name,
+               fill: (if (.fills|length)>0 and .fills[0].color then h(.fills[0].color) else null end),
+               fillOpacity: (.fills[0].opacity? // 1),
+               stroke: (if (.strokes|length)>0 and .strokes[0].color then h(.strokes[0].color) else null end),
+               strokeWeight
+             }]' figma-node.json > figma-colores.json
+          echo "--- colores de Figma en hex ---"
+          # El limite va DENTRO de jq a proposito: con `jq ... | head`, head cierra el
+          # pipe, jq muere con "Broken pipe" y pipefail tumba el paso entero.
+          jq -r '.[:40][] | "\(.name): fill=\(.fill // "-") stroke=\(.stroke // "-") weight=\(.strokeWeight // "-")"' figma-colores.json
+
+          # La imagen queda como artifact para que la persona que revisa pueda mirarla.
+          url="$(curl -sS --max-time 30 "${auth[@]}" \
+            "${base}/images/${FILE_KEY}?ids=${NODE_ID}&format=png&scale=2" | jq -r '.images | to_entries[0].value // empty')"
+          if [ -n "$url" ]; then
+            curl -sS --max-time 60 -o figma-node.png "$url" && echo "Screenshot de Figma descargada."
+          else
+            echo "::warning::Figma no devolvio URL de imagen para el nodo."
+          fi
+
+      - name: Computed styles reales (opcional)
+        if: inputs.preview_path != ''
+        continue-on-error: true
+        env:
+          PREVIEW_PATH: ${{ inputs.preview_path }}
+        run: |
+          set -uo pipefail
+          echo "::group::build + playwright"
+          npm ci --no-audit --no-fund || npm install --no-audit --no-fund
+          npm run build
+          npx --yes playwright@1.49.1 install --with-deps chromium
+          npx --yes serve@14 -s dist -l 4173 >/dev/null 2>&1 &
+          for _ in $(seq 1 30); do curl -sf http://localhost:4173 >/dev/null && break; sleep 1; done
+          cat > extract-styles.mjs <<'MJS'
+          import { chromium } from 'playwright';
+          // Solo propiedades que se pueden contrastar contra Figma. El resto es ruido.
+          const PROPS = ['background-color','color','border-color','border-width','border-radius',
+                         'padding','gap','font-family','font-size','font-weight','line-height',
+                         'letter-spacing','width','height','display','flex-direction'];
+          const browser = await chromium.launch();
+          const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+          await page.goto('http://localhost:4173' + process.env.PREVIEW_PATH, { waitUntil: 'networkidle' });
+          const out = await page.evaluate((props) => {
+            const seen = [];
+            for (const el of document.querySelectorAll('button, [role="button"], input, label, h1, h2, h3, p')) {
+              const cs = getComputedStyle(el);
+              const style = {};
+              for (const p of props) style[p] = cs.getPropertyValue(p);
+              seen.push({ tag: el.tagName.toLowerCase(), text: (el.textContent || '').trim().slice(0, 60),
+                          cls: el.className?.toString?.().slice(0, 200), style });
+            }
+            return seen;
+          }, PROPS);
+          await browser.close();
+          console.log(JSON.stringify(out, null, 2));
+          MJS
+          node extract-styles.mjs > computed-styles.json 2>/dev/null \
+            && echo "Elementos medidos: $(jq 'length' computed-styles.json)" \
+            || echo "::warning::No se pudieron extraer computed styles."
+          echo "::endgroup::"
+
+      - name: Guardar evidencia
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: figma-evidencia-pr-${{ github.event.pull_request.number }}
+          path: |
+            figma-node.png
+            figma-node.json
+            figma-colores.json
+            computed-styles.json
+            ticket.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - id: claude
+        # Sin nodo de Figma no hay nada que comparar: llamar al modelo seria
+        # gastar tokens para que conteste que no puede verificar nada.
+        if: steps.node.outputs.found == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}
+          claude_code_oauth_token: ${{ secrets.claude_code_oauth_token }}
+          # Diagnostico: la action oculta la salida del SDK, asi que cuando el LLM
+          # falla no queda rastro del motivo. Se prende con `gh variable set
+          # CLAUDE_DEBUG --body true` y se apaga despues: expone TODOS los mensajes,
+          # incluidos resultados de herramientas.
+          show_full_output: ${{ vars.CLAUDE_DEBUG == 'true' }}
+          prompt: |
+            Sos el auditor de fidelidad de diseno de MicroChangas. Tu unica pregunta es:
+            **¿lo que dice el codigo coincide con lo que dice Figma?** No revises bugs de
+            logica, seguridad ni performance: de eso se ocupa el agente de PR review.
+
+            Archivos disponibles en el working directory (algunos pueden faltar):
+            - `ticket.json` — el ticket, con las medidas exactas que pidio el disenador.
+            - `figma-colores.json` — fills, strokes y grosores del nodo, ya convertidos a hex.
+            - `figma-node.json` — padding, gap, radius, tipografia y tamanos del nodo.
+            - `computed-styles.json` — computed styles reales del navegador. **Si este archivo
+              no existe, no lo inventes**: significa que la comparacion es estatica.
+            - `${{ inputs.tokens_file }}` — los design tokens del repo.
+
+            Metodo, en este orden:
+
+            1. Corre `git diff origin/${{ github.base_ref }}...HEAD --stat` y leé los componentes
+               que cambiaron y el archivo de tokens.
+            2. Para cada valor visual que Figma define (color de fondo, color y grosor de borde,
+               color de texto, padding, gap, radius, font-size, font-weight), busca el valor
+               correspondiente en el codigo y compara **numero contra numero**.
+            3. Resolve las clases de Tailwind a su valor real usando `${{ inputs.tokens_file }}`
+               antes de comparar. `bg-accent-subtle` no se compara contra `#eff4ff`: primero
+               buscas a que hex mapea `accent-subtle` en los tokens, y despues comparas.
+            4. Marca como defecto cualquier color hex hardcodeado en el componente que deberia
+               ser un token.
+
+            Reglas duras:
+            - **Nunca digas que algo coincide sin haber visto los dos numeros.** Si un valor no
+              esta en los archivos que tenes, el veredicto de ese punto es "no verificable", y
+              deci que archivo o dato te falto. Comparar "a ojo" es exactamente lo que este
+              agente existe para evitar.
+            - Un borde que pasa de 1px a 2px entre estados cambia el tamano del elemento salvo
+              que este compensado. Verifica esa compensacion si el diseno tiene estados.
+            - Distingui un color solido de uno translucido: un fill con opacity < 1 sobre fondo
+              blanco da un hex distinto al del token.
+
+            Escribi el texto literal dentro de --body: el sandbox rechaza `$(...)`, backticks,
+            pipes y redirecciones, y en ese caso el comentario no se publica.
+
+            Publica UN comentario en la PR #${{ github.event.pull_request.number }} del repo
+            ${{ github.repository }} usando `gh pr comment`, con esta estructura:
+            - Un veredicto de una linea: coincide / tiene desvios / no verificable.
+            - Una tabla: propiedad | Figma | codigo | estado.
+            - Los desvios concretos, con archivo y linea.
+            - Que quedo sin verificar y por que.
+
+            Escribi en espanol rioplatense.
+          claude_args: |
+            --model ${{ inputs.model }}
+            --max-turns ${{ inputs.max_turns }}
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(jq:*),Bash(gh pr comment:*),Bash(gh pr view:*)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Resumen y notificacion
+        # always(): el resumen sirve sobre todo cuando algo salio mal.
+        if: always()
+        env:
+          AGENTE: 'Figma Fidelity'
+          ESTADO: ${{ steps.claude.outcome }}
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          TICKET_CODE: ${{ steps.ticket.outputs.code }}
+          NODE_FOUND: ${{ steps.node.outputs.found }}
+          NOTIFY_EMAIL: ${{ vars.NOTIFY_EMAIL }}
+          NOTIFY_FROM: ${{ vars.NOTIFY_FROM }}
+          RESEND_API_KEY: ${{ secrets.resend_api_key }}
+        run: |
+          set -uo pipefail
+
+          # ---- estado de las conexiones ----
+          if [ -f ticket.json ]; then
+            # La REST no siempre devuelve short_id en el issue individual, asi que
+            # se cae al codigo que detectamos de la rama.
+            multica="OK - $(jq -r --arg c "${TICKET_CODE:-?}" '((.short_id // "") | if . == "" then $c else . end) + " " + (.title // "?")' ticket.json | head -c 90)"
+          else
+            multica="sin ticket"
+          fi
+          if [ -f figma-colores.json ]; then
+            figma="OK - $(jq 'length' figma-colores.json) nodos con color"
+          elif [ "${NODE_FOUND:-}" != "true" ]; then
+            figma="no aplica: el ticket no referencia ningun nodo de Figma"
+          else
+            figma="no se pudo leer el nodo"
+          fi
+          CONEXIONES="| Multica | ${multica} |
+          | Figma | ${figma} |"
+
+          # ---- diagnostico cuando la llamada al LLM falla ----
+          # La action oculta la salida del SDK "for security", asi que cuando algo
+          # falla no queda rastro del motivo. Esto vuelca solo los campos de error
+          # del archivo de ejecucion, no la conversacion entera.
+          if [ "${ESTADO:-}" = "failure" ] && [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            echo "::group::Diagnostico de la falla"
+            jq -r '
+              [.. | objects | with_entries(select(.key | test("error|message|subtype|type|reason|status|code";"i")))]
+              | map(select(length > 0)) | unique | .[] | tostring
+            ' "$EXEC_FILE" 2>/dev/null | head -40 || echo "(no se pudo parsear)"
+            echo "--- tamano del archivo: $(wc -c < "$EXEC_FILE") bytes ---"
+            echo "::endgroup::"
+          fi
+
+          # ---- conclusion del agente ----
+          # Sale de la transcripcion. El formato puede cambiar entre versiones de
+          # la action, asi que se prueban varias formas; si ninguna da, se dice
+          # que no esta disponible en vez de inventar algo.
+          # ── El agente puede terminar en verde sin haber corrido ──────────
+          # La action se autosaltea cuando el archivo de workflow que disparo la
+          # corrida no es identico al que hay en la rama default del repo, y en
+          # ese caso sale con conclusion=success: job verde, cero review, y el
+          # motivo enterrado en el log. Sin archivo de ejecucion no hubo llamada
+          # al modelo, asi que eso no se reporta como exito.
+          if [ "${ESTADO:-}" = "success" ] && { [ -z "${EXEC_FILE:-}" ] || [ ! -f "${EXEC_FILE}" ]; }; then
+            ESTADO="NO CORRIO - ver abajo"
+            echo "::error::El agente termino en verde pero no dejo archivo de ejecucion: nunca llamo al modelo. Causa mas probable: .github/workflows/agents.yml de ${GITHUB_REPOSITORY} no es identico al de la rama default. Tiene que estar igual en la default y en la rama de trabajo."
+          fi
+
+          conclusion=""
+          if [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            conclusion="$(jq -r '
+                (.result? // empty),
+                ([.. | objects | select(.type? == "result") | .result?] | map(select(. != null)) | last // empty),
+                ([.. | objects | select(.type? == "text")   | .text?]   | map(select(. != null)) | last // empty)
+              ' "$EXEC_FILE" 2>/dev/null | grep -v '^$' | tail -n1)"
+          fi
+          [ -n "$conclusion" ] || conclusion="(no se pudo extraer del archivo de ejecucion)"
+          corto="$(printf '%s' "$conclusion" | head -c 1200)"
+          [ "${#conclusion}" -gt 1200 ] && corto="${corto}..."
+
+          # ---- armar el resumen ----
+          {
+            echo "## ${AGENTE}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Repo | ${GITHUB_REPOSITORY} |"
+            echo "| PR | #${PR_NUM:-?} |"
+            echo "| Resultado | ${ESTADO} |"
+            printf '%s\n' "$CONEXIONES"
+            echo
+            echo "### Conclusion"
+            echo
+            printf '%s\n' "$corto"
+            echo
+            echo "Corrida completa: ${RUN_URL}"
+          } > resumen.md
+          cat resumen.md >> "$GITHUB_STEP_SUMMARY"
+
+          # ---- mandar el mail ----
+          # Best-effort a proposito: un problema de notificacion no deberia
+          # marcar en rojo una corrida de review.
+          if [ -z "${NOTIFY_EMAIL:-}" ]; then
+            echo "::notice::Sin vars.NOTIFY_EMAIL: no se manda mail."
+            exit 0
+          fi
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "::warning::Hay NOTIFY_EMAIL pero falta el secret RESEND_API_KEY."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg from "${NOTIFY_FROM:-MicroChangas Agentes <onboarding@resend.dev>}" \
+            --arg to "$NOTIFY_EMAIL" \
+            --arg subject "[${GITHUB_REPOSITORY##*/}] PR #${PR_NUM:-?} - ${AGENTE}: ${ESTADO}" \
+            --rawfile text resumen.md \
+            '{from: $from, to: [$to], subject: $subject, text: $text}')"
+          resp="$(curl -sS --max-time 20 -w '\n%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$payload")"
+          code="$(printf '%s' "$resp" | tail -n1)"
+          if [ "$code" = "200" ]; then
+            echo "Mail enviado a ${NOTIFY_EMAIL}."
+          else
+            echo "::warning::Resend devolvio HTTP ${code}: $(printf '%s' "$resp" | sed '$d' | head -c 300)"
+          fi
+
+      - name: Guardar salida de ejecucion si fallo
+        if: failure() && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-exec-figma-pr-${{ github.event.pull_request.number }}
+          path: ${{ steps.claude.outputs.execution_file }}
+          if-no-files-found: ignore
+          retention-days: 7
