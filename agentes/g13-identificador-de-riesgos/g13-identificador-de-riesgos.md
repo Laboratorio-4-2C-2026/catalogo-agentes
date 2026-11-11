@@ -30,6 +30,7 @@ metadata:
   - g15-risk-register-keeper
   - g06-management-risk-dependency-manager
   - g02-registro-de-riesgos
+  - g04-riesgos-presentacion
   - g13-detector-de-blockers
   - g13-early-warning-de-sprint
 ---

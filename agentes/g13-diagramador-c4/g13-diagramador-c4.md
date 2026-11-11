@@ -1,6 +1,6 @@
 ---
 name: g13-diagramador-c4
-description: 'Agente de MicroChangas que regenera los diagramas C4 (contexto, contenedores y componentes del backend) en Mermaid leyendo el código real de origin/dev de los dos repos: módulos de NestJS y sus imports, features del front, servicios externos sacados de package.json y .env.example. Compara contra la versión anterior y marca qué cambió. Usalo después de cada merge a dev o antes de una presentación. No redacta decisiones (g13-redactor-de-adrs).'
+description: 'Agente de MicroChangas que regenera los diagramas C4 (contexto, contenedores y componentes del backend) en Mermaid leyendo el código real de origin/dev de los dos repos: módulos de NestJS y sus imports, features del front, servicios externos sacados de package.json y .env.example. Compara contra la versión anterior y marca qué cambió. Usalo cuando se mergeó algo a dev que cambia módulos o servicios, o antes de una presentación. No redacta decisiones (g13-redactor-de-adrs).'
 tools: Bash, Read, Grep, Glob
 metadata:
   tipo: agente

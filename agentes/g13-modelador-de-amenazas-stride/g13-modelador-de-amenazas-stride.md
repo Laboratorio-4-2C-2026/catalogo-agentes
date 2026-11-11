@@ -1,6 +1,6 @@
 ---
 name: g13-modelador-de-amenazas-stride
-description: 'Agente de MicroChangas que arma el modelo de amenazas STRIDE de la aplicación leyendo el código real (guards de NestJS, políticas RLS y funciones de las migraciones de Supabase, webhooks, flujo de pagos protegidos): diagrama de flujo de datos con límites de confianza, amenazas por elemento, árboles de ataque de las más graves, puntaje 3×3 y mitigaciones con archivo y línea. Usalo antes de un release o al sumar un flujo sensible. No es un escáner de código (SAST) ni una checklist OWASP por PR.'
+description: 'Agente de MicroChangas que arma el modelo de amenazas STRIDE de la aplicación leyendo el código real (guards de NestJS, políticas RLS y funciones de las migraciones de Supabase, webhooks, flujo de pagos protegidos): diagrama de flujo de datos con límites de confianza, amenazas por elemento, árboles de ataque de las más graves, puntaje 3×3 y mitigaciones con archivo y línea. Usalo cuando se acerca un release o se suma un flujo sensible (pagos, identidad, datos personales). No es un escáner de código (SAST) ni una checklist OWASP por PR.'
 tools: Bash, Read, Grep, Glob
 metadata:
   tipo: agente

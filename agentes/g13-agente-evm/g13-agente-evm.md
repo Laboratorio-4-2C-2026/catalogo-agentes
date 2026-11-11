@@ -1,6 +1,6 @@
 ---
 name: g13-agente-evm
-description: 'Agente de MicroChangas que calcula el Valor Ganado de todo el proyecto (PV, EV, AC, SV, CV, SPI, CPI, EAC, ETC, VAC, TCPI) desde las horas estimadas y reales del tablero de Multica y una línea base explícita, con costos por tarifas ficticias por rol, separa lo medido de lo supuesto, controla que los números cierren entre sí y explica las variancias en lenguaje natural. Usalo antes de un steering o de una presentación de sprint. No arma el deck (g13-preparador-de-steering).'
+description: 'Agente de MicroChangas que calcula el Valor Ganado de todo el proyecto (PV, EV, AC, SV, CV, SPI, CPI, EAC, ETC, VAC, TCPI) desde las horas estimadas y reales del tablero de Multica y una línea base explícita, con costos por tarifas ficticias por rol, separa lo medido de lo supuesto, controla que los números cierren entre sí y explica las variancias en lenguaje natural. Usalo cuando tengas que presentar el avance en un steering o en la presentación de un sprint. No arma el deck (g13-preparador-de-steering).'
 tools: Bash, Read
 metadata:
   tipo: agente

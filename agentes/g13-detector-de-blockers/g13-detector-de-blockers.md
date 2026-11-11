@@ -1,6 +1,6 @@
 ---
 name: g13-detector-de-blockers
-description: 'Agente de MicroChangas que detecta bloqueos temprano cruzando Multica con GitHub: tickets en curso sin commits en N días, PRs sin review hace más de 48 h, PRs con cambios pedidos y sin respuesta, tickets que rebotan de estado, CI rojo y dependencias (escritas como texto) que todavía no están terminadas. Separa bloqueos confirmados de señales. Usalo a diario o antes de la daily. No es el reporte semanal (g13-reporte-de-estado) ni el registro de riesgos (g13-identificador-de-riesgos).'
+description: 'Agente de MicroChangas que detecta bloqueos temprano cruzando Multica con GitHub: tickets en curso sin commits en N días, PRs sin review hace más de 48 h, PRs con cambios pedidos y sin respuesta, tickets que rebotan de estado, CI rojo y dependencias (escritas como texto) que todavía no están terminadas. Separa bloqueos confirmados de señales. Usalo cuando quieras saber qué está trabado hoy, por ejemplo antes de la daily. No es el reporte semanal (g13-reporte-de-estado) ni el registro de riesgos (g13-identificador-de-riesgos).'
 tools: Bash, Read, Grep
 metadata:
   tipo: agente

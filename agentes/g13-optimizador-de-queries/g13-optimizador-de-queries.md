@@ -31,6 +31,7 @@ metadata:
   madurez: experimental
   relacionados:
   - g03-postgresql-best-practices
+  - g11-revisar-consultas
 ---
 
 # Optimizador de queries

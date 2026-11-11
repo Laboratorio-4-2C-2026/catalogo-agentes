@@ -7,6 +7,7 @@ metadata:
   area:
   - datos
   - qa
+  - backend
   fase:
   - testing
   - desarrollo
