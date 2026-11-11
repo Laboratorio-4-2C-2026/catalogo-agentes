@@ -32,6 +32,7 @@ metadata:
   - g12-construir-pantalla
   - g12-iterar-canvas
   - g12-verificar-historias-completadas
+  - g12-to-canvas
 ---
 
 # Orientar el sprint

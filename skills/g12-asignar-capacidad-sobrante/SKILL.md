@@ -27,6 +27,7 @@ metadata:
   madurez: experimental
   relacionados:
   - g12-armar-tickets-semanales
+  - g12-cerrar-semana
 ---
 
 # Asignar capacidad sobrante

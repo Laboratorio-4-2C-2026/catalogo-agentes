@@ -1,6 +1,6 @@
 ---
 name: g12-calcular-valor-ganado
-description: Calcula el valor ganado de un proyecto a una fecha de corte, con PV, EV, AC, indicadores y proyección trazables a la línea base aprobada y a la evidencia de ejecución.
+description: Calcula el valor ganado de un proyecto a una fecha de corte, con PV, EV, AC, indicadores y proyección trazables a la línea base aprobada y a la evidencia de ejecución. Usar en cada corte de seguimiento o antes de un steering, cuando hay que medir avance y costo contra la línea base.
 owner: '@husseymarcos'
 role: pm
 created: '2026-11-05'
@@ -27,6 +27,8 @@ metadata:
   madurez: usado-en-proyecto
   relacionados:
   - g12-cerrar-semana
+  - g02-valor-ganado-evm
+  - g15-evm-calculator
 ---
 
 # Calcular valor ganado

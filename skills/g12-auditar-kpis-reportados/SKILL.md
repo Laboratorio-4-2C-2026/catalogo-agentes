@@ -28,6 +28,7 @@ metadata:
   madurez: usado-en-proyecto
   relacionados:
   - g12-reportar-incidente
+  - g04-chequeo-de-kpis
 ---
 
 # Auditar los KPIs reportados

@@ -29,6 +29,7 @@ metadata:
   relacionados:
   - g12-construir-pantalla
   - g12-iterar-canvas
+  - g12-orientar-sprint
 ---
 
 # Mock → canvas

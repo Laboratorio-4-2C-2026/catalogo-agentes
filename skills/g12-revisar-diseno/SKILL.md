@@ -29,6 +29,7 @@ metadata:
   relacionados:
   - g12-iterar-canvas
   - g12-construir-pantalla
+  - g03-figma-inspect-design
 ---
 
 # Revisar diseño contra historia

@@ -28,6 +28,7 @@ metadata:
   madurez: experimental
   relacionados:
   - g12-reportar-incidente
+  - g15-bug-investigator
 ---
 
 # Triar un reporte de bug

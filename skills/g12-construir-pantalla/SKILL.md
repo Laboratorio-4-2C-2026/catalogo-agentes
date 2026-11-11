@@ -32,6 +32,7 @@ metadata:
   - g12-to-canvas
   - g12-iterar-canvas
   - g12-revisar-diseno
+  - g12-orientar-sprint
 ---
 
 # Construir la pantalla de una historia

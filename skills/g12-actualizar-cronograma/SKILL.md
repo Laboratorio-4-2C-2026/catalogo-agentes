@@ -1,6 +1,6 @@
 ---
 name: g12-actualizar-cronograma
-description: Prepara o aplica una actualización del cronograma de un proyecto comparando línea base, ejecución real y plan futuro en su herramienta de planificación, con evidencia por cambio.
+description: Prepara o aplica una actualización del cronograma de un proyecto comparando línea base, ejecución real y plan futuro en su herramienta de planificación, con evidencia por cambio. Usar al hacer un corte de avance, al reprogramar trabajo o antes de un steering.
 owner: '@husseymarcos'
 role: pm
 created: '2026-11-05'
@@ -26,7 +26,8 @@ metadata:
   responsables:
   - husseymarcos
   madurez: usado-en-proyecto
-  relacionados: []
+  relacionados:
+  - g04-cronograma
 ---
 
 # Actualizar cronograma

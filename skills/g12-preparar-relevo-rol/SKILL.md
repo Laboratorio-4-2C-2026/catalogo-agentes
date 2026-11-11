@@ -1,6 +1,6 @@
 ---
 name: g12-preparar-relevo-rol
-description: Prepara el traspaso de una responsabilidad o rol de proyecto con estado a la fecha, decisiones vigentes, pendientes con responsable y próximos pasos sustentados en fuentes.
+description: Prepara el traspaso de una responsabilidad o rol de proyecto con estado a la fecha, decisiones vigentes, pendientes con responsable y próximos pasos sustentados en fuentes. Usar cuando una persona deja un rol y otra lo toma, por ejemplo al rotar roles entre sprints.
 owner: '@husseymarcos'
 role: pm
 created: '2026-11-05'

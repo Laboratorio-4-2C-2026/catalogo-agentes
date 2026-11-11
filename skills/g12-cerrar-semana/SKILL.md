@@ -29,6 +29,7 @@ metadata:
   relacionados:
   - g12-calcular-valor-ganado
   - g12-reportar-semaforo
+  - g12-asignar-capacidad-sobrante
 ---
 
 # Cerrar semana

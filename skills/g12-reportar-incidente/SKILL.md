@@ -1,6 +1,6 @@
 ---
 name: g12-reportar-incidente
-description: Convierte el relato de un incidente en un registro factual con impacto, estado, criticidad, fechas y resolución. Adapta el formato al proyecto; no diagnostica ni corrige la falla.
+description: Convierte el relato de un incidente en un registro factual con impacto, estado, criticidad, fechas y resolución. Adapta el formato al proyecto; no diagnostica ni corrige la falla. Usar cuando una falla ya ocurrió y hay que dejarla registrada en el log de incidentes.
 owner: '@husseymarcos'
 role: pm
 created: '2026-09-08'
@@ -27,6 +27,8 @@ metadata:
   madurez: usado-en-proyecto
   relacionados:
   - g12-registrar-riesgo
+  - g11-triage-incidente
+  - g03-status-incidents
 ---
 
 # Reportar incidente

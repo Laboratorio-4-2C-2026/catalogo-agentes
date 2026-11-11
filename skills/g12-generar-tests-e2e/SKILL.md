@@ -28,6 +28,8 @@ metadata:
   madurez: experimental
   relacionados:
   - g12-validar-pr-de-producto
+  - g02-e2e-test-writer
+  - g02-zest-e2e-conventions
 ---
 
 # Generar tests E2E de una PR

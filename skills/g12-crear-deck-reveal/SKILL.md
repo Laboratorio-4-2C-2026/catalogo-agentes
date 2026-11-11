@@ -1,6 +1,6 @@
 ---
 name: g12-crear-deck-reveal
-description: Crea o actualiza presentaciones HTML con Reveal.js a partir de un brief y fuentes, adaptando narrativa, identidad visual, notas y exportación a la audiencia y al proyecto.
+description: Crea o actualiza presentaciones HTML con Reveal.js a partir de un brief y fuentes, adaptando narrativa, identidad visual, notas y exportación a la audiencia y al proyecto. Usar al preparar un steering, una demo o una propuesta que se presenta con diapositivas.
 owner: '@husseymarcos'
 role: pm
 created: '2026-11-05'
