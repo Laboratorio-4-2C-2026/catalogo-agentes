@@ -66,6 +66,7 @@ valores:
     k6: ''
     turborepo: ''
     cypress: ''
+    terraform: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
@@ -93,6 +94,9 @@ valores:
     multica: ''
     supabase: ''
     platformance: ''
+    cloudflare: ''
+    neon: ''
+    render: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
