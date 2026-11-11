@@ -1,0 +1,455 @@
+name: Agente · Checklist pre-deploy
+
+# Reusable workflow. Antes de que una PR entre a la rama que despliega, junta la
+# evidencia dura (CI, migraciones, rollback) y un agente dictamina si esta en
+# condiciones de salir a produccion.
+#
+# IMPORTANTE: este agente NO escribe en el repo de producto. Solo lee y comenta.
+#
+# El reparto de trabajo es a proposito: lo que se puede verificar con un comando
+# lo hace un script, porque es exacto y gratis. El modelo queda para lo unico que
+# no es mecanico — si la migracion rompe el codigo que ya esta corriendo, y si el
+# rollback documentado es creible.
+
+on:
+  workflow_call:
+    inputs:
+      project_kind:
+        type: string
+        required: true
+      production_branch:
+        description: 'Rama cuyo merge dispara el deploy. Fuera de ella el agente se omite.'
+        type: string
+        default: 'main'
+      migrations_glob:
+        description: 'Donde viven las migraciones. En el backend: supabase/migrations.'
+        type: string
+        default: ''
+      schema_file:
+        description: 'Archivo que tiene que regenerarse junto con una migracion.'
+        type: string
+        default: ''
+      bloquear:
+        description: |
+          true = el job falla si hay bloqueantes, para poder marcarlo como required
+          check. Arranca en false: primero se mira si dictamina bien.
+        type: boolean
+        default: false
+      model:
+        type: string
+        default: 'claude-sonnet-5'
+      max_turns:
+        # El tope es una red de seguridad, no un presupuesto: los turnos se
+        # gastan solo si hacen falta. Pero quedarse corto marca el paso como
+        # fallido AUNQUE el agente haya terminado bien y publicado su comentario
+        # ("Claude reported a successful result after N turns, exceeding the
+        # configured maximum of M"). El de Figma venia en 25 y necesito 31.
+        # Quien corta de verdad si algo se desboca es timeout_minutes.
+        type: number
+        default: 40
+      timeout_minutes:
+        type: number
+        default: 15
+    secrets:
+      anthropic_api_key:
+        required: false
+      claude_code_oauth_token:
+        required: false
+      resend_api_key:
+        required: false
+
+jobs:
+  pre-deploy:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+      checks: read
+      actions: read
+    steps:
+      - name: Decidir si corre
+        id: gate
+        env:
+          BASE: ${{ github.base_ref }}
+          PROD: ${{ inputs.production_branch }}
+        run: |
+          set -uo pipefail
+          if [ "$BASE" = "$PROD" ]; then
+            echo "La PR apunta a '${PROD}', que es la rama que despliega. Corre el checklist."
+            echo "correr=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Se omite: la PR apunta a '${BASE}', no a '${PROD}'. Todavia no hay deploy en juego."
+            echo "correr=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v6
+        if: steps.gate.outputs.correr == 'true'
+        with:
+          fetch-depth: 0
+
+      # ─────────────────────────────────────────────────────────────────────
+      # Toda la evidencia verificable, en un archivo. Esto no opina: cuenta.
+      # ─────────────────────────────────────────────────────────────────────
+      - name: Juntar evidencia
+        id: evid
+        if: steps.gate.outputs.correr == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.base_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          MIGR_IN: ${{ inputs.migrations_glob }}
+          SCHEMA_IN: ${{ inputs.schema_file }}
+          KIND: ${{ inputs.project_kind }}
+        run: |
+          set -uo pipefail
+
+          migr="${MIGR_IN:-}"
+          schema="${SCHEMA_IN:-}"
+          if [ -z "$migr" ] && [ "$KIND" = "backend" ]; then migr="supabase/migrations"; fi
+          if [ -z "$schema" ] && [ "$KIND" = "backend" ]; then schema="prisma/schema.prisma"; fi
+
+          : > evidencia.md
+          bloqueantes=0
+
+          # El informe se arma linea por linea y dentro de condicionales. Esta
+          # funcion concentra la escritura en un solo redirect, que es mas legible
+          # que agrupar bloques con llaves alrededor de cada `if`.
+          ev() { printf '%s\n' "$@" >> evidencia.md; }
+          evfile() { cat "$1" >> evidencia.md; }
+
+          # ── 1. Estado de la CI ───────────────────────────────────────────
+          # Se excluye este mismo job: todavia esta corriendo y siempre figuraria
+          # como pendiente.
+          ev "## Estado de la CI"
+          if gh api "repos/${GITHUB_REPOSITORY}/commits/${HEAD_SHA}/check-runs" \
+               --jq '.check_runs[] | "\(.conclusion // .status)\t\(.name)"' > checks.txt 2>/dev/null; then
+            grep -vi 'pre-deploy' checks.txt > checks-otros.txt || true
+            fallados="$(grep -cE '^(failure|timed_out|cancelled|action_required)' checks-otros.txt || true)"
+            pendientes="$(grep -cE '^(queued|in_progress)' checks-otros.txt || true)"
+            total="$(wc -l < checks-otros.txt | tr -d ' ')"
+            ev "Checks: ${total} en total, ${fallados} fallados, ${pendientes} pendientes." '```'
+            evfile checks-otros.txt
+            ev '```'
+            if [ "$fallados" -gt 0 ]; then bloqueantes=$((bloqueantes + 1)); fi
+          else
+            ev "No se pudo consultar el estado de los checks."
+          fi
+          ev ""
+
+          # ── 2. Migraciones ───────────────────────────────────────────────
+          ev "## Migraciones"
+          if [ -z "$migr" ]; then
+            ev "Este repo no tiene directorio de migraciones configurado."
+          else
+            git diff --name-only --diff-filter=AM "origin/${BASE}...HEAD" -- "$migr" > migr-nuevas.txt || true
+            n_migr="$(wc -l < migr-nuevas.txt | tr -d ' ')"
+            if [ "$n_migr" -eq 0 ]; then
+              ev "La PR no agrega ni modifica migraciones."
+            else
+              ev "La PR toca ${n_migr} migracion(es):" ""
+
+              # Que migraciones estan proponiendo las otras PRs abiertas contra la
+              # misma rama. Se releva una sola vez, a una variable: escribir un
+              # archivo que despues se lee dentro del loop confunde a shellcheck
+              # y es mas fragil. Formato "0009_lo_que_sea.sql (PR #41)".
+              otras_migr=""
+              prs_abiertas="$(gh pr list --state open --base "$BASE" --limit 20 \
+                --json number --jq '.[].number' 2>/dev/null || true)"
+              for n in $prs_abiertas; do
+                if [ "$n" = "$PR_NUM" ]; then continue; fi
+                encontradas="$(gh pr diff "$n" --name-only 2>/dev/null \
+                  | grep -E "^${migr}/" \
+                  | xargs -n1 basename 2>/dev/null \
+                  | sed "s/\$/ (PR #${n})/" || true)"
+                if [ -n "$encontradas" ]; then
+                  # Con printf y no con un salto de linea literal: dentro de un
+                  # bloque YAML `run: |`, una linea sin indentar cierra el bloque.
+                  otras_migr="$(printf '%s\n%s' "$otras_migr" "$encontradas")"
+                fi
+              done
+              if [ -n "$otras_migr" ]; then
+                echo "Migraciones propuestas por otras PRs abiertas:"
+                printf '%s' "$otras_migr"
+              fi
+
+              # La lista propia tambien a variable, por el mismo motivo: el loop
+              # de abajo consume migr-nuevas.txt como stdin.
+              migr_lista="$(cat migr-nuevas.txt)"
+
+              while IFS= read -r f; do
+                [ -n "$f" ] || continue
+                ev "### \`${f}\`"
+
+                # ── Colision de numeracion ──────────────────────────────
+                # Tres frentes, porque el caso que duele es el tercero: dos devs
+                # que ramean desde la misma base y cada uno crea la 0009. Ninguno
+                # de los dos lo ve hasta que el segundo mergea y rompe el orden.
+                num="$(basename "$f" | grep -oE '^[0-9]+' || true)"
+                if [ -n "$num" ]; then
+                  # a) contra lo que ya esta en la base
+                  ya="$(git ls-tree --name-only "origin/${BASE}" "${migr}/" \
+                        | xargs -n1 basename 2>/dev/null \
+                        | grep -E "^${num}[_-]" | grep -v "^$(basename "$f")$" || true)"
+                  if [ -n "$ya" ]; then
+                    ev "- **Colision de numeracion**: en \`${BASE}\` ya existe \`${ya}\` con el mismo numero ${num}."
+                    bloqueantes=$((bloqueantes + 1))
+                  fi
+
+                  # b) contra otra migracion de esta misma PR
+                  hermana="$(printf '%s\n' "$migr_lista" \
+                             | grep -vxF "$f" \
+                             | xargs -n1 basename 2>/dev/null \
+                             | grep -E "^${num}[_-]" || true)"
+                  if [ -n "$hermana" ]; then
+                    ev "- **Colision dentro de la propia PR**: \`${hermana}\` usa el mismo numero ${num}."
+                    bloqueantes=$((bloqueantes + 1))
+                  fi
+
+                  # c) contra las PRs abiertas que apuntan a la misma base
+                  if [ -n "$otras_migr" ]; then
+                    choque="$(printf '%s' "$otras_migr" | grep -E "^${num}[_-]" || true)"
+                    if [ -n "$choque" ]; then
+                      ev "- **Colision con una PR abierta**: ${choque}"
+                      bloqueantes=$((bloqueantes + 1))
+                    fi
+                  fi
+                fi
+
+                # Operaciones que no se pueden deshacer con un revert del codigo.
+                if [ -f "$f" ]; then
+                  if grep -inE 'drop[[:space:]]+(table|column|constraint|type)|truncate|alter[[:space:]]+column.*type|set[[:space:]]+not[[:space:]]+null|rename[[:space:]]+(to|column)|delete[[:space:]]+from' "$f" > destructivo.txt; then
+                    ev "- **Operaciones destructivas o incompatibles hacia atras**:" '```sql'
+                    head -15 destructivo.txt >> evidencia.md
+                    ev '```'
+                    bloqueantes=$((bloqueantes + 1))
+                  else
+                    ev "- Sin operaciones destructivas evidentes."
+                  fi
+                  ev "- Contenido completo:" '```sql'
+                  head -120 "$f" >> evidencia.md
+                  ev '```'
+                fi
+                ev ""
+              done < migr-nuevas.txt
+
+              # El schema de Prisma se regenera con db:pull. Si hay migracion nueva
+              # y el schema no cambio, el ORM no ve las columnas nuevas.
+              if [ -n "$schema" ]; then
+                if git diff --name-only "origin/${BASE}...HEAD" -- "$schema" | grep -q .; then
+                  ev "\`${schema}\` se actualizo junto con la migracion."
+                else
+                  ev "- **\`${schema}\` NO se actualizo** aunque hay migraciones nuevas. Si la migracion cambia la forma de alguna tabla, el ORM no la va a ver."
+                  bloqueantes=$((bloqueantes + 1))
+                fi
+              fi
+
+              # Dato duro sobre el proceso, no sobre esta PR.
+              ev "" "Nota: ningun workflow de deploy aplica migraciones. Se aplican a mano, asi que mergear no las ejecuta."
+            fi
+          fi
+          ev ""
+
+          # ── 3. Rollback documentado ──────────────────────────────────────
+          ev "## Rollback"
+          if printf '%s' "${PR_BODY:-}" | grep -qiE 'rollback|revertir|vuelta atras|volver atras|plan b'; then
+            ev "El cuerpo de la PR menciona un rollback:" '```'
+            printf '%s' "${PR_BODY:-}" | grep -iA6 -E 'rollback|revertir|vuelta atras|volver atras' | head -20 >> evidencia.md
+            ev '```'
+          else
+            ev "**El cuerpo de la PR no documenta ningun rollback.**"
+            bloqueantes=$((bloqueantes + 1))
+          fi
+          ev ""
+
+          # ── 4. Tamano del cambio ─────────────────────────────────────────
+          ev "## Tamano"
+          git diff --shortstat "origin/${BASE}...HEAD" >> evidencia.md || true
+          ev ""
+
+          echo "Senales bloqueantes detectadas por el script: ${bloqueantes}"
+          echo "bloqueantes=$bloqueantes" >> "$GITHUB_OUTPUT"
+          echo "--- evidencia ---"
+          head -c 3000 evidencia.md
+
+      - id: claude
+        if: steps.gate.outputs.correr == 'true'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}
+          claude_code_oauth_token: ${{ secrets.claude_code_oauth_token }}
+          show_full_output: ${{ vars.CLAUDE_DEBUG == 'true' }}
+          prompt: |
+            Sos el ultimo control antes de que esto salga a produccion. El repo es el
+            ${{ inputs.project_kind }} y esta PR apunta a `${{ inputs.production_branch }}`,
+            que es la rama que dispara el deploy.
+
+            En `evidencia.md` tenes todo lo que ya se verifico con comandos: estado de la
+            CI, migraciones que toca la PR con su contenido, si el schema se regenero, y
+            si el cuerpo de la PR documenta un rollback. **Eso son hechos, no los vuelvas
+            a chequear.** Leelos y juzga.
+
+            El diff, si lo necesitas:
+              git diff origin/${{ github.base_ref }}...HEAD
+
+            Lo que tenes que dictaminar, que es lo que ningun script puede:
+
+            1. **¿La migracion rompe el codigo que ya esta corriendo en produccion?**
+               Entre que se aplica la migracion y que termina el deploy hay una ventana en
+               la que la base nueva convive con el codigo viejo. Una columna que se agrega
+               no molesta; una que se borra, se renombra o pasa a NOT NULL tira abajo el
+               codigo que todavia la usa como antes. Decilo en esos terminos.
+            2. **¿El rollback es creible?** No alcanza con que la PR diga "se revierte el
+               commit". Si hubo una migracion, revertir el codigo **no** deshace el cambio
+               en la base, y estas migraciones no tienen un `down`. Si no hay forma real de
+               volver atras, eso es lo mas importante del comentario.
+            3. **¿Hay algo en el diff que no deberia salir?** Secretos, URLs de desarrollo,
+               `console.log` con datos, flags de debug prendidas, codigo comentado a medias.
+            4. **¿El tamano es razonable para un deploy?** Si son muchos archivos y temas
+               mezclados, decilo: un deploy grande es mas dificil de revertir.
+
+            Reglas:
+
+            - Separa **bloqueantes** de **avisos**. Un bloqueante es algo que puede dejar la
+              app rota o los datos inconsistentes. Todo lo demas es un aviso. Si marcas
+              todo como bloqueante, nadie te va a dar bola la segunda vez.
+            - Si la evidencia no alcanza para decidir algo, decilo. No supongas que la
+              migracion se aplico en produccion: nadie lo verifico y ningun workflow lo hace.
+            - Si esta todo bien, decilo corto y claro. Esto corre antes de cada deploy, y un
+              dictamen largo cuando no hay problemas hace que dejen de leerlo.
+
+            Publicacion. Un unico comentario en la PR con:
+              gh pr comment ${{ github.event.pull_request.number }} --body "el texto aca"
+
+            Arranca con el veredicto en una linea: **sale**, **sale con reservas**, o
+            **no sale**. Despues los bloqueantes, despues los avisos, y cerra con lo que
+            hay que hacer a mano antes o despues de mergear (aplicar la migracion, por
+            ejemplo) si corresponde.
+
+            Escribi el texto literal dentro de --body, un solo comando, entre comillas
+            dobles. El sandbox rechaza todo lo que no sea un comando simple: nada de
+            `$(...)`, backticks, pipes, `>` ni `&&`. Leé los archivos con Read.
+
+            Espanol rioplatense. No modifiques ningun archivo del repositorio.
+          claude_args: |
+            --model ${{ inputs.model }}
+            --max-turns ${{ inputs.max_turns }}
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*),Bash(gh run list:*),Bash(gh run view:*)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Resumen y notificacion
+        if: always()
+        env:
+          AGENTE: 'Checklist pre-deploy'
+          ESTADO: ${{ steps.claude.outcome }}
+          CORRER: ${{ steps.gate.outputs.correr }}
+          BLOQ: ${{ steps.evid.outputs.bloqueantes }}
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          NOTIFY_EMAIL: ${{ vars.NOTIFY_EMAIL }}
+          NOTIFY_FROM: ${{ vars.NOTIFY_FROM }}
+          RESEND_API_KEY: ${{ secrets.resend_api_key }}
+        run: |
+          set -uo pipefail
+
+          if [ "${CORRER:-}" != "true" ]; then
+            echo "Agente omitido: la PR no apunta a la rama que despliega." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ "${ESTADO:-}" = "failure" ] && [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            echo "::group::Diagnostico de la falla"
+            jq -r '
+              [.. | objects | with_entries(select(.key | test("error|message|subtype|type|reason|status|code";"i")))]
+              | map(select(length > 0)) | unique | .[] | tostring
+            ' "$EXEC_FILE" 2>/dev/null | head -40 || echo "(no se pudo parsear)"
+            echo "::endgroup::"
+          fi
+
+          # ── El agente puede terminar en verde sin haber corrido ──────────
+          # La action se autosaltea cuando el archivo de workflow que disparo la
+          # corrida no es identico al que hay en la rama default del repo, y en
+          # ese caso sale con conclusion=success: job verde, cero review, y el
+          # motivo enterrado en el log. Sin archivo de ejecucion no hubo llamada
+          # al modelo, asi que eso no se reporta como exito.
+          if [ "${ESTADO:-}" = "success" ] && { [ -z "${EXEC_FILE:-}" ] || [ ! -f "${EXEC_FILE}" ]; }; then
+            ESTADO="NO CORRIO - ver abajo"
+            echo "::error::El agente termino en verde pero no dejo archivo de ejecucion: nunca llamo al modelo. Causa mas probable: .github/workflows/agents.yml de ${GITHUB_REPOSITORY} no es identico al de la rama default. Tiene que estar igual en la default y en la rama de trabajo."
+          fi
+
+          conclusion=""
+          if [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            conclusion="$(jq -r '
+                (.result? // empty),
+                ([.. | objects | select(.type? == "result") | .result?] | map(select(. != null)) | last // empty),
+                ([.. | objects | select(.type? == "text")   | .text?]   | map(select(. != null)) | last // empty)
+              ' "$EXEC_FILE" 2>/dev/null | grep -v '^$' | tail -n1)"
+          fi
+          [ -n "$conclusion" ] || conclusion="(no se pudo extraer del archivo de ejecucion)"
+          corto="$(printf '%s' "$conclusion" | head -c 1500)"
+          [ "${#conclusion}" -gt 1500 ] && corto="${corto}..."
+
+          {
+            echo "## ${AGENTE}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Repo | ${GITHUB_REPOSITORY} |"
+            echo "| PR | #${PR_NUM:-?} |"
+            echo "| Resultado | ${ESTADO:-omitido} |"
+            echo "| Senales duras bloqueantes | ${BLOQ:-0} |"
+            echo
+            echo "### Dictamen"
+            echo
+            printf '%s\n' "$corto"
+            echo
+            echo "Corrida completa: ${RUN_URL}"
+          } > resumen.md
+          cat resumen.md >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -z "${NOTIFY_EMAIL:-}" ]; then
+            echo "::notice::Sin vars.NOTIFY_EMAIL: no se manda mail."
+            exit 0
+          fi
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "::warning::Hay NOTIFY_EMAIL pero falta el secret RESEND_API_KEY."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg from "${NOTIFY_FROM:-MicroChangas Agentes <onboarding@resend.dev>}" \
+            --arg to "$NOTIFY_EMAIL" \
+            --arg subject "[${GITHUB_REPOSITORY##*/}] PR #${PR_NUM:-?} - ${AGENTE}: ${ESTADO:-omitido}" \
+            --rawfile text resumen.md \
+            '{from: $from, to: [$to], subject: $subject, text: $text}')"
+          resp="$(curl -sS --max-time 20 -w '\n%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$payload")"
+          code="$(printf '%s' "$resp" | tail -n1)"
+          if [ "$code" = "200" ]; then
+            echo "Mail enviado a ${NOTIFY_EMAIL}."
+          else
+            echo "::warning::Resend devolvio HTTP ${code}: $(printf '%s' "$resp" | sed '$d' | head -c 300)"
+          fi
+
+      # Lo ultimo, para que el comentario y el mail salgan igual antes de cortar.
+      - name: Bloquear si corresponde
+        if: steps.gate.outputs.correr == 'true' && inputs.bloquear && steps.evid.outputs.bloqueantes != '0'
+        run: |
+          echo "::error::Hay ${{ steps.evid.outputs.bloqueantes }} senal(es) bloqueante(s) para el deploy. Ver el comentario en la PR."
+          exit 1
+
+      - name: Guardar salida de ejecucion si fallo
+        if: failure() && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-exec-predeploy-pr-${{ github.event.pull_request.number }}
+          path: ${{ steps.claude.outputs.execution_file }}
+          if-no-files-found: ignore
+          retention-days: 7

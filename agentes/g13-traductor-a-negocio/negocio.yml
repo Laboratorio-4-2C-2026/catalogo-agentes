@@ -1,0 +1,320 @@
+name: Agente · Traductor a negocio
+
+# Reusable workflow. Traduce cada PR al lenguaje del negocio: que historia
+# implementa, que riesgo trae y que habria que probar.
+#
+# Lo lee gente que no programa — PM, profesores, el steering — asi que el
+# comentario no menciona archivos, funciones ni componentes.
+#
+# IMPORTANTE: este agente NO escribe en el repo de producto. Solo lee y comenta.
+
+on:
+  workflow_call:
+    inputs:
+      project_kind:
+        description: 'frontend | backend.'
+        type: string
+        required: true
+      ticket_prefix:
+        type: string
+        default: 'MC'
+      multica_workspace_id:
+        type: string
+        required: false
+        default: ''
+      model:
+        type: string
+        default: 'claude-sonnet-5'
+      max_turns:
+        # Es un agente corto: lee el ticket, lee el diff y escribe un comentario.
+        # Igual sobra margen, porque quedarse corto marca el paso como fallido
+        # aunque el comentario se haya publicado.
+        type: number
+        default: 30
+      timeout_minutes:
+        type: number
+        default: 15
+    secrets:
+      anthropic_api_key:
+        required: false
+      claude_code_oauth_token:
+        required: false
+      resend_api_key:
+        required: false
+      multica_token:
+        required: false
+
+jobs:
+  negocio:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: read
+      id-token: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolver codigo de ticket
+        id: ticket
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          PREFIX: ${{ inputs.ticket_prefix }}
+        run: |
+          blob="$(printf '%s\n%s\n%s\n' "$HEAD_REF" "$PR_TITLE" "$PR_BODY")"
+          code="$(printf '%s' "$blob" | grep -oE '\bMIC-[0-9]+' | head -n1 || true)"
+          kind=short_id
+          if [ -z "$code" ]; then
+            code="$(printf '%s' "$blob" | grep -oE "\b${PREFIX}-[0-9]+" | head -n1 || true)"
+            kind=en_titulo
+          fi
+          if [ -z "$code" ]; then
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Ticket detectado: $code (se busca por $kind)"
+            {
+              echo "found=true"
+              echo "code=$code"
+              echo "kind=$kind"
+            } >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Traer el ticket de Multica
+        continue-on-error: true
+        if: steps.ticket.outputs.found == 'true' && inputs.multica_workspace_id != ''
+        env:
+          MULTICA_TOKEN: ${{ secrets.multica_token }}
+          MULTICA_WORKSPACE_ID: ${{ inputs.multica_workspace_id }}
+          TICKET_CODE: ${{ steps.ticket.outputs.code }}
+          TICKET_KIND: ${{ steps.ticket.outputs.kind }}
+        run: |
+          set -uo pipefail
+          if [ -z "${MULTICA_TOKEN:-}" ]; then
+            echo "::warning::Falta el secret MULTICA_TOKEN."
+            exit 0
+          fi
+          API="https://api.multica.ai/api"
+          auth=(-H "Authorization: Bearer ${MULTICA_TOKEN}" -H "X-Workspace-ID: ${MULTICA_WORKSPACE_ID}")
+
+          bajar() {
+            curl -sS --max-time 20 "${auth[@]}" "${API}/issues/$1" -o ticket.json \
+              && jq -e '.title' ticket.json >/dev/null 2>&1
+          }
+
+          if [ "$TICKET_KIND" = "short_id" ] && bajar "$TICKET_CODE"; then
+            echo "Ticket recuperado: $(jq -r --arg c "$TICKET_CODE" '((.short_id // "") | if . == "" then $c else . end) + " — " + (.title // "?")' ticket.json)"
+            exit 0
+          fi
+          rm -f ticket.json
+
+          uuid=''; offset=0
+          for _ in $(seq 1 10); do
+            page="$(curl -sS --max-time 20 "${auth[@]}" "${API}/issues?limit=100&offset=${offset}")" || break
+            if [ "$TICKET_KIND" = "short_id" ]; then
+              match="$(printf '%s' "$page" | jq -r --arg c "$TICKET_CODE" \
+                '(if type == "object" then (.items // []) else . end) | map(select(.short_id == $c)) | .[0].id // empty')"
+            else
+              match="$(printf '%s' "$page" | jq -r --arg c "[${TICKET_CODE}]" \
+                '(if type == "object" then (.items // []) else . end) | map(select(.title | contains($c))) | .[0].id // empty')"
+            fi
+            if [ -n "$match" ]; then uuid="$match"; break; fi
+            [ "$(printf '%s' "$page" | jq -r '.has_more // false')" = "true" ] || break
+            offset="$(printf '%s' "$page" | jq -r --argjson o "$offset" '.next_offset // ($o + 100)')"
+          done
+
+          [ -n "$uuid" ] || { echo "::warning::No hay issue para ${TICKET_CODE}."; exit 0; }
+          bajar "$uuid" || { echo "::warning::El issue ${uuid} no se pudo leer."; rm -f ticket.json; }
+
+      - name: Armar el contexto del ticket
+        run: |
+          if [ -f ticket.json ]; then
+            {
+              echo "## Ticket de Multica"
+              jq -r '"**" + (.short_id // "?") + "** — " + (.title // "?")' ticket.json
+              echo
+              jq -r '.description // "(sin descripcion)"' ticket.json
+            } > ticket-context.md
+          else
+            printf '## Ticket de Multica\n\nNo se pudo recuperar: hay que deducir la historia del diff.\n' > ticket-context.md
+          fi
+
+      - id: claude
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.anthropic_api_key }}
+          claude_code_oauth_token: ${{ secrets.claude_code_oauth_token }}
+          show_full_output: ${{ vars.CLAUDE_DEBUG == 'true' }}
+          prompt: |
+            Traducis Pull Requests al lenguaje del negocio. El repo es el
+            ${{ inputs.project_kind }} de MicroChangas, una app donde la gente publica
+            changas y otros se postulan para hacerlas.
+
+            Quien te lee **no programa**: es el PM, un profesor, alguien del steering.
+            Abrio la PR porque quiere saber que cambia en el producto, no como esta hecho.
+
+            En `ticket-context.md` tenes el ticket. El diff:
+              git diff origin/${{ github.base_ref }}...HEAD
+
+            Escribi un comentario corto con exactamente estas tres partes:
+
+            **Que resuelve.** Una o dos frases sobre que puede hacer ahora un usuario de
+            MicroChangas que antes no podia, o que problema deja de tener. Contalo desde la
+            persona que usa la app: "quien publica una changa ahora puede...", "al que se
+            postula ya no le pasa que...". Prohibido nombrar archivos, funciones,
+            componentes, endpoints o librerias. Si no podes explicarlo sin nombrarlos, es
+            que todavia no lo entendiste.
+
+            **Riesgo.** Bajo, medio o alto, y por que en una frase:
+            - **Alto** si toca login, permisos, datos personales o plata. Si algo sale mal
+              ahi, alguien ve lo que no tiene que ver o pierde acceso.
+            - **Medio** si cambia algo que ya funcionaba y que la gente usa hoy.
+            - **Bajo** si agrega algo nuevo y aislado, que si falla no rompe lo de antes.
+            Decilo en terminos de que pasaria si sale mal, no de complejidad tecnica.
+
+            **Que probar.** Las dos o tres acciones concretas que alguien deberia hacer en
+            la app para comprobar que esto anda. Pasos que una persona puede seguir sentada
+            frente a la pantalla: a donde entrar, que apretar, que tiene que ver.
+
+            Despues de las tres partes, si corresponde, agrega una linea que empiece con
+            "Ojo:" para algo que el negocio deberia saber y que no se ve en la PR: que
+            depende de otra cosa que todavia no esta, que cambia algo que los usuarios ya
+            tenian aprendido, que necesita un dato cargado para funcionar. Si no hay nada
+            asi, no la pongas.
+
+            Reglas:
+
+            - Se corto. Esto se lee en treinta segundos o no se lee.
+            - Si el diff y el ticket no coinciden —la PR hace mas, menos o algo distinto de
+              lo que el ticket pedia— decilo, porque es justo lo que el negocio necesita
+              enterarse y nadie mas se lo va a contar.
+            - Si no hay ticket, deci que lo dedujiste del codigo y que puede faltarte
+              contexto.
+            - No opines sobre la calidad del codigo. De eso ya se encargan otros agentes.
+
+            Publicacion. Un unico comentario en la PR con:
+              gh pr comment ${{ github.event.pull_request.number }} --body "el texto aca"
+
+            Escribi el texto literal dentro de --body, un solo comando, entre comillas
+            dobles. El sandbox rechaza todo lo que no sea un comando simple: nada de
+            `$(...)`, backticks, pipes, `>` ni `&&`. Leé los archivos con Read, no con cat.
+
+            Espanol rioplatense, en prosa, sin jerga. No modifiques ningun archivo del
+            repositorio: tu unica salida es el comentario.
+          claude_args: |
+            --model ${{ inputs.model }}
+            --max-turns ${{ inputs.max_turns }}
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),Bash(gh pr comment:*),Bash(gh pr view:*),Bash(gh pr diff:*)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Resumen y notificacion
+        if: always()
+        env:
+          AGENTE: 'Traductor a negocio'
+          ESTADO: ${{ steps.claude.outcome }}
+          EXEC_FILE: ${{ steps.claude.outputs.execution_file }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          PR_NUM: ${{ github.event.pull_request.number }}
+          TICKET_CODE: ${{ steps.ticket.outputs.code }}
+          NOTIFY_EMAIL: ${{ vars.NOTIFY_EMAIL }}
+          NOTIFY_FROM: ${{ vars.NOTIFY_FROM }}
+          RESEND_API_KEY: ${{ secrets.resend_api_key }}
+        run: |
+          set -uo pipefail
+
+          if [ -f ticket.json ]; then
+            multica="OK - $(jq -r --arg c "${TICKET_CODE:-?}" '((.short_id // "") | if . == "" then $c else . end) + " " + (.title // "?")' ticket.json | head -c 90)"
+          else
+            multica="sin ticket (dedujo la historia del diff)"
+          fi
+
+          if [ "${ESTADO:-}" = "failure" ] && [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            echo "::group::Diagnostico de la falla"
+            jq -r '
+              [.. | objects | with_entries(select(.key | test("error|message|subtype|type|reason|status|code";"i")))]
+              | map(select(length > 0)) | unique | .[] | tostring
+            ' "$EXEC_FILE" 2>/dev/null | head -40 || echo "(no se pudo parsear)"
+            echo "::endgroup::"
+          fi
+
+          # ── El agente puede terminar en verde sin haber corrido ──────────
+          # La action se autosaltea cuando el archivo de workflow que disparo la
+          # corrida no es identico al que hay en la rama default del repo, y en
+          # ese caso sale con conclusion=success: job verde, cero review, y el
+          # motivo enterrado en el log. Sin archivo de ejecucion no hubo llamada
+          # al modelo, asi que eso no se reporta como exito.
+          if [ "${ESTADO:-}" = "success" ] && { [ -z "${EXEC_FILE:-}" ] || [ ! -f "${EXEC_FILE}" ]; }; then
+            ESTADO="NO CORRIO - ver abajo"
+            echo "::error::El agente termino en verde pero no dejo archivo de ejecucion: nunca llamo al modelo. Causa mas probable: .github/workflows/agents.yml de ${GITHUB_REPOSITORY} no es identico al de la rama default. Tiene que estar igual en la default y en la rama de trabajo."
+          fi
+
+          conclusion=""
+          if [ -n "${EXEC_FILE:-}" ] && [ -f "$EXEC_FILE" ]; then
+            conclusion="$(jq -r '
+                (.result? // empty),
+                ([.. | objects | select(.type? == "result") | .result?] | map(select(. != null)) | last // empty),
+                ([.. | objects | select(.type? == "text")   | .text?]   | map(select(. != null)) | last // empty)
+              ' "$EXEC_FILE" 2>/dev/null | grep -v '^$' | tail -n1)"
+          fi
+          [ -n "$conclusion" ] || conclusion="(no se pudo extraer del archivo de ejecucion)"
+          corto="$(printf '%s' "$conclusion" | head -c 1200)"
+          [ "${#conclusion}" -gt 1200 ] && corto="${corto}..."
+
+          {
+            echo "## ${AGENTE}"
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Repo | ${GITHUB_REPOSITORY} |"
+            echo "| PR | #${PR_NUM:-?} |"
+            echo "| Resultado | ${ESTADO} |"
+            echo "| Multica | ${multica} |"
+            echo
+            echo "### Traduccion"
+            echo
+            printf '%s\n' "$corto"
+            echo
+            echo "Corrida completa: ${RUN_URL}"
+          } > resumen.md
+          cat resumen.md >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -z "${NOTIFY_EMAIL:-}" ]; then
+            echo "::notice::Sin vars.NOTIFY_EMAIL: no se manda mail."
+            exit 0
+          fi
+          if [ -z "${RESEND_API_KEY:-}" ]; then
+            echo "::warning::Hay NOTIFY_EMAIL pero falta el secret RESEND_API_KEY."
+            exit 0
+          fi
+          payload="$(jq -n \
+            --arg from "${NOTIFY_FROM:-MicroChangas Agentes <onboarding@resend.dev>}" \
+            --arg to "$NOTIFY_EMAIL" \
+            --arg subject "[${GITHUB_REPOSITORY##*/}] PR #${PR_NUM:-?} - ${AGENTE}: ${ESTADO}" \
+            --rawfile text resumen.md \
+            '{from: $from, to: [$to], subject: $subject, text: $text}')"
+          resp="$(curl -sS --max-time 20 -w '\n%{http_code}' -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${RESEND_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "$payload")"
+          code="$(printf '%s' "$resp" | tail -n1)"
+          if [ "$code" = "200" ]; then
+            echo "Mail enviado a ${NOTIFY_EMAIL}."
+          else
+            echo "::warning::Resend devolvio HTTP ${code}: $(printf '%s' "$resp" | sed '$d' | head -c 300)"
+          fi
+
+      - name: Guardar salida de ejecucion si fallo
+        if: failure() && steps.claude.outputs.execution_file != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: claude-exec-negocio-pr-${{ github.event.pull_request.number }}
+          path: ${{ steps.claude.outputs.execution_file }}
+          if-no-files-found: ignore
+          retention-days: 7
