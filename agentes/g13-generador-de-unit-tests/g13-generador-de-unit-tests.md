@@ -31,6 +31,7 @@ metadata:
   - g08-backend-test-engineer
   - g03-express-test-builder-agent
   - g11-test-agent
+  - g13-diagnostico-de-ci
 ---
 
 # Generador de unit tests

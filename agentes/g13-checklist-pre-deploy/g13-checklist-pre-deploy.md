@@ -1,11 +1,12 @@
 ---
 name: g13-checklist-pre-deploy
-description: 'Agente de GitHub Actions que corre solo en las PRs que apuntan a la rama que despliega (main): junta la evidencia dura (checks de CI, migraciones, regeneración del schema, rollback documentado) y dictamina si la PR está en condiciones de salir a producción. Opcionalmente bloquea el merge.'
+description: 'Agente de GitHub Actions que corre solo en las PRs que apuntan a la rama que despliega (main): junta la evidencia dura (checks de CI, migraciones, regeneración del schema, rollback documentado) y dictamina si la PR está en condiciones de salir a producción. Opcionalmente bloquea el merge. Usar cuando se quiere un control automático antes de cada release a producción.'
 metadata:
   tipo: agente
   area:
   - devops
   - qa
+  - backend
   fase:
   - despliegue
   - revision
@@ -32,6 +33,7 @@ metadata:
   - g11-revisar-despliegue
   - g08-release-checklist
   - g10-migration-safety-reviewer
+  - g08-ready-for-prod-agent
 ---
 
 # Checklist pre-deploy
