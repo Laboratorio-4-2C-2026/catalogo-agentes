@@ -1,0 +1,83 @@
+name: eureka-tests
+
+# Agente de propósito específico: lo que el PR agrega y ningún test ejercita.
+#
+# Eureka DoD verifica que el PR muestre evidencia de "Tests pasando", pero que
+# pasen no dice nada de lo que no se prueba. Un PR puede sumar un camino de
+# falla, una ruta o una función del contrato y dejar todos los tests en verde.
+# Este agente busca ese comportamiento nuevo sin cobertura y propone los casos
+# que faltan, empezando por los caminos que mueven plata o autoría.
+#
+# No juzga si los tests pasan (eso es DoD) ni busca bugs en el código (eso es
+# de los otros revisores).
+
+on:
+  pull_request:
+    types: [opened, ready_for_review, reopened]
+    paths:
+      - "lib/**"
+      - "app/api/**"
+      - "contracts/src/**"
+      - "supabase/**"
+
+concurrency:
+  group: eureka-tests-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Eureka Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: anthropics/claude-code-action@1d6de8cb0c237e7c15e9e1bdf973826ebae490cc # v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Revisá este pull request como revisor de cobertura de tests del
+            proyecto Eureka.
+
+            Tu alcance es el comportamiento que el PR agrega o cambia y que
+            ningún test ejercita: rutas, funciones, ramas de error, reverts y
+            guardas de SQL nuevas o modificadas.
+
+            Fuera de tu alcance: si los tests pasan (eureka-dod) y si el código
+            tiene bugs (los otros revisores). Si el diff solo toca tests, docs,
+            estilos o configuración, decilo en un comentario y terminá.
+
+            Leé y aplicá:
+            - .github/copilot-instructions.md — contexto del producto
+            - .github/skills/tests-review/SKILL.md — tu checklist: dónde vive
+              cada tipo de test, el orden de prioridad y qué cuenta como
+              faltante
+
+            Antes de marcar un caso como faltante, buscalo en `test/`,
+            `contracts/test/` y `cypress/e2e/` aunque esos archivos no estén en
+            el diff: muchas veces ya está cubierto por un test existente.
+
+            Reglas de salida:
+            - Un comentario por caso faltante, anclado a la línea del
+              comportamiento sin test.
+            - Prefijá cada uno con [Crítico], [Alto], [Medio] o [Bajo].
+            - Proponé el test concreto: archivo, nombre, y una línea para el
+              setup, la acción y el resultado esperado.
+            - Si no estás seguro de que falte (puede estar cubierto
+              indirectamente), decilo.
+            - No comentes estilo ni naming.
+          # Lee bastante fuera del diff para buscar los tests existentes, por
+          # eso el mismo margen que eureka-credits. Bash solo para git de
+          # lectura.
+          claude_args: >-
+            --max-turns 60
+            --allowedTools "Read,Grep,Glob,Bash(git diff:*),Bash(git log:*),Bash(git show:*),mcp__github_inline_comment__create_inline_comment"

