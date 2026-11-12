@@ -68,9 +68,11 @@ done
 # --- Issues abiertos ----------------------------------------------------------
 # Se excluyen los issues de los reportes automáticos: el de este mismo detector,
 # que si no se encuentra a sí mismo, el semanal de progreso, que queda abierto
-# a propósito y a los siete días figuraría como un ticket sin código, y el de
-# post-deploy, que no se arregla con código sino con configuración.
-ETIQUETAS_DE_REPORTE='["blockers-report", "reporte-semanal", "post-deploy"]'
+# a propósito y a los siete días figuraría como un ticket sin código, el de
+# post-deploy, que no se arregla con código sino con configuración, y el de
+# dependencias, que se reescribe cada lunes. Los de `incidente` sí cuentan: un
+# incidente abierto una semana sin código es un blocker.
+ETIQUETAS_DE_REPORTE='["blockers-report", "reporte-semanal", "post-deploy", "dependencias"]'
 numeros=$(gh issue list -R "$REPO" --state open --limit 100 \
   --json number,labels \
   | jq -r --argjson excluir "$ETIQUETAS_DE_REPORTE" \

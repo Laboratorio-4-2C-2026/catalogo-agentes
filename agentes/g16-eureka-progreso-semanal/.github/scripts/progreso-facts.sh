@@ -23,7 +23,7 @@ HASTA_ISO=$(iso "$AHORA")
 
 # Las etiquetas de los reportes automáticos: sus issues no son trabajo del
 # equipo y no tienen que aparecer como tal.
-ETIQUETAS_DE_REPORTE='["blockers-report", "reporte-semanal"]'
+ETIQUETAS_DE_REPORTE='["blockers-report", "reporte-semanal", "hallazgos-pendientes"]'
 
 # --- Pull requests ------------------------------------------------------------
 # Una sola llamada trae todo lo que hace falta de los PRs; el filtro por ventana
