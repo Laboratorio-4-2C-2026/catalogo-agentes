@@ -1,6 +1,6 @@
 ---
 name: g05-watchparty-acceptance-evidence
-description: "Contrasta los criterios de aceptación de los tickets de una versión de WatchParty con evidencia de la candidata desplegada antes de cerrar la validación de QA."
+description: "Contrasta los criterios de aceptación de los tickets de una versión de WatchParty con evidencia de la candidata desplegada. Usar cuando haya que cerrar la validación de QA de una release."
 metadata:
   tipo: agente
   area: ["qa","gestion"]
@@ -15,7 +15,7 @@ metadata:
     github: Manuelsalasseeber
   responsables: [Manuelsalasseeber]
   madurez: experimental
-  relacionados: ["g15-regression-matrix-keeper","g05-watchparty-qa-test-designer","g05-watchparty-release-readiness"]
+  relacionados: ["g15-regression-matrix-keeper", "g15-release-criteria-evidence-checker","g05-watchparty-qa-test-designer","g05-watchparty-release-readiness"]
 ---
 
 # Trazabilidad de aceptación por versión

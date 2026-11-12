@@ -1,6 +1,6 @@
 ---
 name: g05-watchparty-release-compatibility
-description: "Evalúa si distintas revisiones de la web y la API de WatchParty pueden convivir durante un despliegue escalonado o una reversión."
+description: "Evalúa si distintas revisiones de la web y la API de WatchParty pueden convivir. Usar cuando se planifique un despliegue escalonado o una reversión."
 metadata:
   tipo: agente
   area: ["backend","frontend","devops"]

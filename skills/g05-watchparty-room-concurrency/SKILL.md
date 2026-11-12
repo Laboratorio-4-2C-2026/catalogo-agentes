@@ -1,6 +1,6 @@
 ---
 name: g05-watchparty-room-concurrency
-description: "Mide el rendimiento de salas de WatchParty con niveles acordados de concurrencia en un entorno de prueba, desde la entrada a sala hasta la propagación de eventos."
+description: "Mide el rendimiento de salas de WatchParty con niveles acordados de concurrencia en un entorno de prueba. Usar cuando se necesite medir la latencia de entrada a sala o de propagación de eventos."
 metadata:
   tipo: skill
   area: ["qa","backend"]
@@ -15,7 +15,7 @@ metadata:
     github: Manuelsalasseeber
   responsables: [Manuelsalasseeber]
   madurez: experimental
-  relacionados: ["g07-performance-con-volumen"]
+  relacionados: ["g07-performance-con-volumen", "g05-watchparty-room-reconnect-check"]
 ---
 
 # Rendimiento de salas con concurrencia

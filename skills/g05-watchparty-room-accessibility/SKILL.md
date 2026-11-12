@@ -15,7 +15,7 @@ metadata:
     github: Manuelsalasseeber
   responsables: [Manuelsalasseeber]
   madurez: experimental
-  relacionados: ["g07-auditoria-accesibilidad","g05-watchparty-ui"]
+  relacionados: ["g07-auditoria-accesibilidad","g05-watchparty-ui", "g05-watchparty-room-reconnect-check"]
 ---
 
 # Accesibilidad de una sala en vivo

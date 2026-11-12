@@ -15,7 +15,7 @@ metadata:
     github: Manuelsalasseeber
   responsables: [Manuelsalasseeber]
   madurez: experimental
-  relacionados: ["g06-architecture-adr","g05-watchparty-module-dependency-map"]
+  relacionados: ["g06-architecture-adr", "g10-adr-writer","g05-watchparty-module-dependency-map"]
 ---
 
 # Registro de decisiones de arquitectura

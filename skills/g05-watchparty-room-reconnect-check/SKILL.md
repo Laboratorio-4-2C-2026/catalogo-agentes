@@ -1,6 +1,6 @@
 ---
 name: g05-watchparty-room-reconnect-check
-description: "Ejecuta y documenta una comprobación repetible de reconexión en salas de WatchParty con dos sesiones de navegador y una interrupción controlada."
+description: "Ejecuta y documenta una comprobación repetible de reconexión en salas de WatchParty con dos sesiones de navegador y una interrupción controlada. Usar cuando un cambio pueda afectar la recuperación del estado o de los eventos en vivo."
 metadata:
   tipo: skill
   area: ["qa"]
@@ -15,7 +15,7 @@ metadata:
     github: Manuelsalasseeber
   responsables: [Manuelsalasseeber]
   madurez: experimental
-  relacionados: ["g06-qa-playwright-evidence","g05-watchparty-qa-handoff"]
+  relacionados: ["g06-qa-playwright-evidence","g05-watchparty-qa-handoff", "g05-watchparty-room-accessibility", "g05-watchparty-room-concurrency"]
 ---
 
 # Verificación de reconexión en salas
