@@ -105,6 +105,7 @@ valores:
     canva: ''
     gemini: ''
     vertex-ai: ''
+    vercel: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
