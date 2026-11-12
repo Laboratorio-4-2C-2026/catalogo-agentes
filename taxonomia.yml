@@ -67,6 +67,8 @@ valores:
     turborepo: ''
     cypress: ''
     terraform: ''
+    foundry: ''
+    solidity: ''
   metodologia:
     scrum: Pensada para Scrum
     kanban: Pensada para Kanban
