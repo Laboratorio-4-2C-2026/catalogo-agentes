@@ -106,6 +106,7 @@ valores:
     gemini: ''
     vertex-ai: ''
     vercel: ''
+    openfort: ''
   madurez:
     experimental: Recién hecha, poco probada
     probado: Se probó varias veces
